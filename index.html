@@ -280,10 +280,12 @@
         // Initialize the map
         function initializeMap() {
             try {
+                console.log('🗺️ Initializing map...');
                 updateStatus('Initializing map...');
                 
                 const mapContainer = document.getElementById('railway-map');
                 if (!mapContainer) {
+                    console.error('❌ Map container not found!');
                     updateStatus('❌ Map container not found!');
                     return;
                 }
@@ -317,7 +319,12 @@
 
         // Add stations to map
         function addStationsToMap() {
-            if (!map || !mapData) return;
+            if (!map || !mapData) {
+                console.log('❌ Cannot add stations: map or mapData not available');
+                return;
+            }
+            
+            console.log('🚉 Adding stations to map:', mapData.stations.length);
             
             // Clear existing station markers
             stationMarkers.forEach(marker => map.removeLayer(marker));
@@ -339,7 +346,12 @@
 
         // Add tracks to map
         function addTracksToMap() {
-            if (!map || !mapData) return;
+            if (!map || !mapData) {
+                console.log('❌ Cannot add tracks: map or mapData not available');
+                return;
+            }
+            
+            console.log('🛤️ Adding tracks to map:', mapData.tracks.length);
             
             // Clear existing track lines
             trackLines.forEach(line => map.removeLayer(line));
@@ -376,7 +388,12 @@
 
         // Add trains to map
         function addTrainsToMap() {
-            if (!map || !mapData) return;
+            if (!map || !mapData) {
+                console.log('❌ Cannot add trains: map or mapData not available');
+                return;
+            }
+            
+            console.log('🚂 Adding trains to map:', mapData.trains.length);
             
             // Clear existing train markers
             trainMarkers.forEach(marker => map.removeLayer(marker));
@@ -632,6 +649,7 @@
         // Enhanced loadMapData function
         async function loadMapData() {
             try {
+                console.log('📡 Loading data from API...');
                 updateStatus('Loading data from API...');
                 
                 const response = await fetch('http://localhost:8081/api/map-data');
@@ -640,6 +658,7 @@
                 }
                 
                 mapData = await response.json();
+                console.log('✅ Data loaded:', mapData);
                 updateStatus(`✅ Data loaded! Stations: ${mapData.stations.length}, Trains: ${mapData.trains.length}, Tracks: ${mapData.tracks.length}`);
                 
                 // Add data to map
@@ -1583,10 +1602,19 @@
         // Auto-initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             updateStatus('Ready to initialize map');
+            
+            // Auto-initialize map after a short delay
+            setTimeout(() => {
+                initializeMap();
+                setTimeout(() => {
+                    loadMapData();
+                }, 1000);
+            }, 500);
+            
             // Auto-populate station dropdown
             setTimeout(() => {
                 populateStationDropdown();
-            }, 1000);
+            }, 2000);
         });
     </script>
 </body>
