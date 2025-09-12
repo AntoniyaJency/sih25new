@@ -96,41 +96,67 @@
                 <h2>Live Railway Map</h2>
                 <p class="page-description">Interactive map showing real-time train positions and railway network</p>
             </div>
-            <div class="map-container">
-                <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                    <button onclick="initializeMap()" class="btn">Initialize Map</button>
-                    <button onclick="loadMapData()" class="btn btn-secondary">Load Data</button>
-                    <button onclick="refreshMap()" class="btn btn-success">Refresh</button>
-                    <button onclick="toggleFullscreen()" class="btn btn-warning">Fullscreen</button>
-                    <button onclick="toggleVoiceAlerts()" class="btn" id="voice-btn">🔊 Voice Alerts</button>
-                    <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Live Movement</button>
-                    <button onclick="forceUpdateTrains()" class="btn btn-primary">🚂 Force Update</button>
-                    <button onclick="showSectionController()" class="btn" id="controller-btn">🎛️ Section Controller</button>
-                    <button onclick="showAllTrains()" class="btn" id="trains-btn">🚂 All Trains</button>
+            
+            <!-- Map Controls Panel -->
+            <div class="map-controls-panel">
+                <div class="control-section">
+                    <h4>Map Controls</h4>
+                    <div class="control-buttons">
+                        <button onclick="initializeMap()" class="btn btn-primary">🗺️ Initialize Map</button>
+                        <button onclick="loadMapData()" class="btn btn-secondary">📊 Load Data</button>
+                        <button onclick="refreshMap()" class="btn btn-success">🔄 Refresh</button>
+                        <button onclick="forceUpdateTrains()" class="btn btn-info">🚂 Force Update</button>
+                    </div>
                 </div>
                 
-                <!-- Station Selection -->
-                <div style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <label for="station-select" style="font-weight: 600; color: #1e3a8a;">🎯 Monitor Station:</label>
-                            <select id="station-select" onchange="selectStation()" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 200px;">
-                                <option value="">Select a station to monitor...</option>
+                <div class="control-section">
+                    <h4>Display Options</h4>
+                    <div class="control-buttons">
+                        <button onclick="toggleFullscreen()" class="btn btn-warning">📺 Fullscreen</button>
+                        <button onclick="toggleVoiceAlerts()" class="btn" id="voice-btn">🔊 Voice Alerts</button>
+                        <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Live Movement</button>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h4>Analysis Tools</h4>
+                    <div class="control-buttons">
+                        <button onclick="showSectionController()" class="btn" id="controller-btn">🎛️ Section Controller</button>
+                        <button onclick="showAllTrains()" class="btn" id="trains-btn">🚂 All Trains</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Map Container -->
+            <div class="map-container">
+                
+                <!-- Station Selection Panel -->
+                <div class="station-selection-panel">
+                    <h4>🎯 Station Monitoring</h4>
+                    <div class="station-controls">
+                        <div class="station-input-group">
+                            <label for="station-select">Select Station:</label>
+                            <select id="station-select" onchange="selectStation()">
+                                <option value="">Choose a station to monitor...</option>
                             </select>
                         </div>
-                        <button onclick="clearStationFocus()" class="btn btn-secondary" id="clear-station-btn" style="display: none;">Clear Focus</button>
-                        <button onclick="populateStationDropdown()" class="btn btn-info">🔄 Load Stations</button>
-                        <button onclick="toggleStationMonitoring()" class="btn" id="monitor-btn">📡 Start Monitoring</button>
+                        <div class="station-actions">
+                            <button onclick="populateStationDropdown()" class="btn btn-info">🔄 Load Stations</button>
+                            <button onclick="toggleStationMonitoring()" class="btn btn-primary" id="monitor-btn">📡 Start Monitoring</button>
+                            <button onclick="clearStationFocus()" class="btn btn-secondary" id="clear-station-btn" style="display: none;">Clear Focus</button>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Alert Panel -->
-                <div id="alert-panel" style="margin-bottom: 10px; padding: 10px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 5px; display: none;">
-                    <h4 style="margin: 0 0 10px 0; color: #dc2626;">🚨 Active Alerts</h4>
+                <div id="alert-panel" class="alert-panel">
+                    <h4>🚨 Active Alerts</h4>
                     <div id="alert-list"></div>
                 </div>
                 
-                <div id="railway-map" style="height: 600px; border: 2px solid #e5e7eb; border-radius: 10px; position: relative;"></div>
+                <!-- Map Area -->
+                <div class="map-area">
+                    <div id="railway-map" class="railway-map"></div>
                 
                 <!-- AI Message Overlay -->
                 <div id="ai-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; display: none; max-width: 300px; z-index: 1000;">
@@ -175,18 +201,40 @@
                     <div id="ai-controller-content"></div>
                 </div>
                 
-                <div id="map-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                    <strong>Map Status:</strong> <span id="status-text">Ready to initialize</span>
                 </div>
                 
-                <!-- Real-time Data Display -->
-                <div id="realtime-data" style="margin-top: 10px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid #1e40af;">
-                    <h4 style="margin: 0 0 10px 0; color: #1e40af;">📊 Real-Time Data</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px;">
-                        <div><strong>Last Update:</strong> <span id="last-update">Never</span></div>
-                        <div><strong>Active Trains:</strong> <span id="active-trains">0</span></div>
-                        <div><strong>Moving Trains:</strong> <span id="moving-trains">0</span></div>
-                        <div><strong>System Status:</strong> <span id="system-status">Offline</span></div>
+                <!-- Status Panels -->
+                <div class="status-panels">
+                    <div class="status-panel">
+                        <h4>📊 System Status</h4>
+                        <div class="status-content">
+                            <div class="status-item">
+                                <span class="status-label">Map Status:</span>
+                                <span id="status-text" class="status-value">Ready to initialize</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-panel">
+                        <h4>🚂 Real-Time Data</h4>
+                        <div class="status-content">
+                            <div class="status-item">
+                                <span class="status-label">Last Update:</span>
+                                <span id="last-update" class="status-value">Never</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Active Trains:</span>
+                                <span id="active-trains" class="status-value">0</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Moving Trains:</span>
+                                <span id="moving-trains" class="status-value">0</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">System Status:</span>
+                                <span id="system-status" class="status-value">Offline</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
