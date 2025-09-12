@@ -834,6 +834,7 @@
             
             // Try multiple API endpoints for different deployment scenarios
             const apiEndpoints = [
+                'http://localhost:8084/api/map-data',
                 'http://localhost:8081/api/map-data',
                 'http://localhost:8080/api/map-data',
                 '/api/map-data',
@@ -1420,7 +1421,7 @@
             
             realTimeUpdateInterval = setInterval(() => {
                 // Fetch fresh data from backend
-                fetch('http://localhost:8081/api/map-data')
+                fetch('http://localhost:8084/api/map-data')
                     .then(response => response.json())
                     .then(data => {
                         mapData = data;
@@ -2145,7 +2146,7 @@
 
         function forceUpdateTrains() {
             // Force refresh train data
-            fetch('http://localhost:8081/api/map-data')
+            fetch('http://localhost:8084/api/map-data')
                 .then(response => response.json())
                 .then(data => {
                     mapData = data;
