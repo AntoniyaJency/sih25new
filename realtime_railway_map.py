@@ -55,6 +55,13 @@ class Train:
         self.progress = 0.0  # Progress along current track (0-1)
         self.delay_minutes = 0
         self.last_update = datetime.now()
+        self.collision_risk = False
+        self.rerouting_needed = False
+        self.ai_message = ""
+        self.voice_enabled = False
+        self.lat = 0.0
+        self.lon = 0.0
+        self.current_track_id = None
 
 class RailwayMapSystem:
     def __init__(self):
@@ -545,11 +552,154 @@ class RailwayMapSystem:
             "stations": stations_list,
             "tracks": tracks_list,
             "trains": trains_list,
+            "collisions": self._get_collision_alerts(),
+            "rerouting": self._get_rerouting_alerts(),
             "timestamp": datetime.now().isoformat()
         }
+    
+    def update_train_positions(self):
+        """Update train positions with real movement"""
+        for train_id, train in self.trains.items():
+            self._move_train(train_id, train)
+            self._check_collision_risk(train_id, train)
+            self._check_rerouting_needed(train_id, train)
+    
+    def _move_train(self, train_id, train):
+        """Move train along its current track"""
+        if train_id in self.positions:
+            position = self.positions[train_id]
+            
+            # Update progress based on speed
+            speed_factor = position["speed"] / 100.0  # Normalize speed
+            position["progress"] += speed_factor * 0.02  # Small increment
+            
+            if position["progress"] >= 1.0:
+                # Train reached destination station
+                position["progress"] = 0.0
+                # Move to next station in route
+                self._advance_to_next_station(train_id, train)
+            
+            # Update position based on current track
+            self._update_train_coordinates(train_id, train, position)
+    
+    def _advance_to_next_station(self, train_id, train):
+        """Move train to next station in route"""
+        # Simple route progression
+        current_station = train.current_station
+        available_tracks = [t for t in self.tracks.values() 
+                          if t.from_station == current_station]
+        if available_tracks:
+            next_track = available_tracks[0]
+            train.next_station = next_track.to_station
+            train.current_station = next_track.to_station
+    
+    def _update_train_coordinates(self, train_id, train, position):
+        """Update train coordinates based on current track"""
+        # Find current track
+        current_track = None
+        for track in self.tracks.values():
+            if track.from_station == train.current_station and track.to_station == train.next_station:
+                current_track = track
+                break
+        
+        if current_track:
+            from_station = self.stations[current_track.from_station]
+            to_station = self.stations[current_track.to_station]
+            
+            # Calculate position based on progress
+            progress = position["progress"]
+            position["lat"] = from_station.lat + (to_station.lat - from_station.lat) * progress
+            position["lon"] = from_station.lon + (to_station.lon - from_station.lon) * progress
+    
+    def _check_collision_risk(self, train_id, train):
+        """Check if train is at risk of collision"""
+        position = self.positions[train_id]
+        
+        # Check for trains on same track segment
+        for other_id, other_train in self.trains.items():
+            if other_id != train_id:
+                other_position = self.positions[other_id]
+                
+                # Check if trains are on same track and too close
+                if (train.current_station == other_train.current_station and 
+                    train.next_station == other_train.next_station):
+                    
+                    distance = abs(position["progress"] - other_position["progress"])
+                    if distance < 0.15:  # Within 15% of track
+                        position["collision_risk"] = True
+                        position["ai_message"] = f"⚠️ COLLISION RISK: Too close to {other_train.train_number}"
+                        return
+        
+        position["collision_risk"] = False
+        position["ai_message"] = ""
+    
+    def _check_rerouting_needed(self, train_id, train):
+        """Check if train needs rerouting"""
+        position = self.positions[train_id]
+        
+        # Check for delays
+        if position.get("delay_minutes", 0) > 15:
+            position["rerouting_needed"] = True
+            position["ai_message"] = f"🔄 REROUTING NEEDED: {position['delay_minutes']} min delay"
+            return
+        
+        # Check for track maintenance (random chance)
+        if random.random() < 0.03:  # 3% chance
+            position["rerouting_needed"] = True
+            position["ai_message"] = "🚧 REROUTING NEEDED: Track maintenance ahead"
+            return
+        
+        position["rerouting_needed"] = False
+        if not position["collision_risk"]:
+            position["ai_message"] = ""
+    
+    def _get_collision_alerts(self):
+        """Get all collision alerts"""
+        alerts = []
+        for train_id, train in self.trains.items():
+            position = self.positions[train_id]
+            if position.get("collision_risk", False):
+                alerts.append({
+                    "train_id": train_id,
+                    "train_number": train.train_number,
+                    "message": position["ai_message"],
+                    "severity": "high",
+                    "timestamp": datetime.now().isoformat()
+                })
+        return alerts
+    
+    def _get_rerouting_alerts(self):
+        """Get all rerouting alerts"""
+        alerts = []
+        for train_id, train in self.trains.items():
+            position = self.positions[train_id]
+            if position.get("rerouting_needed", False):
+                alerts.append({
+                    "train_id": train_id,
+                    "train_number": train.train_number,
+                    "message": position["ai_message"],
+                    "severity": "medium",
+                    "timestamp": datetime.now().isoformat()
+                })
+        return alerts
 
 # Global system instance
 railway_map = RailwayMapSystem()
+
+# Background thread for real-time updates
+def update_positions_thread():
+    """Background thread to update train positions"""
+    while True:
+        try:
+            railway_map.update_train_positions()
+            time.sleep(2)  # Update every 2 seconds
+        except Exception as e:
+            print(f"Error updating positions: {e}")
+            time.sleep(5)
+
+# Start background thread
+position_thread = threading.Thread(target=update_positions_thread, daemon=True)
+position_thread.start()
 
 def create_realtime_map_html():
     """Create the real-time interactive railway map"""

@@ -97,12 +97,28 @@
                 <p class="page-description">Interactive map showing real-time train positions and railway network</p>
             </div>
             <div class="map-container">
-                <div style="margin-bottom: 10px;">
+                <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
                     <button onclick="initializeMap()" class="btn">Initialize Map</button>
                     <button onclick="loadMapData()" class="btn btn-secondary">Load Data</button>
                     <button onclick="refreshMap()" class="btn btn-success">Refresh</button>
+                    <button onclick="toggleFullscreen()" class="btn btn-warning">Fullscreen</button>
+                    <button onclick="toggleVoiceAlerts()" class="btn" id="voice-btn">🔊 Voice Alerts</button>
+                    <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Live Movement</button>
                 </div>
-                <div id="railway-map" style="height: 600px; border: 2px solid #e5e7eb; border-radius: 10px;"></div>
+                
+                <!-- Alert Panel -->
+                <div id="alert-panel" style="margin-bottom: 10px; padding: 10px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 5px; display: none;">
+                    <h4 style="margin: 0 0 10px 0; color: #dc2626;">🚨 Active Alerts</h4>
+                    <div id="alert-list"></div>
+                </div>
+                
+                <div id="railway-map" style="height: 600px; border: 2px solid #e5e7eb; border-radius: 10px; position: relative;"></div>
+                
+                <!-- AI Message Overlay -->
+                <div id="ai-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; display: none; max-width: 300px; z-index: 1000;">
+                    <div id="ai-message"></div>
+                </div>
+                
                 <div id="map-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
                     <strong>Map Status:</strong> <span id="status-text">Ready to initialize</span>
                 </div>
@@ -189,6 +205,10 @@
         let stationMarkers = [];
         let trainMarkers = [];
         let trackLines = [];
+        let liveMovementEnabled = false;
+        let voiceAlertsEnabled = false;
+        let updateInterval = null;
+        let speechSynthesis = window.speechSynthesis;
 
         // Update status text
         function updateStatus(message) {
@@ -236,31 +256,6 @@
             }
         }
 
-        // Load map data from API
-        async function loadMapData() {
-            try {
-                updateStatus('Loading data from API...');
-                
-                const response = await fetch('http://localhost:8081/api/map-data');
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                mapData = await response.json();
-                updateStatus(`✅ Data loaded! Stations: ${mapData.stations.length}, Trains: ${mapData.trains.length}, Tracks: ${mapData.tracks.length}`);
-                
-                // Add data to map
-                addStationsToMap();
-                addTracksToMap();
-                addTrainsToMap();
-                
-                updateStatus(`✅ Map fully loaded with ${mapData.stations.length} stations, ${mapData.tracks.length} tracks, and ${mapData.trains.length} trains!`);
-                
-            } catch (error) {
-                updateStatus('❌ Error loading data: ' + error.message);
-                console.error('Data loading error:', error);
-            }
-        }
 
         // Add stations to map
         function addStationsToMap() {
@@ -330,19 +325,32 @@
             trainMarkers = [];
             
             mapData.trains.forEach(train => {
+                // Determine marker style based on alerts
+                let markerClass = 'train-marker';
+                let markerColor = '';
+                
+                if (train.collision_risk) {
+                    markerClass += ' collision-risk';
+                    markerColor = 'red';
+                } else if (train.rerouting_needed) {
+                    markerClass += ' rerouting-needed';
+                    markerColor = 'orange';
+                }
+                
                 const trainIcon = L.divIcon({
-                    className: 'train-marker',
-                    html: getTrainIcon(train.train_type),
-                    iconSize: [25, 25],
-                    iconAnchor: [12, 12]
+                    className: markerClass,
+                    html: getTrainIcon(train.train_type, markerColor),
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
                 });
                 
                 const trainMarker = L.marker([train.lat, train.lon], {
                     icon: trainIcon
                 }).addTo(map);
                 
-                trainMarker.bindPopup(`
-                    <div style="min-width: 250px;">
+                // Enhanced popup with AI messages
+                let popupContent = `
+                    <div style="min-width: 280px;">
                         <h3 style="margin: 0 0 10px 0; color: #1e3a8a;">${train.train_number}</h3>
                         <p style="margin: 5px 0;"><strong>Type:</strong> ${train.train_type}</p>
                         <p style="margin: 5px 0;"><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
@@ -350,8 +358,21 @@
                         <p style="margin: 5px 0;"><strong>Next:</strong> ${train.next_station}</p>
                         <p style="margin: 5px 0;"><strong>Speed:</strong> ${train.speed} km/h</p>
                         <p style="margin: 5px 0;"><strong>Status:</strong> ${train.status}</p>
-                    </div>
-                `);
+                        <p style="margin: 5px 0;"><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
+                `;
+                
+                if (train.ai_message) {
+                    popupContent += `
+                        <div style="margin-top: 10px; padding: 8px; background: ${train.collision_risk ? '#fef2f2' : '#fef3c7'}; border-radius: 4px; border-left: 4px solid ${train.collision_risk ? '#dc2626' : '#d97706'};">
+                            <strong>🤖 AI Alert:</strong><br>
+                            ${train.ai_message}
+                        </div>
+                    `;
+                }
+                
+                popupContent += `</div>`;
+                
+                trainMarker.bindPopup(popupContent);
                 trainMarkers.push(trainMarker);
             });
         }
@@ -377,7 +398,7 @@
             return weights[trackType] || 3;
         }
 
-        function getTrainIcon(trainType) {
+        function getTrainIcon(trainType, color = '') {
             const icons = {
                 'Rajdhani Express': '🚄',
                 'Shatabdi Express': '🚅',
@@ -388,7 +409,16 @@
                 'Freight': '🚛',
                 'Local': '🚋'
             };
-            return icons[trainType] || '🚂';
+            
+            const icon = icons[trainType] || '🚂';
+            
+            if (color === 'red') {
+                return `<div style="color: red; font-size: 20px; text-shadow: 2px 2px 4px rgba(255,0,0,0.8); animation: pulse-red 1s infinite;">${icon}</div>`;
+            } else if (color === 'orange') {
+                return `<div style="color: orange; font-size: 20px; text-shadow: 2px 2px 4px rgba(255,165,0,0.8); animation: pulse-orange 1s infinite;">${icon}</div>`;
+            } else {
+                return `<div style="font-size: 20px;">${icon}</div>`;
+            }
         }
 
         // Refresh map data
@@ -397,6 +427,176 @@
                 loadMapData();
             } else {
                 updateStatus('❌ Please initialize map first');
+            }
+        }
+
+        // Toggle fullscreen mode
+        function toggleFullscreen() {
+            const mapContainer = document.getElementById('railway-map');
+            if (!document.fullscreenElement) {
+                mapContainer.requestFullscreen().then(() => {
+                    mapContainer.style.height = '100vh';
+                    if (map) {
+                        map.invalidateSize();
+                    }
+                    updateStatus('✅ Fullscreen mode enabled');
+                }).catch(err => {
+                    updateStatus('❌ Error entering fullscreen: ' + err.message);
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    mapContainer.style.height = '600px';
+                    if (map) {
+                        map.invalidateSize();
+                    }
+                    updateStatus('✅ Fullscreen mode disabled');
+                });
+            }
+        }
+
+        // Toggle voice alerts
+        function toggleVoiceAlerts() {
+            voiceAlertsEnabled = !voiceAlertsEnabled;
+            const voiceBtn = document.getElementById('voice-btn');
+            voiceBtn.textContent = voiceAlertsEnabled ? '🔇 Voice Alerts' : '🔊 Voice Alerts';
+            voiceBtn.style.backgroundColor = voiceAlertsEnabled ? '#dc2626' : '';
+            updateStatus(voiceAlertsEnabled ? '✅ Voice alerts enabled' : '✅ Voice alerts disabled');
+        }
+
+        // Toggle live movement
+        function toggleLiveMovement() {
+            liveMovementEnabled = !liveMovementEnabled;
+            const movementBtn = document.getElementById('movement-btn');
+            movementBtn.textContent = liveMovementEnabled ? '⏸️ Live Movement' : '▶️ Live Movement';
+            movementBtn.style.backgroundColor = liveMovementEnabled ? '#dc2626' : '';
+            
+            if (liveMovementEnabled) {
+                startLiveMovement();
+                updateStatus('✅ Live movement enabled');
+            } else {
+                stopLiveMovement();
+                updateStatus('✅ Live movement disabled');
+            }
+        }
+
+        // Start live movement updates
+        function startLiveMovement() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            updateInterval = setInterval(() => {
+                if (map && mapData) {
+                    loadMapData();
+                }
+            }, 3000); // Update every 3 seconds
+        }
+
+        // Stop live movement updates
+        function stopLiveMovement() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+
+        // Speak alert message
+        function speakAlert(message) {
+            if (voiceAlertsEnabled && speechSynthesis) {
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.rate = 0.8;
+                utterance.pitch = 1.0;
+                utterance.volume = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Show AI message overlay
+        function showAIMessage(message, duration = 5000) {
+            const overlay = document.getElementById('ai-overlay');
+            const messageDiv = document.getElementById('ai-message');
+            
+            if (overlay && messageDiv) {
+                messageDiv.textContent = message;
+                overlay.style.display = 'block';
+                
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, duration);
+            }
+        }
+
+        // Update alert panel
+        function updateAlertPanel(collisions, rerouting) {
+            const alertPanel = document.getElementById('alert-panel');
+            const alertList = document.getElementById('alert-list');
+            
+            if (!alertPanel || !alertList) return;
+            
+            const allAlerts = [...collisions, ...rerouting];
+            
+            if (allAlerts.length > 0) {
+                alertPanel.style.display = 'block';
+                alertList.innerHTML = '';
+                
+                allAlerts.forEach(alert => {
+                    const alertDiv = document.createElement('div');
+                    alertDiv.style.cssText = `
+                        padding: 8px; margin: 5px 0; border-radius: 4px;
+                        background: ${alert.severity === 'high' ? '#fef2f2' : '#fef3c7'};
+                        border-left: 4px solid ${alert.severity === 'high' ? '#dc2626' : '#d97706'};
+                    `;
+                    alertDiv.innerHTML = `
+                        <strong>${alert.train_number}</strong><br>
+                        ${alert.message}<br>
+                        <small>${new Date(alert.timestamp).toLocaleTimeString()}</small>
+                    `;
+                    alertList.appendChild(alertDiv);
+                    
+                    // Speak high priority alerts
+                    if (alert.severity === 'high') {
+                        speakAlert(`Collision risk detected for train ${alert.train_number}`);
+                    }
+                });
+            } else {
+                alertPanel.style.display = 'none';
+            }
+        }
+
+        // Enhanced loadMapData function
+        async function loadMapData() {
+            try {
+                updateStatus('Loading data from API...');
+                
+                const response = await fetch('http://localhost:8081/api/map-data');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                mapData = await response.json();
+                updateStatus(`✅ Data loaded! Stations: ${mapData.stations.length}, Trains: ${mapData.trains.length}, Tracks: ${mapData.tracks.length}`);
+                
+                // Add data to map
+                addStationsToMap();
+                addTracksToMap();
+                addTrainsToMap();
+                
+                // Update alerts
+                if (mapData.collisions || mapData.rerouting) {
+                    updateAlertPanel(mapData.collisions || [], mapData.rerouting || []);
+                }
+                
+                // Show AI messages for trains with alerts
+                mapData.trains.forEach(train => {
+                    if (train.ai_message) {
+                        showAIMessage(`${train.train_number}: ${train.ai_message}`, 3000);
+                    }
+                });
+                
+                updateStatus(`✅ Map fully loaded with ${mapData.stations.length} stations, ${mapData.tracks.length} tracks, and ${mapData.trains.length} trains!`);
+                
+            } catch (error) {
+                updateStatus('❌ Error loading data: ' + error.message);
+                console.error('Data loading error:', error);
             }
         }
 
