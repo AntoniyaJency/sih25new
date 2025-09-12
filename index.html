@@ -48,11 +48,7 @@
                 </div>
                 <div class="feature-card">
                     <h3>📊 Analytics Dashboard</h3>
-                    <p>Comprehensive KPIs, performance metrics, and predictive analytics for better decision making.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>🎯 Simulation Engine</h3>
-                    <p>What-if scenarios and disruption handling with rapid re-optimization capabilities.</p>
+                    <p>Comprehensive analytics and reporting for railway operations and performance metrics.</p>
                 </div>
             </div>
         </div>
@@ -60,32 +56,30 @@
         <!-- Dashboard Page -->
         <div id="dashboard" class="page">
             <div class="page-header">
-                <h2>System Dashboard</h2>
-                <p class="page-description">Real-time monitoring and control of the railway traffic system</p>
+                <h2>📊 Dashboard</h2>
+                <p class="page-description">Real-time overview of railway operations and system performance</p>
             </div>
+            
             <div class="dashboard-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="total-stations">-</div>
-                    <div class="stat-label">Total Stations</div>
+                <div class="dashboard-card">
+                    <h3>🚂 Active Trains</h3>
+                    <div class="metric-value">50</div>
+                    <div class="metric-label">Currently Running</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="total-trains">-</div>
-                    <div class="stat-label">Active Trains</div>
+                <div class="dashboard-card">
+                    <h3>🚉 Stations</h3>
+                    <div class="metric-value">124</div>
+                    <div class="metric-label">Total Stations</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="total-tracks">-</div>
-                    <div class="stat-label">Track Segments</div>
+                <div class="dashboard-card">
+                    <h3>🛤️ Track Segments</h3>
+                    <div class="metric-value">86</div>
+                    <div class="metric-label">Active Routes</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="system-efficiency">-</div>
-                    <div class="stat-label">System Efficiency</div>
-                </div>
-            </div>
-
-            <div class="train-list">
-                <h3>Recent Train Activity</h3>
-                <div id="recent-trains">
-                    <div class="loading">Loading train data...</div>
+                <div class="dashboard-card">
+                    <h3>⚡ System Status</h3>
+                    <div class="metric-value online">Online</div>
+                    <div class="metric-label">All Systems Operational</div>
                 </div>
             </div>
         </div>
@@ -93,8 +87,8 @@
         <!-- Live Map Page -->
         <div id="map" class="page">
             <div class="page-header">
-                <h2>Live Railway Map</h2>
-                <p class="page-description">Interactive map showing real-time train positions and railway network</p>
+                <h2>🗺️ Live Railway Map</h2>
+                <p class="page-description">Interactive map showing real-time train positions and railway network across India</p>
             </div>
             
             <!-- Main Map Layout -->
@@ -181,261 +175,152 @@
                 </div>
             </div>
             
-            <!-- Main Map Container -->
-            <div class="map-container">
-                
-                <!-- Station Selection Panel -->
-                <div class="station-selection-panel">
-                    <h4>🎯 Station Monitoring</h4>
-                    <div class="station-controls">
-                        <div class="station-input-group">
-                            <label for="station-select">Select Station:</label>
-                            <select id="station-select" onchange="selectStation()">
-                                <option value="">Choose a station to monitor...</option>
-                            </select>
-                        </div>
-                        <div class="station-actions">
-                            <button onclick="populateStationDropdown()" class="btn btn-info">🔄 Load Stations</button>
-                            <button onclick="toggleStationMonitoring()" class="btn btn-primary" id="monitor-btn">📡 Start Monitoring</button>
-                            <button onclick="clearStationFocus()" class="btn btn-secondary" id="clear-station-btn" style="display: none;">Clear Focus</button>
-                        </div>
-                    </div>
+            <!-- Live Station Monitoring Panel -->
+            <div id="live-station-monitor" class="live-station-monitor" style="display: none;">
+                <div class="monitor-header">
+                    <h4>📡 Live Station Monitoring</h4>
+                    <button onclick="closeLiveMonitor()" class="btn btn-secondary">✕ Close</button>
                 </div>
-                
-                <!-- Live Station Monitoring Panel -->
-                <div id="live-station-monitor" class="live-station-monitor" style="display: none;">
-                    <div class="monitor-header">
-                        <h4>📡 Live Station Monitoring</h4>
-                        <button onclick="closeLiveMonitor()" class="btn btn-secondary">✕ Close</button>
-                    </div>
-                    <div class="monitor-content">
-                        <div class="station-info">
-                            <h5 id="monitor-station-name">Station Name</h5>
-                            <div class="station-stats">
-                                <div class="stat-item">
-                                    <span class="stat-label">Connected Tracks:</span>
-                                    <span id="monitor-tracks-count" class="stat-value">0</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Active Trains:</span>
-                                    <span id="monitor-trains-count" class="stat-value">0</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Monitoring Status:</span>
-                                    <span id="monitor-status" class="stat-value">Active</span>
-                                </div>
+                <div class="monitor-content">
+                    <div class="station-info">
+                        <h5 id="monitor-station-name">Station Name</h5>
+                        <div class="station-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Connected Tracks:</span>
+                                <span id="monitor-tracks-count" class="stat-value">0</span>
                             </div>
-                        </div>
-                        <div class="live-trains-list">
-                            <h6>🚂 Live Train Movements</h6>
-                            <div id="live-trains-container" class="trains-container">
-                                <div class="loading">Loading live train data...</div>
+                            <div class="stat-item">
+                                <span class="stat-label">Active Trains:</span>
+                                <span id="monitor-trains-count" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Monitoring Status:</span>
+                                <span id="monitor-status" class="stat-value">Active</span>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Map Area -->
-                <div class="map-area">
-                    <div id="railway-map" class="railway-map" style="width: 100%; height: 600px; position: relative; display: block; visibility: visible;"></div>
-                    
-                    <!-- AI Message Overlay -->
-                <div id="ai-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; display: none; max-width: 300px; z-index: 1000;">
-                    <div id="ai-message"></div>
-                </div>
-                
-                <!-- Section Controller Panel -->
-                <div id="section-controller" style="position: absolute; top: 10px; right: 10px; background: white; border: 2px solid #1e3a8a; border-radius: 10px; padding: 15px; display: none; max-width: 400px; max-height: 600px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="margin: 0; color: #1e3a8a;">🎛️ Section Controller</h3>
-                        <button onclick="hideSectionController()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
-                    </div>
-                    <div id="section-list"></div>
-                </div>
-                
-                <!-- All Trains Panel -->
-                <div id="all-trains-panel" style="position: absolute; bottom: 10px; left: 10px; background: white; border: 2px solid #059669; border-radius: 10px; padding: 15px; display: none; max-width: 500px; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="margin: 0; color: #059669;">🚂 All Trains Status</h3>
-                        <button onclick="hideAllTrains()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
-                    </div>
-                    <div id="trains-list"></div>
-                </div>
-                
-                <!-- Station Monitoring Panel -->
-                <div id="station-monitoring-panel" style="position: absolute; top: 10px; left: 10px; background: white; border: 2px solid #7c3aed; border-radius: 10px; padding: 15px; display: none; max-width: 600px; max-height: 700px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="margin: 0; color: #7c3aed;">📡 Station Monitoring</h3>
-                        <button onclick="hideStationMonitoring()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
-                    </div>
-                    <div id="station-info"></div>
-                    <div id="station-trains"></div>
-                    <div id="station-paths"></div>
-                </div>
-                
-                <!-- AI Controller Panel -->
-                <div id="ai-controller-panel" style="position: absolute; top: 10px; right: 10px; background: white; border: 2px solid #7c3aed; border-radius: 10px; padding: 15px; display: none; max-width: 500px; max-height: 600px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="margin: 0; color: #7c3aed;">🤖 AI Section Controller</h3>
-                        <button onclick="hideAIControllerPanel()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
-                    </div>
-                    <div id="ai-controller-content"></div>
-                </div>
-                
-                </div>
-                
-                <!-- Status Panels -->
-                <div class="status-panels">
-                    <div class="status-panel">
-                        <h4>📊 System Status</h4>
-                        <div class="status-content">
-                            <div class="status-item">
-                                <span class="status-label">Map Status:</span>
-                                <span id="status-text" class="status-value">Ready to initialize</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="status-panel">
-                        <h4>🚂 Real-Time Data</h4>
-                        <div class="status-content">
-                            <div class="status-item">
-                                <span class="status-label">Last Update:</span>
-                                <span id="last-update" class="status-value">Never</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">Active Trains:</span>
-                                <span id="active-trains" class="status-value">0</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">Moving Trains:</span>
-                                <span id="moving-trains" class="status-value">0</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">System Status:</span>
-                                <span id="system-status" class="status-value">Offline</span>
-                            </div>
+                    <div class="live-trains-list">
+                        <h6>🚂 Live Train Movements</h6>
+                        <div id="live-trains-container" class="trains-container">
+                            <div class="loading">Loading live train data...</div>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- AI Controller Panel -->
+            <div id="ai-controller-panel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 2px solid #dc2626; border-radius: 10px; padding: 20px; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0; color: #dc2626;">🎛️ AI Section Controller</h3>
+                    <button onclick="hideAIControllerPanel()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                </div>
+                <div id="ai-controller-content"></div>
             </div>
         </div>
 
         <!-- Trains Page -->
         <div id="trains" class="page">
             <div class="page-header">
-                <h2>Train Management</h2>
+                <h2>🚂 Train Management</h2>
                 <p class="page-description">Monitor and manage all active trains across the railway network</p>
             </div>
-            <div class="train-list">
-                <div id="all-trains">
-                    <div class="loading">Loading train information...</div>
-                </div>
+            
+            <div class="trains-grid">
+                <div class="loading">Loading train data...</div>
             </div>
         </div>
 
         <!-- Analytics Page -->
         <div id="analytics" class="page">
             <div class="page-header">
-                <h2>Performance Analytics</h2>
-                <p class="page-description">Comprehensive performance metrics and system analytics</p>
+                <h2>📊 Analytics</h2>
+                <p class="page-description">Comprehensive analytics and performance metrics</p>
             </div>
-            <div class="dashboard-grid">
-                <div class="stat-card">
-                    <div class="stat-number">95.2%</div>
-                    <div class="stat-label">Punctuality Rate</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">87.5%</div>
-                    <div class="stat-label">Throughput Efficiency</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Conflicts Resolved</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">2.3 min</div>
-                    <div class="stat-label">Average Delay</div>
-                </div>
+            
+            <div class="analytics-grid">
+                <div class="loading">Loading analytics data...</div>
             </div>
         </div>
 
         <!-- About Page -->
         <div id="about" class="page">
             <div class="page-header">
-                <h2>About the System</h2>
-                <p class="page-description">Learn about our AI-powered railway traffic control technology</p>
+                <h2>ℹ️ About</h2>
+                <p class="page-description">Learn more about the Railway Traffic Control System</p>
             </div>
-            <div class="features">
-                <div class="feature-card">
+            
+            <div class="about-content">
+                <div class="about-card">
                     <h3>🎯 Mission</h3>
-                    <p>To revolutionize railway traffic control through AI-powered optimization, ensuring maximum efficiency and safety across India's vast railway network.</p>
+                    <p>To revolutionize railway traffic control through AI-powered decision support systems that maximize throughput while ensuring safety and efficiency.</p>
                 </div>
-                <div class="feature-card">
-                    <h3>🔧 Technology</h3>
-                    <p>Built with FastAPI, React, Leaflet.js, and advanced optimization algorithms using Google OR-Tools for real-time decision support.</p>
+                <div class="about-card">
+                    <h3>🚀 Technology</h3>
+                    <p>Built with cutting-edge technologies including machine learning, real-time data processing, and advanced optimization algorithms.</p>
                 </div>
-                <div class="feature-card">
-                    <h3>📈 Impact</h3>
-                    <p>Reducing delays, maximizing throughput, and providing intelligent decision support for railway traffic controllers nationwide.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>🚀 Future</h3>
-                    <p>Integration with existing railway control systems, machine learning enhancements, and predictive analytics for proactive management.</p>
+                <div class="about-card">
+                    <h3>🏆 Smart India Hackathon 2025</h3>
+                    <p>Developed for the Ministry of Railways as part of the Smart India Hackathon 2025 initiative.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <footer class="footer">
-        <p>&copy; 2025 Railway Traffic Control System - Smart India Hackathon</p>
-        <p>Ministry of Railways | AI-Powered Decision Support System</p>
+        <div class="footer-content">
+            <p>&copy; 2025 Railway Traffic Control System. Smart India Hackathon 2025 - Ministry of Railways</p>
+        </div>
     </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="js/app.js"></script>
     <script>
-        // Global variables for map
-        let map = null;
+        // Global variables
+        let map;
         let mapData = null;
-        let stationMarkers = [];
         let trainMarkers = [];
+        let stationMarkers = [];
         let trackLines = [];
-        let liveMovementEnabled = false;
+        let isFullscreen = false;
         let voiceAlertsEnabled = false;
-        let updateInterval = null;
-        let speechSynthesis = window.speechSynthesis;
+        let liveMovementEnabled = true;
+        let realTimeUpdateInterval;
         let selectedStation = null;
-        let stationMonitoringEnabled = false;
-        let stationUpdateInterval = null;
+        let liveStationMonitorInterval;
 
-        // Update status text
-        function updateStatus(message) {
-            const statusText = document.getElementById('status-text');
-            if (statusText) {
-                statusText.textContent = message;
+        // Navigation functionality
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+            
+            // Initialize map if on map page
+            if (pageId === 'map') {
+                setTimeout(() => {
+                    initializeMap();
+                    loadMapData();
+                }, 100);
             }
-            console.log('🗺️ Status:', message);
         }
 
-        // Initialize the map
+        // Map initialization
         function initializeMap() {
             try {
                 console.log('🗺️ Initializing map...');
-                updateStatus('Initializing map...');
                 
-                const mapContainer = document.getElementById('railway-map');
-                if (!mapContainer) {
-                    console.error('❌ Map container not found!');
-                    updateStatus('❌ Map container not found!');
-                    return;
-                }
-
-                // Clear existing map if any
                 if (map) {
                     map.remove();
                 }
-
+                
                 // Create new map with stable settings - centered on India
                 map = L.map('railway-map', {
                     zoomControl: true,
@@ -450,7 +335,7 @@
                     wheelPxPerZoomLevel: 120
                 }).setView([20.5937, 78.9629], 6); // Centered on India with zoom level 6
                 
-                // Add tile layer with better visibility
+                // Add tile layer
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors',
                     maxZoom: 18,
@@ -458,17 +343,15 @@
                     opacity: 0.9
                 }).addTo(map);
                 
-                // Prevent map resizing issues
-                map.on('resize', function() {
-                    map.invalidateSize();
+                // Prevent map resize issues
+                map.on('resize', () => {
+                    setTimeout(() => map.invalidateSize(), 100);
                 });
                 
-                // Ensure map is properly sized
-                setTimeout(function() {
+                // Initial size validation
+                setTimeout(() => {
                     map.invalidateSize();
                 }, 100);
-                
-                updateStatus('✅ Map initialized successfully!');
                 
                 // Debug: Check if map is visible
                 setTimeout(() => {
@@ -488,1678 +371,391 @@
                     }
                 }, 1000);
                 
+                updateStatus('✅ Map initialized successfully');
+                
             } catch (error) {
-                updateStatus('❌ Error initializing map: ' + error.message);
-                console.error('Map initialization error:', error);
+                console.error('❌ Map initialization error:', error);
+                updateStatus('❌ Map initialization failed: ' + error.message);
             }
         }
 
+        // Load map data
+        function loadMapData() {
+            console.log('📊 Loading map data...');
+            updateStatus('📊 Loading map data...');
+            
+            fetch('http://localhost:8081/api/map-data')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ Map data loaded:', data);
+                    mapData = data;
+                    
+                    // Add elements to map
+                    addStationsToMap();
+                    addTracksToMap();
+                    addTrainsToMap();
+                    
+                    // Update real-time data display
+                    updateRealTimeDataDisplay();
+                    
+                    // Start real-time updates
+                    startRealTimeUpdates();
+                    
+                    // Populate station dropdown
+                    populateStationDropdown();
+                    
+                    updateStatus('✅ Map data loaded successfully');
+                })
+                .catch(error => {
+                    console.error('❌ Error loading map data:', error);
+                    updateStatus('❌ Failed to load map data: ' + error.message);
+                });
+        }
 
         // Add stations to map
         function addStationsToMap() {
-            if (!map || !mapData) {
-                console.log('❌ Cannot add stations: map or mapData not available');
-                return;
-            }
+            if (!mapData || !mapData.stations) return;
             
-            console.log('🚉 Adding stations to map:', mapData.stations.length);
-            
-            // Clear existing station markers
-            stationMarkers.forEach(marker => map.removeLayer(marker));
-            stationMarkers = [];
+            console.log('🚉 Adding stations to map...');
             
             mapData.stations.forEach(station => {
-                const marker = L.marker([station.lat, station.lon]).addTo(map);
-                marker.bindPopup(`
-                    <div style="min-width: 200px;">
-                        <h3 style="margin: 0 0 10px 0; color: #1e3a8a;">${station.name}</h3>
-                        <p style="margin: 5px 0;"><strong>Type:</strong> ${station.type}</p>
-                        <p style="margin: 5px 0;"><strong>Platforms:</strong> ${station.platforms}</p>
-                        <p style="margin: 5px 0;"><strong>ID:</strong> ${station.id}</p>
+                const stationMarker = L.marker([station.latitude, station.longitude], {
+                    icon: L.divIcon({
+                        className: 'station-marker',
+                        html: '🚉',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    })
+                }).addTo(map);
+                
+                stationMarker.bindPopup(`
+                    <div class="station-popup">
+                        <h4>${station.name}</h4>
+                        <p><strong>Code:</strong> ${station.code}</p>
+                        <p><strong>State:</strong> ${station.state}</p>
+                        <p><strong>Zone:</strong> ${station.zone}</p>
                     </div>
                 `);
-                stationMarkers.push(marker);
+                
+                stationMarkers.push(stationMarker);
             });
+            
+            console.log(`✅ Added ${mapData.stations.length} stations to map`);
         }
 
         // Add tracks to map
         function addTracksToMap() {
-            if (!map || !mapData) {
-                console.log('❌ Cannot add tracks: map or mapData not available');
-                return;
-            }
+            if (!mapData || !mapData.tracks) return;
             
-            console.log('🛤️ Adding tracks to map:', mapData.tracks.length);
-            
-            // Clear existing track lines
-            trackLines.forEach(line => map.removeLayer(line));
-            trackLines = [];
+            console.log('🛤️ Adding tracks to map...');
             
             mapData.tracks.forEach(track => {
                 const fromStation = mapData.stations.find(s => s.id === track.from_station);
                 const toStation = mapData.stations.find(s => s.id === track.to_station);
                 
                 if (fromStation && toStation) {
-                    const polyline = L.polyline([
-                        [fromStation.lat, fromStation.lon],
-                        [toStation.lat, toStation.lon]
+                    const trackLine = L.polyline([
+                        [fromStation.latitude, fromStation.longitude],
+                        [toStation.latitude, toStation.longitude]
                     ], {
-                        color: getTrackColor(track.track_type),
-                        weight: getTrackWeight(track.track_type),
-                        opacity: 0.8
+                        color: '#1e40af',
+                        weight: 3,
+                        opacity: 0.7,
+                        dashArray: '5, 5'
                     }).addTo(map);
                     
-                    polyline.bindPopup(`
-                        <div style="min-width: 200px;">
-                            <h4 style="margin: 0 0 10px 0;">Track Segment</h4>
-                            <p style="margin: 5px 0;"><strong>From:</strong> ${fromStation.name}</p>
-                            <p style="margin: 5px 0;"><strong>To:</strong> ${toStation.name}</p>
-                            <p style="margin: 5px 0;"><strong>Distance:</strong> ${track.distance} km</p>
-                            <p style="margin: 5px 0;"><strong>Max Speed:</strong> ${track.max_speed} km/h</p>
-                            <p style="margin: 5px 0;"><strong>Type:</strong> ${track.track_type}</p>
+                    trackLine.bindPopup(`
+                        <div class="track-popup">
+                            <h4>Track ${track.id}</h4>
+                            <p><strong>From:</strong> ${fromStation.name}</p>
+                            <p><strong>To:</strong> ${toStation.name}</p>
+                            <p><strong>Length:</strong> ${track.length} km</p>
                         </div>
                     `);
-                    trackLines.push(polyline);
+                    
+                    trackLines.push(trackLine);
                 }
             });
+            
+            console.log(`✅ Added ${mapData.tracks.length} tracks to map`);
         }
 
         // Add trains to map
         function addTrainsToMap() {
-            if (!map || !mapData) {
-                console.log('❌ Cannot add trains: map or mapData not available');
-                return;
-            }
-            
-            console.log('🚂 Adding trains to map:', mapData.trains.length);
-            
-            // Clear existing train markers
-            trainMarkers.forEach(marker => map.removeLayer(marker));
-            trainMarkers = [];
-            
-            mapData.trains.forEach(train => {
-                // Calculate train position on track
-                const trainPosition = calculateTrainPosition(train);
-                
-                if (!trainPosition) {
-                    console.log(`⚠️ Could not calculate position for train ${train.train_number}`);
-                    return;
-                }
-                
-                // Determine marker style based on alerts
-                let markerClass = 'train-marker';
-                let markerColor = '';
-                
-                if (train.collision_risk) {
-                    markerClass += ' collision-risk';
-                    markerColor = 'red';
-                } else if (train.rerouting_needed) {
-                    markerClass += ' rerouting-needed';
-                    markerColor = 'orange';
-                }
-                
-                const trainIcon = L.divIcon({
-                    className: markerClass,
-                    html: getTrainIcon(train.train_type, markerColor),
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-                
-                const trainMarker = L.marker([trainPosition.lat, trainPosition.lon], {
-                    icon: trainIcon
-                }).addTo(map);
-                
-                // Store train number for smooth movement tracking
-                trainMarker.trainNumber = train.train_number;
-                
-                // Enhanced popup with AI messages and section info
-                let popupContent = `
-                    <div style="min-width: 320px;">
-                        <h3 style="margin: 0 0 10px 0; color: #1e3a8a;">${train.train_number}</h3>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <span style="background: ${getPriorityColor(train.priority)}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
-                                Priority ${train.priority}
-                            </span>
-                            <span style="background: ${getSectionColor(train.section_id)}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
-                                ${train.section_id.replace(/_/g, ' ')}
-                            </span>
-                        </div>
-                        <p style="margin: 5px 0;"><strong>Type:</strong> ${train.train_type}</p>
-                        <p style="margin: 5px 0;"><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
-                        <p style="margin: 5px 0;"><strong>Current:</strong> ${train.current_station}</p>
-                        <p style="margin: 5px 0;"><strong>Next:</strong> ${train.next_station}</p>
-                        <p style="margin: 5px 0;"><strong>Speed:</strong> ${train.speed} km/h</p>
-                        <p style="margin: 5px 0;"><strong>Status:</strong> ${train.status}</p>
-                        <p style="margin: 5px 0;"><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
-                        ${train.delay_minutes > 0 ? `<p style="margin: 5px 0; color: #dc2626;"><strong>Delay:</strong> ${train.delay_minutes} min</p>` : ''}
-                `;
-                
-                if (train.ai_message) {
-                    popupContent += `
-                        <div style="margin-top: 10px; padding: 8px; background: ${train.collision_risk ? '#fef2f2' : '#fef3c7'}; border-radius: 4px; border-left: 4px solid ${train.collision_risk ? '#dc2626' : '#d97706'};">
-                            <strong>🤖 AI Alert:</strong><br>
-                            ${train.ai_message}
-                        </div>
-                    `;
-                }
-                
-                popupContent += `</div>`;
-                
-                trainMarker.bindPopup(popupContent);
-                trainMarkers.push(trainMarker);
-            });
-        }
-
-        // Helper functions
-        function getTrackColor(trackType) {
-            const colors = {
-                'main': '#1e3a8a',
-                'suburban': '#dc2626',
-                'branch': '#d97706',
-                'freight': '#6b7280'
-            };
-            return colors[trackType] || '#1e3a8a';
-        }
-
-        function getTrackWeight(trackType) {
-            const weights = {
-                'main': 4,
-                'suburban': 3,
-                'branch': 2,
-                'freight': 2
-            };
-            return weights[trackType] || 3;
-        }
-
-        function getTrainIcon(trainType, color = '') {
-            const icons = {
-                'Rajdhani Express': '🚄',
-                'Shatabdi Express': '🚅',
-                'Duronto Express': '🚆',
-                'Vande Bharat Express': '🚈',
-                'Express': '🚂',
-                'Mail': '🚃',
-                'Freight': '🚛',
-                'Local': '🚋'
-            };
-            
-            const icon = icons[trainType] || '🚂';
-            
-            if (color === 'red') {
-                return `<div style="color: red; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,0,0,0.8); animation: pulse-red 1s infinite; transform: scale(1.1);">${icon}</div>`;
-            } else if (color === 'orange') {
-                return `<div style="color: orange; font-size: 16px; text-shadow: 1px 1px 2px rgba(255,165,0,0.8); animation: pulse-orange 1s infinite; transform: scale(1.1);">${icon}</div>`;
-            } else {
-                return `<div style="font-size: 16px; color: #1e40af; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">${icon}</div>`;
-            }
-        }
-
-        // Refresh map data
-        function refreshMap() {
-            if (map) {
-                loadMapData();
-            } else {
-                updateStatus('❌ Please initialize map first');
-            }
-        }
-
-        // Toggle fullscreen mode
-        function toggleFullscreen() {
-            const mapContainer = document.getElementById('railway-map');
-            if (!document.fullscreenElement) {
-                mapContainer.requestFullscreen().then(() => {
-                    mapContainer.style.height = '100vh';
-                    if (map) {
-                        map.invalidateSize();
-                    }
-                    updateStatus('✅ Fullscreen mode enabled');
-                }).catch(err => {
-                    updateStatus('❌ Error entering fullscreen: ' + err.message);
-                });
-            } else {
-                document.exitFullscreen().then(() => {
-                    mapContainer.style.height = '600px';
-                    if (map) {
-                        map.invalidateSize();
-                    }
-                    updateStatus('✅ Fullscreen mode disabled');
-                });
-            }
-        }
-
-        // Toggle voice alerts
-        function toggleVoiceAlerts() {
-            voiceAlertsEnabled = !voiceAlertsEnabled;
-            const voiceBtn = document.getElementById('voice-btn');
-            voiceBtn.textContent = voiceAlertsEnabled ? '🔇 Voice Alerts' : '🔊 Voice Alerts';
-            voiceBtn.style.backgroundColor = voiceAlertsEnabled ? '#dc2626' : '';
-            updateStatus(voiceAlertsEnabled ? '✅ Voice alerts enabled' : '✅ Voice alerts disabled');
-        }
-
-        // Toggle live movement
-        function toggleLiveMovement() {
-            liveMovementEnabled = !liveMovementEnabled;
-            const movementBtn = document.getElementById('movement-btn');
-            movementBtn.textContent = liveMovementEnabled ? '⏸️ Live Movement' : '▶️ Live Movement';
-            movementBtn.style.backgroundColor = liveMovementEnabled ? '#dc2626' : '';
-            
-            if (liveMovementEnabled) {
-                startLiveMovement();
-                updateStatus('✅ Live movement enabled');
-            } else {
-                stopLiveMovement();
-                updateStatus('✅ Live movement disabled');
-            }
-        }
-
-        // Start live movement updates
-        function startLiveMovement() {
-            if (updateInterval) {
-                clearInterval(updateInterval);
-            }
-            updateInterval = setInterval(() => {
-                if (map && mapData) {
-                    loadMapData();
-                }
-            }, 3000); // Update every 3 seconds
-        }
-
-        // Stop live movement updates
-        function stopLiveMovement() {
-            if (updateInterval) {
-                clearInterval(updateInterval);
-                updateInterval = null;
-            }
-        }
-
-        // Speak alert message
-        function speakAlert(message) {
-            if (voiceAlertsEnabled && speechSynthesis) {
-                const utterance = new SpeechSynthesisUtterance(message);
-                utterance.rate = 0.8;
-                utterance.pitch = 1.0;
-                utterance.volume = 0.8;
-                speechSynthesis.speak(utterance);
-            }
-        }
-
-        // Show AI message overlay
-        function showAIMessage(message, duration = 5000) {
-            const overlay = document.getElementById('ai-overlay');
-            const messageDiv = document.getElementById('ai-message');
-            
-            if (overlay && messageDiv) {
-                messageDiv.textContent = message;
-                overlay.style.display = 'block';
-                
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                }, duration);
-            }
-        }
-
-        // Update alert panel
-        function updateAlertPanel(collisions, rerouting) {
-            const alertPanel = document.getElementById('alert-panel');
-            const alertList = document.getElementById('alert-list');
-            
-            if (!alertPanel || !alertList) return;
-            
-            const allAlerts = [...collisions, ...rerouting];
-            
-            if (allAlerts.length > 0) {
-                alertPanel.style.display = 'block';
-                alertList.innerHTML = '';
-                
-                allAlerts.forEach(alert => {
-                    const alertDiv = document.createElement('div');
-                    alertDiv.style.cssText = `
-                        padding: 8px; margin: 5px 0; border-radius: 4px;
-                        background: ${alert.severity === 'high' ? '#fef2f2' : '#fef3c7'};
-                        border-left: 4px solid ${alert.severity === 'high' ? '#dc2626' : '#d97706'};
-                    `;
-                    alertDiv.innerHTML = `
-                        <strong>${alert.train_number}</strong><br>
-                        ${alert.message}<br>
-                        <small>${new Date(alert.timestamp).toLocaleTimeString()}</small>
-                    `;
-                    alertList.appendChild(alertDiv);
-                    
-                    // Speak high priority alerts
-                    if (alert.severity === 'high') {
-                        speakAlert(`Collision risk detected for train ${alert.train_number}`);
-                    }
-                });
-            } else {
-                alertPanel.style.display = 'none';
-            }
-        }
-
-        // Enhanced loadMapData function
-        async function loadMapData() {
-            try {
-                console.log('📡 Loading data from API...');
-                updateStatus('Loading data from API...');
-                
-                const response = await fetch('http://localhost:8081/api/map-data');
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                mapData = await response.json();
-                console.log('✅ Data loaded:', mapData);
-                updateStatus(`✅ Data loaded! Stations: ${mapData.stations.length}, Trains: ${mapData.trains.length}, Tracks: ${mapData.tracks.length}`);
-                
-                // Add data to map
-                addStationsToMap();
-                addTracksToMap();
-                addTrainsToMap();
-                
-                // Populate station dropdown
-                populateStationDropdown();
-                
-                // Update alerts
-                if (mapData.collisions || mapData.rerouting) {
-                    updateAlertPanel(mapData.collisions || [], mapData.rerouting || []);
-                }
-                
-                // Show AI messages for trains with alerts
-                mapData.trains.forEach(train => {
-                    if (train.ai_message) {
-                        showAIMessage(`${train.train_number}: ${train.ai_message}`, 3000);
-                    }
-                });
-                
-                updateStatus(`✅ Map fully loaded with ${mapData.stations.length} stations, ${mapData.tracks.length} tracks, and ${mapData.trains.length} trains!`);
-                
-            } catch (error) {
-                updateStatus('❌ Error loading data: ' + error.message);
-                console.error('Data loading error:', error);
-            }
-        }
-
-        // Show Section Controller
-        function showSectionController() {
-            const panel = document.getElementById('section-controller');
-            if (panel) {
-                panel.style.display = 'block';
-                loadSectionData();
-                updateStatus('✅ Section Controller opened');
-            }
-        }
-
-        // Hide Section Controller
-        function hideSectionController() {
-            const panel = document.getElementById('section-controller');
-            if (panel) {
-                panel.style.display = 'none';
-            }
-        }
-
-        // Show All Trains Panel
-        function showAllTrains() {
-            const panel = document.getElementById('all-trains-panel');
-            if (panel) {
-                panel.style.display = 'block';
-                loadTrainsData();
-                updateStatus('✅ All Trains panel opened');
-            }
-        }
-
-        // Hide All Trains Panel
-        function hideAllTrains() {
-            const panel = document.getElementById('all-trains-panel');
-            if (panel) {
-                panel.style.display = 'none';
-            }
-        }
-
-        // Load Section Data
-        async function loadSectionData() {
-            try {
-                const response = await fetch('http://localhost:8081/api/section-status');
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const sectionData = await response.json();
-                displaySectionData(sectionData);
-                
-            } catch (error) {
-                console.error('Error loading section data:', error);
-                updateStatus('❌ Error loading section data: ' + error.message);
-            }
-        }
-
-        // Display Section Data
-        function displaySectionData(sections) {
-            const sectionList = document.getElementById('section-list');
-            if (!sectionList) return;
-            
-            sectionList.innerHTML = '';
-            
-            Object.values(sections).forEach(section => {
-                const sectionDiv = document.createElement('div');
-                sectionDiv.style.cssText = `
-                    margin-bottom: 15px; padding: 12px; border-radius: 8px;
-                    border-left: 4px solid ${getSectionColor(section)};
-                    background: ${getSectionBackground(section)};
-                `;
-                
-                sectionDiv.innerHTML = `
-                    <h4 style="margin: 0 0 8px 0; color: #1e3a8a;">${section.section_id.replace(/_/g, ' ')}</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
-                        <div><strong>Total Trains:</strong> ${section.total_trains}</div>
-                        <div><strong>Delayed:</strong> ${section.delayed_trains}</div>
-                        <div><strong>Collision Risks:</strong> ${section.collision_risks}</div>
-                        <div><strong>Rerouting:</strong> ${section.rerouting_needed}</div>
-                        <div><strong>Avg Delay:</strong> ${section.avg_delay} min</div>
-                        <div><strong>Status:</strong> ${getSectionStatus(section)}</div>
-                    </div>
-                    <div style="margin-top: 8px;">
-                        <strong>Trains:</strong>
-                        <div style="max-height: 100px; overflow-y: auto; font-size: 12px;">
-                            ${section.trains.map(train => `
-                                <div style="margin: 2px 0; padding: 2px 4px; background: rgba(0,0,0,0.05); border-radius: 3px;">
-                                    ${train.train_number} (${train.train_type}) - ${train.current_station}
-                                    ${train.collision_risk ? ' 🚨' : ''} ${train.rerouting_needed ? ' 🔄' : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                
-                sectionList.appendChild(sectionDiv);
-            });
-        }
-
-        // Load Trains Data
-        function loadTrainsData() {
             if (!mapData || !mapData.trains) return;
             
-            const trainsList = document.getElementById('trains-list');
-            if (!trainsList) return;
+            console.log('🚂 Adding trains to map...');
             
-            trainsList.innerHTML = '';
-            
-            // Sort trains by priority and status
-            const sortedTrains = mapData.trains.sort((a, b) => {
-                if (a.collision_risk !== b.collision_risk) {
-                    return a.collision_risk ? -1 : 1;
-                }
-                if (a.rerouting_needed !== b.rerouting_needed) {
-                    return a.rerouting_needed ? -1 : 1;
-                }
-                return a.priority - b.priority;
+            mapData.trains.forEach(train => {
+                const trainMarker = L.marker([train.position.latitude, train.position.longitude], {
+                    icon: L.divIcon({
+                        className: 'train-marker',
+                        html: getTrainIcon(train),
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    })
+                }).addTo(map);
+                
+                trainMarker.bindPopup(`
+                    <div class="train-popup">
+                        <h4>${train.train_number} - ${train.train_name}</h4>
+                        <p><strong>Speed:</strong> ${train.speed} km/h</p>
+                        <p><strong>Progress:</strong> ${train.progress}%</p>
+                        <p><strong>Status:</strong> ${train.status}</p>
+                        <p><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
+                    </div>
+                `);
+                
+                trainMarker.trainNumber = train.train_number;
+                trainMarkers.push(trainMarker);
             });
             
-            sortedTrains.forEach(train => {
-                const trainDiv = document.createElement('div');
-                trainDiv.style.cssText = `
-                    margin-bottom: 8px; padding: 10px; border-radius: 6px;
-                    border-left: 4px solid ${getTrainStatusColor(train)};
-                    background: ${getTrainBackground(train)};
-                    cursor: pointer;
-                `;
-                
-                trainDiv.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>${train.train_number}</strong> (${train.train_type})
-                            ${train.collision_risk ? ' 🚨' : ''} ${train.rerouting_needed ? ' 🔄' : ''}
-                        </div>
-                        <div style="font-size: 12px; color: #666;">
-                            Priority: ${train.priority}
-                        </div>
-                    </div>
-                    <div style="font-size: 12px; margin-top: 4px;">
-                        <div><strong>Route:</strong> ${train.origin} → ${train.destination}</div>
-                        <div><strong>Current:</strong> ${train.current_station} → ${train.next_station}</div>
-                        <div><strong>Speed:</strong> ${train.speed} km/h | <strong>Progress:</strong> ${Math.round(train.progress * 100)}%</div>
-                        <div><strong>Section:</strong> ${train.section_id.replace(/_/g, ' ')}</div>
-                        ${train.delay_minutes > 0 ? `<div style="color: #dc2626;"><strong>Delay:</strong> ${train.delay_minutes} min</div>` : ''}
-                        ${train.ai_message ? `<div style="color: #d97706; font-style: italic;">🤖 ${train.ai_message}</div>` : ''}
-                    </div>
-                `;
-                
-                // Click to focus on train
-                trainDiv.addEventListener('click', () => {
-                    if (map) {
-                        map.setView([train.lat, train.lon], 8);
-                        // Open popup for this train
-                        const marker = trainMarkers.find(m => m.getLatLng().lat === train.lat && m.getLatLng().lng === train.lon);
-                        if (marker) {
-                            marker.openPopup();
-                        }
-                    }
-                });
-                
-                trainsList.appendChild(trainDiv);
+            console.log(`✅ Added ${mapData.trains.length} trains to map`);
+        }
+
+        // Get train icon
+        function getTrainIcon(train) {
+            return `<span style="font-size: 18px; color: #1e40af; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🚂</span>`;
+        }
+
+        // Update train positions
+        function updateTrainPositions() {
+            if (!mapData || !mapData.trains) return;
+            
+            mapData.trains.forEach(train => {
+                const marker = trainMarkers.find(m => m.trainNumber === train.train_number);
+                if (marker) {
+                    marker.setLatLng([train.position.latitude, train.position.longitude]);
+                }
             });
         }
 
-        // Helper functions for styling
-        function getSectionColor(section) {
-            if (section.collision_risks > 0) return '#dc2626';
-            if (section.rerouting_needed > 0) return '#d97706';
-            if (section.delayed_trains > section.total_trains * 0.5) return '#f59e0b';
-            return '#059669';
-        }
-
-        function getSectionBackground(section) {
-            if (section.collision_risks > 0) return '#fef2f2';
-            if (section.rerouting_needed > 0) return '#fef3c7';
-            if (section.delayed_trains > section.total_trains * 0.5) return '#fffbeb';
-            return '#f0fdf4';
-        }
-
-        function getSectionStatus(section) {
-            if (section.collision_risks > 0) return '🚨 CRITICAL';
-            if (section.rerouting_needed > 0) return '🔄 REROUTING';
-            if (section.delayed_trains > section.total_trains * 0.5) return '⚠️ DELAYED';
-            return '✅ NORMAL';
-        }
-
-        function getTrainStatusColor(train) {
-            if (train.collision_risk) return '#dc2626';
-            if (train.rerouting_needed) return '#d97706';
-            if (train.delay_minutes > 15) return '#f59e0b';
-            return '#059669';
-        }
-
-        function getTrainBackground(train) {
-            if (train.collision_risk) return '#fef2f2';
-            if (train.rerouting_needed) return '#fef3c7';
-            if (train.delay_minutes > 15) return '#fffbeb';
-            return '#f0fdf4';
-        }
-
-        function getPriorityColor(priority) {
-            const colors = {
-                1: '#dc2626',  // Highest priority - Red
-                2: '#d97706',  // High priority - Orange
-                3: '#059669',  // Medium priority - Green
-                4: '#2563eb',  // Low priority - Blue
-                5: '#6b7280',  // Lower priority - Gray
-                6: '#9ca3af'   // Lowest priority - Light Gray
-            };
-            return colors[priority] || '#059669';
-        }
-
-        function getSectionColor(sectionId) {
-            const colors = {
-                'NORTH_DELHI': '#dc2626',
-                'SOUTH_DELHI': '#d97706',
-                'MUMBAI_CENTRAL': '#059669',
-                'MUMBAI_WESTERN': '#2563eb',
-                'KOLKATA_HOWRAH': '#7c3aed',
-                'KOLKATA_SEALDAH': '#db2777',
-                'CHENNAI_CENTRAL': '#0891b2',
-                'BANGALORE_CITY': '#16a34a',
-                'BANGALORE_YESVANTPUR': '#ca8a04',
-                'GUJARAT_NORTH': '#dc2626',
-                'AHMEDABAD': '#d97706',
-                'VADODARA': '#059669',
-                'JAIPUR': '#2563eb',
-                'JODHPUR': '#7c3aed',
-                'BIKANER': '#db2777',
-                'LUCKNOW': '#0891b2',
-                'KANPUR': '#16a34a',
-                'GHAZIABAD': '#ca8a04',
-                'PATNA': '#dc2626',
-                'GAYA': '#d97706',
-                'MUZAFFARPUR': '#059669',
-                'ASANSOL': '#2563eb',
-                'DURGAPUR': '#7c3aed',
-                'BURDWAN': '#db2777',
-                'PUNE': '#0891b2',
-                'KOLHAPUR': '#16a34a',
-                'SURAT': '#ca8a04',
-                'HYDERABAD': '#dc2626',
-                'SECUNDERABAD': '#d97706',
-                'KAZIPET': '#059669',
-                'VIJAYAWADA': '#2563eb',
-                'RAJAHMUNDRY': '#7c3aed',
-                'VISAKHAPATNAM': '#db2777',
-                'THIRUVANANTHAPURAM': '#0891b2',
-                'KOLLAM': '#16a34a',
-                'ALLEPPEY': '#ca8a04',
-                'KANNUR': '#dc2626',
-                'KOZHIKODE': '#d97706',
-                'THRISSUR': '#059669'
-            };
-            return colors[sectionId] || '#6b7280';
-        }
-
-        // Populate station dropdown
-        async function populateStationDropdown() {
-            const stationSelect = document.getElementById('station-select');
-            
-            if (!stationSelect) {
-                updateStatus('❌ Station dropdown not found');
-                return;
+        // Start real-time updates
+        function startRealTimeUpdates() {
+            if (realTimeUpdateInterval) {
+                clearInterval(realTimeUpdateInterval);
             }
             
-            // If mapData is not available, fetch it directly
-            if (!mapData) {
-                try {
-                    const response = await fetch('http://localhost:8081/api/map-data');
-                    if (response.ok) {
-                        const data = await response.json();
-                        
-                        stationSelect.innerHTML = '<option value="">Select a station to monitor...</option>';
-                        
-                        data.stations.forEach((station) => {
-                            const option = document.createElement('option');
-                            option.value = station.id;
-                            option.textContent = `${station.name} (${station.id})`;
-                            stationSelect.appendChild(option);
-                        });
-                        
-                        updateStatus(`✅ Station dropdown loaded with ${data.stations.length} stations`);
-                        return;
-                    }
-                } catch (error) {
-                    updateStatus('❌ Error loading stations: ' + error.message);
-                    return;
-                }
-            }
-            
-            stationSelect.innerHTML = '<option value="">Select a station to monitor...</option>';
-            
-            mapData.stations.forEach((station) => {
-                const option = document.createElement('option');
-                option.value = station.id;
-                option.textContent = `${station.name} (${station.id})`;
-                stationSelect.appendChild(option);
-            });
-            
-            updateStatus(`✅ Station dropdown loaded with ${mapData.stations.length} stations`);
+            realTimeUpdateInterval = setInterval(() => {
+                updateTrainPositions();
+                updateRealTimeDataDisplay();
+            }, 2000);
         }
 
-        // Select station for monitoring
+        // Update real-time data display
+        function updateRealTimeDataDisplay() {
+            if (!mapData) return;
+            
+            document.getElementById('active-trains-count').textContent = mapData.trains.length;
+            document.getElementById('total-stations-count').textContent = mapData.stations.length;
+            document.getElementById('track-segments-count').textContent = mapData.tracks.length;
+            document.getElementById('system-status').textContent = 'Online';
+        }
+
+        // Station selection
         function selectStation() {
-            const stationSelect = document.getElementById('station-select');
-            const clearBtn = document.getElementById('clear-station-btn');
+            const select = document.getElementById('station-select');
+            const stationId = select.value;
             
-            if (stationSelect.value) {
-                selectedStation = mapData.stations.find(s => s.id === stationSelect.value);
-                clearBtn.style.display = 'inline-block';
-                updateStatus(`✅ Selected station: ${selectedStation.name} - Starting live monitoring...`);
-                
-                // Focus map on selected station with enhanced view
-                if (map && selectedStation) {
-                    // Direct view change without animation to prevent wobbling
-                    map.setView([selectedStation.lat, selectedStation.lon], 12, {
-                        animate: false
-                    });
-                    
-                    // Add elements immediately without delay
-                    // Highlight the selected station
-                    highlightStation(selectedStation);
-                    
-                    // Show connected tracks and paths
-                    showStationTracksAndPaths(selectedStation);
-                    
-                    // Start live monitoring panel
-                    startLiveStationMonitoring(selectedStation);
-                    
-                    // Start AI section controller for this station
-                    startAISectionController(selectedStation);
+            if (stationId) {
+                const station = mapData.stations.find(s => s.id === stationId);
+                if (station) {
+                    selectedStation = station;
+                    map.setView([station.latitude, station.longitude], 12, { animate: false });
+                    startLiveStationMonitoring(station);
                 }
             } else {
                 clearStationFocus();
             }
         }
 
-        // Clear station focus
-        function clearStationFocus() {
-            selectedStation = null;
-            const stationSelect = document.getElementById('station-select');
-            const clearBtn = document.getElementById('clear-station-btn');
-            
-            stationSelect.value = '';
-            clearBtn.style.display = 'none';
-            
-            // Remove station highlight and track highlights
-            removeStationHighlight();
-            removeTrackHighlights();
-            
-            // Stop AI section controller
-            stopAISectionController();
-            
-            updateStatus('✅ Station focus cleared');
-            
-            // Close live monitoring panel
-            closeLiveMonitor();
-        }
-
-        // Start Live Station Monitoring
+        // Start live station monitoring
         function startLiveStationMonitoring(station) {
-            const monitorPanel = document.getElementById('live-station-monitor');
-            const stationNameEl = document.getElementById('monitor-station-name');
-            const tracksCountEl = document.getElementById('monitor-tracks-count');
-            const trainsCountEl = document.getElementById('monitor-trains-count');
-            const statusEl = document.getElementById('monitor-status');
+            document.getElementById('live-station-monitor').style.display = 'block';
+            document.getElementById('monitor-station-name').textContent = station.name;
             
-            if (!monitorPanel) return;
-            
-            // Show monitoring panel
-            monitorPanel.style.display = 'block';
-            
-            // Update station info
-            stationNameEl.textContent = station.name;
-            
-            // Count connected tracks
-            const connectedTracks = mapData.tracks.filter(track => 
-                track.from_station === station.id || track.to_station === station.id
-            );
-            tracksCountEl.textContent = connectedTracks.length;
-            
-            // Start live updates
             updateLiveStationData(station);
             
-            // Set up interval for live updates
-            if (window.liveMonitorInterval) {
-                clearInterval(window.liveMonitorInterval);
+            if (liveStationMonitorInterval) {
+                clearInterval(liveStationMonitorInterval);
             }
-            window.liveMonitorInterval = setInterval(() => {
+            
+            liveStationMonitorInterval = setInterval(() => {
                 updateLiveStationData(station);
-            }, 2000); // Update every 2 seconds
-            
-            updateStatus(`📡 Live monitoring started for ${station.name}`);
-        }
-
-        // Update Live Station Data
-        function updateLiveStationData(station) {
-            if (!mapData || !station) return;
-            
-            const trainsCountEl = document.getElementById('monitor-trains-count');
-            const statusEl = document.getElementById('monitor-status');
-            const trainsContainer = document.getElementById('live-trains-container');
-            
-            // Find trains on connected tracks and at the station
-            const connectedTracks = mapData.tracks.filter(track => 
-                track.from_station === station.id || track.to_station === station.id
-            );
-            
-            // Get all trains related to this station
-            const stationTrains = mapData.trains.filter(train => {
-                // Trains currently at this station
-                if (train.current_station === station.id) return true;
-                
-                // Trains approaching this station
-                if (train.next_station === station.id) return true;
-                
-                // Trains on tracks connected to this station
-                const connectedTrackIds = connectedTracks.map(track => track.id);
-                if (connectedTrackIds.includes(train.current_track)) return true;
-                
-                // Trains that have this station in their route
-                if (train.origin === station.id || train.destination === station.id) return true;
-                
-                return false;
-            });
-            
-            // Update train count
-            if (trainsCountEl) {
-                trainsCountEl.textContent = stationTrains.length;
-            }
-            
-            // Update status
-            if (statusEl) {
-                statusEl.textContent = 'Live';
-                statusEl.style.color = '#059669';
-            }
-            
-            // Update live trains list
-            if (trainsContainer) {
-                updateLiveTrainsList(stationTrains, connectedTracks);
-            }
-        }
-
-        // Update Live Trains List
-        function updateLiveTrainsList(trains, tracks) {
-            const container = document.getElementById('live-trains-container');
-            if (!container) return;
-            
-            if (trains.length === 0) {
-                container.innerHTML = '<div class="no-trains">No trains currently at or approaching this station</div>';
-                return;
-            }
-            
-            container.innerHTML = trains.map(train => {
-                const fromStation = mapData.stations.find(s => s.id === train.current_station);
-                const toStation = mapData.stations.find(s => s.id === train.next_station);
-                const originStation = mapData.stations.find(s => s.id === train.origin);
-                const destStation = mapData.stations.find(s => s.id === train.destination);
-                
-                // Determine train location status
-                let locationStatus = '';
-                if (train.current_station === train.next_station) {
-                    locationStatus = `At ${fromStation ? fromStation.name : train.current_station}`;
-                } else {
-                    locationStatus = `From ${fromStation ? fromStation.name : train.current_station} to ${toStation ? toStation.name : train.next_station}`;
-                }
-                
-                return `
-                    <div class="train-item">
-                        <div class="train-header">
-                            <span class="train-number">${train.train_number}</span>
-                            <span class="train-name">${train.train_type}</span>
-                            <span class="train-status ${train.status}">${train.status}</span>
-                        </div>
-                        <div class="train-details">
-                            <div class="train-route">
-                                <span class="route-from">${originStation ? originStation.name : train.origin}</span>
-                                <span class="route-arrow">→</span>
-                                <span class="route-to">${destStation ? destStation.name : train.destination}</span>
-                            </div>
-                            <div class="train-location">
-                                <span class="location-text">📍 ${locationStatus}</span>
-                            </div>
-                            <div class="train-metrics">
-                                <span class="metric">Speed: ${train.speed} km/h</span>
-                                <span class="metric">Progress: ${train.progress.toFixed(1)}%</span>
-                                <span class="metric">Delay: ${train.delay_minutes || 0} min</span>
-                            </div>
-                            ${train.collision_risk ? '<div class="alert-badge collision">⚠️ Collision Risk</div>' : ''}
-                            ${train.rerouting_needed ? '<div class="alert-badge rerouting">🔄 Rerouting Needed</div>' : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Close Live Monitor
-        function closeLiveMonitor() {
-            const monitorPanel = document.getElementById('live-station-monitor');
-            if (monitorPanel) {
-                monitorPanel.style.display = 'none';
-            }
-            
-            if (window.liveMonitorInterval) {
-                clearInterval(window.liveMonitorInterval);
-                window.liveMonitorInterval = null;
-            }
-            
-            updateStatus('📡 Live monitoring stopped');
-        }
-        
-        // Prevent map resizing on scroll
-        function preventMapResize() {
-            if (map) {
-                // Ensure map maintains its size
-                map.invalidateSize();
-            }
-        }
-        
-        // Add scroll event listener to prevent map resizing
-        window.addEventListener('scroll', function() {
-            preventMapResize();
-        });
-        
-        // Add resize event listener to maintain map stability
-        window.addEventListener('resize', function() {
-            if (map) {
-                setTimeout(() => {
-                    map.invalidateSize();
-                }, 100);
-            }
-        });
-
-
-        // Start AI Section Controller for selected station
-        function startAISectionController(station) {
-            updateStatus(`🤖 Starting AI Section Controller for ${station.name}...`);
-            
-            // Create AI controller panel
-            showAIControllerPanel(station);
-            
-            // Start real-time AI analysis
-            startAIAnalysis(station);
-        }
-
-        // Stop AI Section Controller
-        function stopAISectionController() {
-            if (window.aiControllerInterval) {
-                clearInterval(window.aiControllerInterval);
-                window.aiControllerInterval = null;
-            }
-            
-            // Hide AI controller panel
-            hideAIControllerPanel();
-            
-            updateStatus('✅ AI Section Controller stopped');
-        }
-
-        // Show AI Controller Panel
-        function showAIControllerPanel(station) {
-            const aiPanel = document.getElementById('ai-controller-panel');
-            if (aiPanel) {
-                aiPanel.style.display = 'block';
-                updateAIControllerDisplay(station);
-            }
-        }
-
-        // Hide AI Controller Panel
-        function hideAIControllerPanel() {
-            const aiPanel = document.getElementById('ai-controller-panel');
-            if (aiPanel) {
-                aiPanel.style.display = 'none';
-            }
-        }
-
-        // Update AI Controller Display
-        function updateAIControllerDisplay(station) {
-            const aiPanel = document.getElementById('ai-controller-panel');
-            if (!aiPanel || !mapData) return;
-            
-            // Find trains in this station's section
-            const stationSection = station.section_id || 'UNKNOWN';
-            const trainsInSection = mapData.trains.filter(train => 
-                train.section_id === stationSection
-            );
-            
-            // Calculate AI metrics
-            const totalTrains = trainsInSection.length;
-            const delayedTrains = trainsInSection.filter(train => train.delay_minutes > 0).length;
-            const collisionRisks = trainsInSection.filter(train => train.collision_risk).length;
-            const reroutingNeeded = trainsInSection.filter(train => train.rerouting_needed).length;
-            const avgDelay = trainsInSection.length > 0 ? 
-                trainsInSection.reduce((sum, train) => sum + train.delay_minutes, 0) / trainsInSection.length : 0;
-            
-            // AI recommendations
-            const aiRecommendations = generateAIRecommendations(trainsInSection, station);
-            
-            aiPanel.innerHTML = `
-                <div style="margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #7c3aed;">
-                    <h4 style="margin: 0 0 8px 0; color: #7c3aed;">🤖 AI Section Controller - ${station.name}</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
-                        <div><strong>Section:</strong> ${stationSection}</div>
-                        <div><strong>Total Trains:</strong> ${totalTrains}</div>
-                        <div><strong>Delayed:</strong> ${delayedTrains}</div>
-                        <div><strong>Collision Risks:</strong> ${collisionRisks}</div>
-                        <div><strong>Rerouting Needed:</strong> ${reroutingNeeded}</div>
-                        <div><strong>Avg Delay:</strong> ${avgDelay.toFixed(1)} min</div>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: #7c3aed;">🎯 AI Recommendations</h4>
-                    <div style="max-height: 200px; overflow-y: auto;">
-                        ${aiRecommendations.map(rec => `
-                            <div style="margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 4px solid ${rec.color}; background: ${rec.background};">
-                                <div style="font-weight: 600; margin-bottom: 4px;">${rec.icon} ${rec.title}</div>
-                                <div style="font-size: 12px; color: #6b7280;">${rec.description}</div>
-                                <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">Priority: ${rec.priority}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: #7c3aed;">📊 Real-Time Metrics</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
-                        <div style="padding: 8px; background: #f0f9ff; border-radius: 4px;">
-                            <strong>Throughput:</strong> ${calculateThroughput(trainsInSection)} trains/hour
-                        </div>
-                        <div style="padding: 8px; background: #f0fdf4; border-radius: 4px;">
-                            <strong>Efficiency:</strong> ${calculateEfficiency(trainsInSection)}%
-                        </div>
-                        <div style="padding: 8px; background: #fef3c7; border-radius: 4px;">
-                            <strong>Safety Score:</strong> ${calculateSafetyScore(trainsInSection)}/100
-                        </div>
-                        <div style="padding: 8px; background: #f3e8ff; border-radius: 4px;">
-                            <strong>AI Confidence:</strong> ${calculateAIConfidence(trainsInSection)}%
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="font-size: 11px; color: #9ca3af; text-align: center;">
-                    Last updated: ${new Date().toLocaleTimeString()}
-                </div>
-            `;
-        }
-
-        // Generate AI Recommendations
-        function generateAIRecommendations(trains, station) {
-            const recommendations = [];
-            
-            // Check for collision risks
-            const collisionTrains = trains.filter(train => train.collision_risk);
-            if (collisionTrains.length > 0) {
-                recommendations.push({
-                    icon: '🚨',
-                    title: 'CRITICAL: Collision Risk Detected',
-                    description: `${collisionTrains.length} train(s) at collision risk. Immediate action required.`,
-                    priority: 'HIGH',
-                    color: '#dc2626',
-                    background: '#fef2f2'
-                });
-            }
-            
-            // Check for delays
-            const delayedTrains = trains.filter(train => train.delay_minutes > 15);
-            if (delayedTrains.length > 0) {
-                recommendations.push({
-                    icon: '⏰',
-                    title: 'Delay Management Required',
-                    description: `${delayedTrains.length} train(s) with significant delays. Consider rerouting.`,
-                    priority: 'MEDIUM',
-                    color: '#d97706',
-                    background: '#fef3c7'
-                });
-            }
-            
-            // Check for rerouting needs
-            const reroutingTrains = trains.filter(train => train.rerouting_needed);
-            if (reroutingTrains.length > 0) {
-                recommendations.push({
-                    icon: '🔄',
-                    title: 'Rerouting Optimization',
-                    description: `${reroutingTrains.length} train(s) need rerouting for optimal efficiency.`,
-                    priority: 'MEDIUM',
-                    color: '#059669',
-                    background: '#f0fdf4'
-                });
-            }
-            
-            // Check throughput optimization
-            if (trains.length > 8) {
-                recommendations.push({
-                    icon: '📈',
-                    title: 'High Traffic Density',
-                    description: 'Station at high capacity. Monitor closely for bottlenecks.',
-                    priority: 'LOW',
-                    color: '#7c3aed',
-                    background: '#f3e8ff'
-                });
-            }
-            
-            // Default recommendation if no issues
-            if (recommendations.length === 0) {
-                recommendations.push({
-                    icon: '✅',
-                    title: 'All Systems Normal',
-                    description: 'No immediate actions required. Traffic flowing smoothly.',
-                    priority: 'LOW',
-                    color: '#059669',
-                    background: '#f0fdf4'
-                });
-            }
-            
-            return recommendations;
-        }
-
-        // Calculate throughput
-        function calculateThroughput(trains) {
-            return Math.round(trains.length * 2.5); // Simplified calculation
-        }
-
-        // Calculate efficiency
-        function calculateEfficiency(trains) {
-            const onTimeTrains = trains.filter(train => train.delay_minutes <= 5).length;
-            return trains.length > 0 ? Math.round((onTimeTrains / trains.length) * 100) : 100;
-        }
-
-        // Calculate safety score
-        function calculateSafetyScore(trains) {
-            const riskTrains = trains.filter(train => train.collision_risk).length;
-            return Math.max(0, 100 - (riskTrains * 20));
-        }
-
-        // Calculate AI confidence
-        function calculateAIConfidence(trains) {
-            const dataQuality = trains.length > 0 ? Math.min(100, trains.length * 10) : 50;
-            return Math.round(dataQuality);
-        }
-
-        // Start AI Analysis
-        function startAIAnalysis(station) {
-            // Update AI controller every 3 seconds
-            window.aiControllerInterval = setInterval(() => {
-                if (selectedStation && mapData) {
-                    updateAIControllerDisplay(station);
-                    // Update track visualization with new train positions
-                    showStationTracksAndPaths(station);
-                }
             }, 3000);
         }
 
-        // Highlight selected station
-        function highlightStation(station) {
-            // Remove existing highlights
-            removeStationHighlight();
+        // Update live station data
+        function updateLiveStationData(station) {
+            if (!mapData) return;
             
-            if (map) {
-                // Create a special marker for the selected station
-                const highlightIcon = L.divIcon({
-                    className: 'station-highlight',
-                    html: `<div style="background: #7c3aed; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 0 10px rgba(124, 58, 237, 0.8);">🎯</div>`,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                });
-                
-                const highlightMarker = L.marker([station.lat, station.lon], {
-                    icon: highlightIcon
-                }).addTo(map);
-                
-                highlightMarker.bindPopup(`
-                    <div style="min-width: 200px;">
-                        <h3 style="margin: 0 0 10px 0; color: #7c3aed;">🎯 ${station.name}</h3>
-                        <p style="margin: 5px 0;"><strong>ID:</strong> ${station.id}</p>
-                        <p style="margin: 5px 0;"><strong>Type:</strong> ${station.type}</p>
-                        <p style="margin: 5px 0;"><strong>Platforms:</strong> ${station.platforms}</p>
-                        <p style="margin: 5px 0;"><strong>Status:</strong> Monitoring Active</p>
-                    </div>
-                `);
-                
-                // Store reference for removal
-                window.highlightMarker = highlightMarker;
-            }
-        }
-
-        // Remove station highlight
-        function removeStationHighlight() {
-            if (window.highlightMarker && map) {
-                map.removeLayer(window.highlightMarker);
-                window.highlightMarker = null;
-            }
-        }
-
-        // Show station tracks and paths with enhanced visualization
-        function showStationTracksAndPaths(station) {
-            if (!map || !mapData) return;
+            // Find trains at or approaching this station
+            const trainsAtStation = mapData.trains.filter(train => 
+                train.current_station === station.id ||
+                train.next_station === station.id ||
+                train.origin === station.id ||
+                train.destination === station.id
+            );
             
-            // Remove existing track highlights
-            removeTrackHighlights();
-            
-            // Find all tracks connected to this station
+            // Find connected tracks
             const connectedTracks = mapData.tracks.filter(track => 
                 track.from_station === station.id || track.to_station === station.id
             );
             
-            updateStatus(`🎯 Showing ${connectedTracks.length} connected tracks for ${station.name}`);
+            // Update display
+            document.getElementById('monitor-tracks-count').textContent = connectedTracks.length;
+            document.getElementById('monitor-trains-count').textContent = trainsAtStation.length;
+            document.getElementById('monitor-status').textContent = 'Active';
             
-            // Create enhanced track visualization
-            connectedTracks.forEach((track, index) => {
-                const fromStation = mapData.stations.find(s => s.id === track.from_station);
-                const toStation = mapData.stations.find(s => s.id === track.to_station);
-                
-                if (fromStation && toStation) {
-                    // Create enhanced track line with animation and train path visualization
-                    const trackLine = L.polyline([
-                        [fromStation.lat, fromStation.lon],
-                        [toStation.lat, toStation.lon]
-                    ], {
-                        color: getTrackColor(track.type),
-                        weight: getTrackWeight(track.type) + 3,
-                        opacity: 0.9,
-                        className: 'station-track-highlight',
-                        dashArray: '10, 5'
-                    }).addTo(map);
-                    
-                    // Add animated markers for trains on this track
-                    addTrainMarkersOnTrack(track, fromStation, toStation);
-                    
-                    // Store reference for removal
-                    if (!window.stationTrackHighlights) {
-                        window.stationTrackHighlights = [];
-                    }
-                    window.stationTrackHighlights.push(trackLine);
-                    
-                    // Add track info popup
-                    trackLine.bindPopup(`
-                        <div style="min-width: 250px;">
-                            <h4 style="margin: 0 0 10px 0; color: ${getTrackColor(track.type)};">🛤️ ${track.type} Track</h4>
-                            <p style="margin: 5px 0;"><strong>From:</strong> ${fromStation.name}</p>
-                            <p style="margin: 5px 0;"><strong>To:</strong> ${toStation.name}</p>
-                            <p style="margin: 5px 0;"><strong>Distance:</strong> ${track.distance} km</p>
-                            <p style="margin: 5px 0;"><strong>Max Speed:</strong> ${track.max_speed} km/h</p>
-                            <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #059669;">Active</span></p>
-                        </div>
-                    `);
-                }
-            });
+            // Update trains list
+            updateLiveTrainsList(trainsAtStation, connectedTracks);
         }
 
-        // Add train markers on specific track
-        function addTrainMarkersOnTrack(track, fromStation, toStation) {
-            if (!mapData) return;
+        // Update live trains list
+        function updateLiveTrainsList(trains, tracks) {
+            const container = document.getElementById('live-trains-container');
             
-            // Find trains on this track or connected to this station
-            const trainsOnTrack = mapData.trains.filter(train => 
-                train.current_track === track.id ||
-                train.current_station === track.from_station ||
-                train.current_station === track.to_station ||
-                train.next_station === track.from_station ||
-                train.next_station === track.to_station
-            );
-            
-            trainsOnTrack.forEach(train => {
-                // Calculate train position on track
-                const progress = (train.progress || 0) / 100;
-                const lat = fromStation.lat + (toStation.lat - fromStation.lat) * progress;
-                const lon = fromStation.lon + (toStation.lon - fromStation.lon) * progress;
-                
-                // Create animated train marker
-                const trainIcon = L.divIcon({
-                    className: 'train-marker-on-track',
-                    html: `<div style="font-size: 18px; color: #1e40af; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🚂</div>`,
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-                
-                const trainMarker = L.marker([lat, lon], {
-                    icon: trainIcon
-                }).addTo(map);
-                
-                // Enhanced train popup
-                trainMarker.bindPopup(`
-                    <div style="min-width: 280px;">
-                        <h3 style="margin: 0 0 10px 0; color: ${getTrainStatusColor(train)};">${getTrainIcon(train.train_type)} ${train.train_number}</h3>
-                        <p style="margin: 5px 0;"><strong>Type:</strong> ${train.train_type}</p>
-                        <p style="margin: 5px 0;"><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
-                        <p style="margin: 5px 0;"><strong>Current:</strong> ${train.current_station}</p>
-                        <p style="margin: 5px 0;"><strong>Next:</strong> ${train.next_station}</p>
-                        <p style="margin: 5px 0;"><strong>Speed:</strong> ${train.speed} km/h</p>
-                        <p style="margin: 5px 0;"><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
-                        <p style="margin: 5px 0;"><strong>Priority:</strong> ${train.priority}</p>
-                        ${train.delay_minutes > 0 ? `<p style="margin: 5px 0; color: #dc2626;"><strong>Delay:</strong> ${train.delay_minutes} min</p>` : ''}
-                        ${train.collision_risk ? '<p style="margin: 5px 0; color: #dc2626;"><strong>⚠️ Collision Risk</strong></p>' : ''}
-                        ${train.rerouting_needed ? '<p style="margin: 5px 0; color: #d97706;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
-                        ${train.ai_message ? `<p style="margin: 5px 0; color: #7c3aed; font-style: italic;"><strong>🤖 AI:</strong> ${train.ai_message}</p>` : ''}
-                    </div>
-                `);
-                
-                // Store reference for removal
-                if (!window.stationTrainMarkers) {
-                    window.stationTrainMarkers = [];
-                }
-                window.stationTrainMarkers.push(trainMarker);
-            });
-        }
-
-        // Remove track highlights
-        function removeTrackHighlights() {
-            if (window.stationTrackHighlights) {
-                window.stationTrackHighlights.forEach(track => {
-                    if (map) map.removeLayer(track);
-                });
-                window.stationTrackHighlights = [];
-            }
-            
-            if (window.stationTrainMarkers) {
-                window.stationTrainMarkers.forEach(marker => {
-                    if (map) map.removeLayer(marker);
-                });
-                window.stationTrainMarkers = [];
-            }
-            
-        }
-
-        // Toggle station monitoring
-        function toggleStationMonitoring() {
-            if (!selectedStation) {
-                updateStatus('❌ Please select a station first');
+            if (trains.length === 0) {
+                container.innerHTML = '<div class="no-trains">No trains at this station</div>';
                 return;
             }
             
-            stationMonitoringEnabled = !stationMonitoringEnabled;
-            const monitorBtn = document.getElementById('monitor-btn');
-            const panel = document.getElementById('station-monitoring-panel');
+            container.innerHTML = trains.map(train => `
+                <div class="train-item">
+                    <div class="train-header">
+                        <span class="train-number">${train.train_number}</span>
+                        <span class="train-name">${train.train_name}</span>
+                        <span class="train-status ${train.status.toLowerCase()}">${train.status}</span>
+                    </div>
+                    <div class="train-details">
+                        <div class="train-route">
+                            <span class="route-from">${train.origin}</span>
+                            <span class="route-arrow">→</span>
+                            <span class="route-to">${train.destination}</span>
+                        </div>
+                        <div class="train-location">
+                            <span class="location-text">Current: ${train.current_station}</span>
+                        </div>
+                        <div class="train-metrics">
+                            <div class="metric">Speed: ${train.speed} km/h</div>
+                            <div class="metric">Progress: ${train.progress}%</div>
+                            <div class="metric">Delay: ${train.delay || 0} min</div>
+                        </div>
+                        ${train.collision_risk ? '<span class="alert-badge collision">⚠️ Collision Risk</span>' : ''}
+                        ${train.rerouting_needed ? '<span class="alert-badge rerouting">🔄 Rerouting Needed</span>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Close live monitor
+        function closeLiveMonitor() {
+            document.getElementById('live-station-monitor').style.display = 'none';
+            if (liveStationMonitorInterval) {
+                clearInterval(liveStationMonitorInterval);
+            }
+        }
+
+        // Clear station focus
+        function clearStationFocus() {
+            selectedStation = null;
+            document.getElementById('station-select').value = '';
+            closeLiveMonitor();
+        }
+
+        // Populate station dropdown
+        function populateStationDropdown() {
+            const select = document.getElementById('station-select');
+            select.innerHTML = '<option value="">Select station to monitor...</option>';
             
-            if (stationMonitoringEnabled) {
-                monitorBtn.textContent = '⏸️ Stop Monitoring';
-                monitorBtn.style.backgroundColor = '#dc2626';
-                panel.style.display = 'block';
-                startStationMonitoring();
-                updateStatus(`✅ Started monitoring ${selectedStation.name}`);
+            if (mapData && mapData.stations) {
+                mapData.stations.forEach(station => {
+                    const option = document.createElement('option');
+                    option.value = station.id;
+                    option.textContent = `${station.name} (${station.code})`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        // Toggle functions
+        function toggleFullscreen() {
+            if (!isFullscreen) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+                isFullscreen = true;
             } else {
-                monitorBtn.textContent = '📡 Start Monitoring';
-                monitorBtn.style.backgroundColor = '';
-                panel.style.display = 'none';
-                stopStationMonitoring();
-                updateStatus('✅ Stopped station monitoring');
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                isFullscreen = false;
             }
         }
 
-        // Start station monitoring
-        function startStationMonitoring() {
-            if (stationUpdateInterval) {
-                clearInterval(stationUpdateInterval);
+        function toggleVoiceAlerts() {
+            voiceAlertsEnabled = !voiceAlertsEnabled;
+            const btn = document.getElementById('voice-btn');
+            btn.textContent = voiceAlertsEnabled ? '🔊 Voice ON' : '🔊 Voice';
+            btn.style.backgroundColor = voiceAlertsEnabled ? '#059669' : '';
+        }
+
+        function toggleLiveMovement() {
+            liveMovementEnabled = !liveMovementEnabled;
+            const btn = document.getElementById('movement-btn');
+            btn.textContent = liveMovementEnabled ? '⏸️ Pause' : '▶️ Movement';
+            btn.style.backgroundColor = liveMovementEnabled ? '#059669' : '';
+        }
+
+        function showSectionController() {
+            document.getElementById('ai-controller-panel').style.display = 'block';
+        }
+
+        function hideAIControllerPanel() {
+            document.getElementById('ai-controller-panel').style.display = 'none';
+        }
+
+        // Utility functions
+        function refreshMap() {
+            if (map) {
+                map.invalidateSize();
+                updateStatus('🔄 Map refreshed');
             }
-            
-            // Initial load
-            loadStationMonitoringData();
-            
-            // Update every 2 seconds
-            stationUpdateInterval = setInterval(() => {
-                loadStationMonitoringData();
-            }, 2000);
         }
 
-        // Stop station monitoring
-        function stopStationMonitoring() {
-            if (stationUpdateInterval) {
-                clearInterval(stationUpdateInterval);
-                stationUpdateInterval = null;
-            }
+        function forceUpdateTrains() {
+            loadMapData();
+            updateStatus('🚂 Train data updated');
         }
 
-        // Load station monitoring data
-        function loadStationMonitoringData() {
-            if (!selectedStation || !mapData) return;
-            
-            // Update station info
-            updateStationInfo();
-            
-            // Update trains at station
-            updateStationTrains();
-            
-            // Update train paths
-            updateStationPaths();
+        function updateStatus(message) {
+            document.getElementById('status-display').textContent = message;
+            console.log('📊 Status:', message);
         }
 
-        // Update station information
-        function updateStationInfo() {
-            const stationInfo = document.getElementById('station-info');
-            if (!stationInfo || !selectedStation) return;
-            
-            stationInfo.innerHTML = `
-                <div style="margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #7c3aed;">
-                    <h4 style="margin: 0 0 8px 0; color: #7c3aed;">📡 ${selectedStation.name}</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
-                        <div><strong>Station ID:</strong> ${selectedStation.id}</div>
-                        <div><strong>Type:</strong> ${selectedStation.type}</div>
-                        <div><strong>Platforms:</strong> ${selectedStation.platforms}</div>
-                        <div><strong>Coordinates:</strong> ${selectedStation.lat.toFixed(4)}, ${selectedStation.lon.toFixed(4)}</div>
-                    </div>
-                    <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                        Last updated: ${new Date().toLocaleTimeString()}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Update trains at station
-        function updateStationTrains() {
-            const stationTrains = document.getElementById('station-trains');
-            if (!stationTrains || !selectedStation || !mapData) return;
-            
-            // Find trains at this station
-            const trainsAtStation = mapData.trains.filter(train => 
-                train.current_station === selectedStation.id || 
-                train.next_station === selectedStation.id
-            );
-            
-            stationTrains.innerHTML = `
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: #7c3aed;">🚂 Trains at Station (${trainsAtStation.length})</h4>
-                    <div style="max-height: 200px; overflow-y: auto;">
-                        ${trainsAtStation.length > 0 ? 
-                            trainsAtStation.map(train => `
-                                <div style="margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 4px solid ${getTrainStatusColor(train)}; background: ${getTrainBackground(train)};">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <strong>${train.train_number}</strong> (${train.train_type})
-                                            ${train.collision_risk ? ' 🚨' : ''} ${train.rerouting_needed ? ' 🔄' : ''}
-                                        </div>
-                                        <div style="font-size: 12px; color: #666;">
-                                            Priority: ${train.priority}
-                                        </div>
-                                    </div>
-                                    <div style="font-size: 12px; margin-top: 4px;">
-                                        <div><strong>Route:</strong> ${train.origin} → ${train.destination}</div>
-                                        <div><strong>Status:</strong> ${train.current_station === selectedStation.id ? 'At Station' : 'Approaching'}</div>
-                                        <div><strong>Speed:</strong> ${train.speed} km/h | <strong>Progress:</strong> ${Math.round(train.progress * 100)}%</div>
-                                        ${train.delay_minutes > 0 ? `<div style="color: #dc2626;"><strong>Delay:</strong> ${train.delay_minutes} min</div>` : ''}
-                                        ${train.ai_message ? `<div style="color: #d97706; font-style: italic;">🤖 ${train.ai_message}</div>` : ''}
-                                    </div>
-                                </div>
-                            `).join('') :
-                            '<div style="text-align: center; color: #6b7280; padding: 20px;">No trains currently at this station</div>'
-                        }
-                    </div>
-                </div>
-            `;
-        }
-
-        // Update station paths
-        function updateStationPaths() {
-            const stationPaths = document.getElementById('station-paths');
-            if (!stationPaths || !selectedStation || !mapData) return;
-            
-            // Find tracks connected to this station
-            const connectedTracks = mapData.tracks.filter(track => 
-                track.from_station === selectedStation.id || track.to_station === selectedStation.id
-            );
-            
-            stationPaths.innerHTML = `
-                <div style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: #7c3aed;">🛤️ Connected Tracks (${connectedTracks.length})</h4>
-                    <div style="max-height: 200px; overflow-y: auto;">
-                        ${connectedTracks.map(track => {
-                            const fromStation = mapData.stations.find(s => s.id === track.from_station);
-                            const toStation = mapData.stations.find(s => s.id === track.to_station);
-                            const isFromStation = track.from_station === selectedStation.id;
-                            
-                            return `
-                                <div style="margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 4px solid ${getTrackColor(track.type)}; background: #f8fafc;">
-                                    <div style="font-weight: 600; margin-bottom: 4px;">
-                                        ${isFromStation ? '⬇️' : '⬆️'} ${isFromStation ? toStation.name : fromStation.name}
-                                    </div>
-                                    <div style="font-size: 12px; color: #6b7280;">
-                                        <div><strong>Distance:</strong> ${track.distance} km</div>
-                                        <div><strong>Max Speed:</strong> ${track.max_speed} km/h</div>
-                                        <div><strong>Type:</strong> ${track.type}</div>
-                                        <div><strong>Direction:</strong> ${isFromStation ? 'Outbound' : 'Inbound'}</div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Hide station monitoring panel
-        function hideStationMonitoring() {
-            const panel = document.getElementById('station-monitoring-panel');
-            if (panel) {
-                panel.style.display = 'none';
-            }
-            stopStationMonitoring();
-            stationMonitoringEnabled = false;
-            const monitorBtn = document.getElementById('monitor-btn');
-            monitorBtn.textContent = '📡 Start Monitoring';
-            monitorBtn.style.backgroundColor = '';
-        }
-
-        // Auto-initialize when page loads
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            updateStatus('Ready to initialize map');
+            console.log('🚀 Railway Traffic Control System initialized');
             
-            // Auto-initialize map after a short delay
-            setTimeout(() => {
-                initializeMap();
-                setTimeout(() => {
-                    loadMapData();
-                    // Start real-time updates after data is loaded
-                    setTimeout(() => {
-                        startRealTimeUpdates();
-                    }, 2000);
-                }, 1000);
-            }, 500);
+            // Set up navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+            
+            // Mobile menu toggle
+            document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
+                document.querySelector('.nav-links').classList.toggle('active');
+            });
             
             // Auto-populate station dropdown
             setTimeout(() => {
                 populateStationDropdown();
-            }, 2000);
+            }, 1000);
         });
-
-        // Real-time update system
-        let realTimeUpdateInterval = null;
-        let lastUpdateTime = 0;
-
-        function startRealTimeUpdates() {
-            if (realTimeUpdateInterval) {
-                clearInterval(realTimeUpdateInterval);
-            }
-            
-            console.log('🔄 Starting real-time updates...');
-            updateStatus('🔄 Starting real-time train movement updates...');
-            
-            // Update every 2 seconds
-            realTimeUpdateInterval = setInterval(async () => {
-                await updateTrainPositions();
-            }, 2000);
-        }
-
-        function stopRealTimeUpdates() {
-            if (realTimeUpdateInterval) {
-                clearInterval(realTimeUpdateInterval);
-                realTimeUpdateInterval = null;
-                console.log('⏹️ Real-time updates stopped');
-                updateStatus('⏹️ Real-time updates stopped');
-            }
-        }
-
-        async function updateTrainPositions() {
-            try {
-                console.log('🔄 Updating train positions...');
-                
-                const response = await fetch('http://localhost:8081/api/map-data');
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const newData = await response.json();
-                
-                // Update global mapData
-                mapData = newData;
-                
-                // Update train positions on map
-                updateTrainMarkers();
-                
-                // Update station monitoring if active
-                if (selectedStation && stationMonitoringEnabled) {
-                    updateStationTrains();
-                    updateStationPaths();
-                }
-                
-                // Update AI controller if active
-                if (selectedStation && window.aiControllerInterval) {
-                    updateAIControllerDisplay(selectedStation);
-                }
-                
-                lastUpdateTime = Date.now();
-                console.log(`✅ Train positions updated at ${new Date().toLocaleTimeString()}`);
-                
-                // Update real-time data display
-                updateRealTimeDataDisplay(newData);
-                
-            } catch (error) {
-                console.error('❌ Error updating train positions:', error);
-                updateStatus('❌ Error updating train positions: ' + error.message);
-            }
-        }
-
-        function updateTrainMarkers() {
-            if (!map || !mapData) return;
-            
-            console.log('🚂 Updating train markers...');
-            
-            // Store previous positions for smooth movement
-            const previousPositions = new Map();
-            trainMarkers.forEach(marker => {
-                const latLng = marker.getLatLng();
-                const trainNumber = marker.trainNumber;
-                if (trainNumber) {
-                    previousPositions.set(trainNumber, { lat: latLng.lat, lon: latLng.lng });
-                }
-            });
-            
-            // Remove existing train markers
-            trainMarkers.forEach(marker => map.removeLayer(marker));
-            trainMarkers = [];
-            
-            // Add updated train markers with smooth movement
-            addTrainsToMap();
-        }
-
-        // Calculate train position on track
-        function calculateTrainPosition(train) {
-            if (!mapData) return null;
-            
-            // Find the track the train is on
-            const track = mapData.tracks.find(t => 
-                (t.from_station === train.current_station && t.to_station === train.next_station) ||
-                (t.from_station === train.next_station && t.to_station === train.current_station)
-            );
-            
-            if (!track) {
-                // If no track found, use station position
-                const station = mapData.stations.find(s => s.id === train.current_station);
-                return station ? { lat: station.lat, lon: station.lon } : null;
-            }
-            
-            // Find station coordinates
-            const fromStation = mapData.stations.find(s => s.id === track.from_station);
-            const toStation = mapData.stations.find(s => s.id === track.to_station);
-            
-            if (!fromStation || !toStation) return null;
-            
-            // Calculate position based on progress
-            const progress = train.progress || 0;
-            const lat = fromStation.lat + (toStation.lat - fromStation.lat) * progress;
-            const lon = fromStation.lon + (toStation.lon - fromStation.lon) * progress;
-            
-            return { lat, lon };
-        }
-
-        // Update real-time data display
-        function updateRealTimeDataDisplay(data) {
-            const lastUpdateEl = document.getElementById('last-update');
-            const activeTrainsEl = document.getElementById('active-trains');
-            const movingTrainsEl = document.getElementById('moving-trains');
-            const systemStatusEl = document.getElementById('system-status');
-            
-            if (lastUpdateEl) {
-                lastUpdateEl.textContent = new Date().toLocaleTimeString();
-            }
-            
-            if (activeTrainsEl && data.trains) {
-                activeTrainsEl.textContent = data.trains.length;
-            }
-            
-            if (movingTrainsEl && data.trains) {
-                const movingTrains = data.trains.filter(train => 
-                    train.status === 'running' && train.speed > 0
-                ).length;
-                movingTrainsEl.textContent = movingTrains;
-            }
-            
-            if (systemStatusEl) {
-                systemStatusEl.textContent = 'Online';
-                systemStatusEl.style.color = '#059669';
-            }
-        }
-
-        // Force update trains (manual refresh)
-        async function forceUpdateTrains() {
-            console.log('🚂 Force updating trains...');
-            updateStatus('🚂 Force updating train positions...');
-            
-            try {
-                await updateTrainPositions();
-                updateStatus('✅ Train positions force updated successfully');
-            } catch (error) {
-                console.error('❌ Error force updating trains:', error);
-                updateStatus('❌ Error force updating trains: ' + error.message);
-            }
-        }
     </script>
 </body>
 </html>
