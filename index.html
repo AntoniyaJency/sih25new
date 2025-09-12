@@ -522,7 +522,30 @@
             mapData.trains.forEach(train => {
                 const marker = trainMarkers.find(m => m.trainNumber === train.train_number);
                 if (marker) {
-                    marker.setLatLng([train.lat, train.lon]);
+                    // Smooth animation to new position
+                    marker.setLatLng([train.lat, train.lon], { animate: true, duration: 1.5 });
+                    
+                    // Update popup with fresh data
+                    marker.bindPopup(`
+                        <div class="train-popup">
+                            <h4>${train.train_number} - ${train.train_type}</h4>
+                            <p><strong>Speed:</strong> ${train.speed} km/h</p>
+                            <p><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
+                            <p><strong>Status:</strong> ${train.status}</p>
+                            <p><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
+                            ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
+                            ${train.rerouting_needed ? '<p style="color: orange;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
+                        </div>
+                    `);
+                    
+                    // Add visual effects for collision risk
+                    if (train.collision_risk) {
+                        marker.getElement().style.animation = 'train-alert 1s infinite';
+                    } else if (train.rerouting_needed) {
+                        marker.getElement().style.animation = 'train-warning 1s infinite';
+                    } else {
+                        marker.getElement().style.animation = 'train-move 2s infinite';
+                    }
                 }
             });
         }
@@ -534,8 +557,18 @@
             }
             
             realTimeUpdateInterval = setInterval(() => {
-                updateTrainPositions();
-                updateRealTimeDataDisplay();
+                // Fetch fresh data from backend
+                fetch('http://localhost:8081/api/map-data')
+                    .then(response => response.json())
+                    .then(data => {
+                        mapData = data;
+                        updateTrainPositions();
+                        updateRealTimeDataDisplay();
+                        console.log('🔄 Real-time update completed');
+                    })
+                    .catch(error => {
+                        console.error('❌ Real-time update error:', error);
+                    });
             }, 2000);
         }
 
@@ -722,13 +755,49 @@
         }
 
         function forceUpdateTrains() {
-            loadMapData();
-            updateStatus('🚂 Train data updated');
+            // Force refresh train data
+            fetch('http://localhost:8081/api/map-data')
+                .then(response => response.json())
+                .then(data => {
+                    mapData = data;
+                    
+                    // Clear existing train markers
+                    trainMarkers.forEach(marker => map.removeLayer(marker));
+                    trainMarkers = [];
+                    
+                    // Re-add trains with fresh data
+                    addTrainsToMap();
+                    updateRealTimeDataDisplay();
+                    
+                    updateStatus('🚂 Train data force updated');
+                    console.log('🚂 Force update completed');
+                })
+                .catch(error => {
+                    console.error('❌ Force update error:', error);
+                    updateStatus('❌ Force update failed');
+                });
         }
 
         function updateStatus(message) {
             document.getElementById('status-display').textContent = message;
             console.log('📊 Status:', message);
+        }
+
+        // Debug function to show train movement
+        function debugTrainMovement() {
+            if (!mapData || !mapData.trains) return;
+            
+            console.log('🚂 Debug: Train Movement Data');
+            mapData.trains.slice(0, 5).forEach(train => {
+                console.log(`Train ${train.train_number}:`, {
+                    position: `[${train.lat.toFixed(4)}, ${train.lon.toFixed(4)}]`,
+                    speed: `${train.speed} km/h`,
+                    progress: `${Math.round(train.progress * 100)}%`,
+                    status: train.status,
+                    collision_risk: train.collision_risk,
+                    rerouting_needed: train.rerouting_needed
+                });
+            });
         }
 
         // Initialize on page load
@@ -753,6 +822,13 @@
             setTimeout(() => {
                 populateStationDropdown();
             }, 1000);
+            
+            // Debug train movement every 10 seconds
+            setInterval(() => {
+                if (mapData && mapData.trains) {
+                    debugTrainMovement();
+                }
+            }, 10000);
         });
     </script>
 </body>
