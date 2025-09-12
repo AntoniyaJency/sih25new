@@ -394,6 +394,7 @@
                     addStationsToMap();
                     addTracksToMap();
                     addTrainsToMap();
+                    addTrainPathVisualization();
                     
                     // Update real-time data display
                     updateRealTimeDataDisplay();
@@ -482,7 +483,10 @@
             console.log('🚂 Adding trains to map...');
             
             mapData.trains.forEach(train => {
-                const trainMarker = L.marker([train.lat, train.lon], {
+                // Calculate initial position on track
+                const trackPosition = calculateTrainPositionOnTrack(train);
+                
+                const trainMarker = L.marker([trackPosition.lat, trackPosition.lon], {
                     icon: L.divIcon({
                         className: 'train-marker',
                         html: getTrainIcon(train),
@@ -498,6 +502,8 @@
                         <p><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
                         <p><strong>Status:</strong> ${train.status}</p>
                         <p><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
+                        <p><strong>Current:</strong> ${train.current_station}</p>
+                        <p><strong>Next:</strong> ${train.next_station}</p>
                         ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
                         ${train.rerouting_needed ? '<p style="color: orange;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
                     </div>
@@ -509,12 +515,119 @@
             
             console.log(`✅ Added ${mapData.trains.length} trains to map`);
         }
+        
+        // Add train path visualization
+        function addTrainPathVisualization() {
+            if (!mapData || !mapData.trains) return;
+            
+            console.log('🛤️ Adding train path visualization...');
+            
+            mapData.trains.forEach(train => {
+                const track = findTrainTrack(train);
+                if (track) {
+                    // Create a path line showing the train's route
+                    const pathLine = L.polyline([
+                        [track.from.lat, track.from.lon],
+                        [track.to.lat, track.to.lon]
+                    ], {
+                        color: '#ff6b35',
+                        weight: 2,
+                        opacity: 0.6,
+                        dashArray: '10, 5'
+                    }).addTo(map);
+                    
+                    // Add to train markers for cleanup
+                    const trainMarker = trainMarkers.find(m => m.trainNumber === train.train_number);
+                    if (trainMarker) {
+                        trainMarker.pathLine = pathLine;
+                    }
+                }
+            });
+            
+            console.log('✅ Added train path visualization');
+        }
 
         // Get train icon
         function getTrainIcon(train) {
             return `<span style="font-size: 18px; color: #1e40af; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🚂</span>`;
         }
 
+        // Calculate train position on track
+        function calculateTrainPositionOnTrack(train) {
+            if (!mapData || !mapData.tracks) return { lat: train.lat, lon: train.lon };
+            
+            // Find the track the train is currently on
+            const currentTrack = findTrainTrack(train);
+            if (!currentTrack) return { lat: train.lat, lon: train.lon };
+            
+            // Calculate position based on progress along the track
+            const progress = train.progress || 0;
+            const fromLat = currentTrack.from.lat;
+            const fromLon = currentTrack.from.lon;
+            const toLat = currentTrack.to.lat;
+            const toLon = currentTrack.to.lon;
+            
+            // Interpolate position along the track
+            const lat = fromLat + (toLat - fromLat) * progress;
+            const lon = fromLon + (toLon - fromLon) * progress;
+            
+            return { lat, lon };
+        }
+        
+        // Find which track a train is currently on
+        function findTrainTrack(train) {
+            if (!mapData || !mapData.tracks) return null;
+            
+            // Try to find track based on current and next station
+            const currentStation = train.current_station;
+            const nextStation = train.next_station;
+            
+            // First, try to find a track that connects the current and next stations
+            let track = mapData.tracks.find(t => {
+                // Get station coordinates for comparison
+                const fromStation = mapData.stations.find(s => s.id === t.from.id);
+                const toStation = mapData.stations.find(s => s.id === t.to.id);
+                
+                if (!fromStation || !toStation) return false;
+                
+                // Check if this track connects current and next stations
+                return (fromStation.id === currentStation && toStation.id === nextStation) ||
+                       (toStation.id === currentStation && fromStation.id === nextStation);
+            });
+            
+            // If not found, try to find any track involving current station
+            if (!track) {
+                track = mapData.tracks.find(t => {
+                    const fromStation = mapData.stations.find(s => s.id === t.from.id);
+                    const toStation = mapData.stations.find(s => s.id === t.to.id);
+                    
+                    if (!fromStation || !toStation) return false;
+                    
+                    return fromStation.id === currentStation || toStation.id === currentStation;
+                });
+            }
+            
+            // If still not found, try to find track based on train's origin and destination
+            if (!track) {
+                track = mapData.tracks.find(t => {
+                    const fromStation = mapData.stations.find(s => s.id === t.from.id);
+                    const toStation = mapData.stations.find(s => s.id === t.to.id);
+                    
+                    if (!fromStation || !toStation) return false;
+                    
+                    return (fromStation.id === train.origin && toStation.id === train.destination) ||
+                           (toStation.id === train.origin && fromStation.id === train.destination);
+                });
+            }
+            
+            // If still not found, use a default track (first available)
+            if (!track && mapData.tracks.length > 0) {
+                track = mapData.tracks[0];
+            }
+            
+            return track;
+        }
+        
         // Update train positions
         function updateTrainPositions() {
             if (!mapData || !mapData.trains) return;
@@ -522,8 +635,11 @@
             mapData.trains.forEach(train => {
                 const marker = trainMarkers.find(m => m.trainNumber === train.train_number);
                 if (marker) {
+                    // Calculate position on track
+                    const trackPosition = calculateTrainPositionOnTrack(train);
+                    
                     // Smooth animation to new position
-                    marker.setLatLng([train.lat, train.lon], { animate: true, duration: 1.5 });
+                    marker.setLatLng([trackPosition.lat, trackPosition.lon], { animate: true, duration: 1.5 });
                     
                     // Update popup with fresh data
                     marker.bindPopup(`
@@ -533,6 +649,8 @@
                             <p><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
                             <p><strong>Status:</strong> ${train.status}</p>
                             <p><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
+                            <p><strong>Current:</strong> ${train.current_station}</p>
+                            <p><strong>Next:</strong> ${train.next_station}</p>
                             ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
                             ${train.rerouting_needed ? '<p style="color: orange;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
                         </div>
