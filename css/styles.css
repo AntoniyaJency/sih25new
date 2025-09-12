@@ -36,6 +36,8 @@ body {
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    position: relative;
+    overflow-x: hidden;
 }
 
 /* Navigation */
@@ -119,6 +121,8 @@ body {
 .main-content {
     margin-top: 80px;
     min-height: calc(100vh - 80px);
+    position: relative;
+    z-index: 1;
 }
 
 .page {
@@ -127,6 +131,8 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     animation: fadeIn 0.5s ease-in-out;
+    position: relative;
+    z-index: 1;
 }
 
 .page.active {
@@ -535,6 +541,9 @@ body {
     padding: 3rem 2rem;
     margin-top: 4rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 1;
+    clear: both;
 }
 
 .footer p {
