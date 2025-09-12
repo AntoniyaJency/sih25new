@@ -183,7 +183,7 @@
 
                 <!-- Map Area -->
                 <div class="map-area">
-                    <div id="railway-map" class="railway-map" style="width: 100%; height: 600px; position: relative; overflow: hidden;"></div>
+                    <div id="railway-map" class="railway-map" style="width: 100%; height: 600px; position: relative; display: block; visibility: visible;"></div>
                     
                     <!-- AI Message Overlay -->
                 <div id="ai-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; display: none; max-width: 300px; z-index: 1000;">
@@ -382,7 +382,7 @@
                     map.remove();
                 }
 
-                // Create new map with stable settings
+                // Create new map with stable settings - centered on India
                 map = L.map('railway-map', {
                     zoomControl: true,
                     scrollWheelZoom: true,
@@ -394,7 +394,7 @@
                     zoomSnap: 0.25,
                     zoomDelta: 0.5,
                     wheelPxPerZoomLevel: 120
-                }).setView([20.5937, 78.9629], 5);
+                }).setView([20.5937, 78.9629], 6); // Centered on India with zoom level 6
                 
                 // Add tile layer with better visibility
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -416,10 +416,23 @@
                 
                 updateStatus('✅ Map initialized successfully!');
                 
-                // Auto-load data after map is ready
+                // Debug: Check if map is visible
                 setTimeout(() => {
-                    loadMapData();
-                }, 500);
+                    if (map) {
+                        console.log('🗺️ Map is ready and visible');
+                        console.log('📍 Map center:', map.getCenter());
+                        console.log('🔍 Map zoom:', map.getZoom());
+                        
+                        // Force map to be visible
+                        map.invalidateSize();
+                        
+                        // Auto-load data after map is ready
+                        loadMapData();
+                    } else {
+                        console.error('❌ Map failed to initialize');
+                        updateStatus('❌ Map failed to initialize');
+                    }
+                }, 1000);
                 
             } catch (error) {
                 updateStatus('❌ Error initializing map: ' + error.message);

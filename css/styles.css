@@ -877,10 +877,11 @@ body {
     position: relative;
     background: #f9fafb;
     width: 100%;
-    overflow: hidden;
-    z-index: 1;
-    width: 100%;
+    overflow: visible;
+    z-index: 10;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: block;
+    visibility: visible;
 }
 
 .status-panels {
@@ -1282,17 +1283,21 @@ body {
 .railway-map {
     transition: none !important;
     resize: none !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     position: relative !important;
+    display: block !important;
+    visibility: visible !important;
 }
 
 .leaflet-container {
     transition: none !important;
     resize: none !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     position: relative !important;
     width: 100% !important;
     height: 100% !important;
+    display: block !important;
+    visibility: visible !important;
 }
 
 .leaflet-map-pane {
