@@ -877,6 +877,9 @@ body {
     position: relative;
     background: #f9fafb;
     width: 100%;
+    overflow: hidden;
+    z-index: 1;
+    width: 100%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -1278,10 +1281,28 @@ body {
 /* Map Stability */
 .railway-map {
     transition: none !important;
+    resize: none !important;
+    overflow: hidden !important;
+    position: relative !important;
 }
 
 .leaflet-container {
     transition: none !important;
+    resize: none !important;
+    overflow: hidden !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.leaflet-map-pane {
+    transition: none !important;
+    resize: none !important;
+}
+
+.leaflet-tile-pane {
+    transition: none !important;
+    resize: none !important;
 }
 
 /* Train Path Indicators */
