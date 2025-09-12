@@ -184,10 +184,17 @@
                     <div class="sidebar-section">
                         <h4>📡 Station Monitoring</h4>
                         <div class="station-controls">
-                            <input type="text" id="station-search" placeholder="Search stations..." class="search-input" oninput="filterStations()">
-                            <select id="station-select" onchange="selectStation()" class="form-select">
-                                <option value="">Select station to monitor...</option>
-                            </select>
+                            <div class="searchable-dropdown">
+                                <div class="dropdown-container">
+                                    <input type="text" id="station-search" placeholder="Search and select station..." class="searchable-input" oninput="filterStations()" onfocus="showDropdown()" onblur="hideDropdown()">
+                                    <div class="dropdown-arrow" onclick="toggleDropdown()">▼</div>
+                                </div>
+                                <div id="station-dropdown" class="dropdown-list" style="display: none;">
+                                    <div class="dropdown-options" id="station-options">
+                                        <!-- Options will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
                             <div class="station-buttons">
                                 <button onclick="populateStationDropdown()" class="btn btn-secondary">🔄 Load</button>
                                 <button onclick="clearStationFocus()" class="btn btn-outline">Clear</button>
@@ -1398,17 +1405,21 @@
         // Clear station focus
         function clearStationFocus() {
             selectedStation = null;
-            document.getElementById('station-select').value = '';
+            const searchInput = document.getElementById('station-search');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            hideDropdown();
             closeLiveMonitor();
         }
 
         // Populate station dropdown
         function populateStationDropdown() {
-            const select = document.getElementById('station-select');
             const searchInput = document.getElementById('station-search');
+            const dropdownOptions = document.getElementById('station-options');
             const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
             
-            select.innerHTML = '<option value="">Select station to monitor...</option>';
+            dropdownOptions.innerHTML = '';
             
             if (mapData && mapData.stations) {
                 let filteredStations = mapData.stations;
@@ -1422,26 +1433,69 @@
                 }
                 
                 filteredStations.forEach(station => {
-                    const option = document.createElement('option');
-                    option.value = station.id;
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
                     option.textContent = `${station.name} (${station.id})`;
-                    select.appendChild(option);
+                    option.onclick = () => selectStationOption(station);
+                    dropdownOptions.appendChild(option);
                 });
                 
                 // Show count of filtered results
                 if (searchTerm && filteredStations.length === 0) {
-                    const noResultsOption = document.createElement('option');
-                    noResultsOption.value = '';
+                    const noResultsOption = document.createElement('div');
+                    noResultsOption.className = 'dropdown-option no-results';
                     noResultsOption.textContent = 'No stations found';
-                    noResultsOption.disabled = true;
-                    select.appendChild(noResultsOption);
+                    dropdownOptions.appendChild(noResultsOption);
                 }
             }
+        }
+        
+        // Select station option from dropdown
+        function selectStationOption(station) {
+            const searchInput = document.getElementById('station-search');
+            if (searchInput) {
+                searchInput.value = `${station.name} (${station.id})`;
+            }
+            hideDropdown();
+            selectStation(station.id);
         }
         
         // Filter stations based on search input
         function filterStations() {
             populateStationDropdown();
+            showDropdown();
+        }
+        
+        // Show dropdown
+        function showDropdown() {
+            const dropdown = document.getElementById('station-dropdown');
+            if (dropdown) {
+                dropdown.style.display = 'block';
+                populateStationDropdown();
+            }
+        }
+        
+        // Hide dropdown
+        function hideDropdown() {
+            // Add delay to allow click events to fire
+            setTimeout(() => {
+                const dropdown = document.getElementById('station-dropdown');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            }, 150);
+        }
+        
+        // Toggle dropdown
+        function toggleDropdown() {
+            const dropdown = document.getElementById('station-dropdown');
+            if (dropdown) {
+                if (dropdown.style.display === 'none') {
+                    showDropdown();
+                } else {
+                    hideDropdown();
+                }
+            }
         }
 
         // Toggle functions
@@ -1863,3 +1917,4 @@
     </script>
 </body>
 </html>
+
