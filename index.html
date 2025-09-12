@@ -832,6 +832,16 @@
             console.log('📊 Loading map data...');
             updateStatus('📊 Loading map data...');
             
+            // Check if we're on GitHub Pages or local development
+            const isGitHubPages = window.location.hostname === 'antoniyaajency.github.io' || 
+                                window.location.hostname.includes('github.io');
+            
+            if (isGitHubPages) {
+                console.log('🌐 Detected GitHub Pages deployment, using fallback data');
+                loadFallbackData();
+                return;
+            }
+            
             // Try multiple API endpoints for different deployment scenarios
             const apiEndpoints = [
                 'http://localhost:8084/api/map-data',
