@@ -116,11 +116,22 @@ class RailwayApp {
 
     async loadInitialData() {
         try {
+            console.log('🌐 Fetching data from API...');
             const response = await fetch('http://localhost:8081/api/map-data');
+            console.log('🌐 API response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             this.mapData = await response.json();
-            console.log('Initial data loaded:', this.mapData);
+            console.log('✅ Initial data loaded:', {
+                stations: this.mapData.stations.length,
+                tracks: this.mapData.tracks.length,
+                trains: this.mapData.trains.length
+            });
         } catch (error) {
-            console.error('Failed to load initial data:', error);
+            console.error('❌ Failed to load initial data:', error);
             this.showError('Failed to connect to the railway system. Please check if the backend is running.');
         }
     }
@@ -227,29 +238,46 @@ class RailwayApp {
     }
 
     initMap() {
-        if (this.map) return; // Map already initialized
+        console.log('🗺️ Initializing map...');
+        if (this.map) {
+            console.log('🗺️ Map already initialized');
+            return; // Map already initialized
+        }
         
         const mapContainer = document.getElementById('railway-map');
-        if (!mapContainer) return;
+        if (!mapContainer) {
+            console.error('❌ Map container not found!');
+            return;
+        }
 
+        console.log('🗺️ Creating Leaflet map...');
         this.map = L.map('railway-map').setView([20.5937, 78.9629], 5);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
         
+        console.log('🗺️ Map created, loading data...');
         this.loadMapData();
     }
 
     async loadMapData() {
+        console.log('🗺️ Loading map data...');
         if (!this.mapData) {
+            console.log('🗺️ No map data, loading initial data...');
             await this.loadInitialData();
         }
 
         if (this.mapData && this.map) {
+            console.log(`🗺️ Adding ${this.mapData.stations.length} stations to map...`);
             this.addStationsToMap();
+            console.log(`🗺️ Adding ${this.mapData.tracks.length} tracks to map...`);
             this.addTracksToMap();
+            console.log(`🗺️ Adding ${this.mapData.trains.length} trains to map...`);
             this.addTrainsToMap();
+            console.log('🗺️ Map data loaded successfully!');
+        } else {
+            console.error('❌ Map or map data not available');
         }
     }
 

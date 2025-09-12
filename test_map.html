@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Map Connection</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        #map { height: 500px; border: 1px solid #ccc; }
+        #status { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>Test Map Connection</h1>
+    <div id="status">Testing API connection...</div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const statusDiv = document.getElementById('status');
+        
+        async function testAPI() {
+            try {
+                const response = await fetch('http://localhost:8081/api/map-data');
+                const data = await response.json();
+                
+                statusDiv.className = 'success';
+                statusDiv.innerHTML = `✅ API Connected! Stations: ${data.stations.length}, Trains: ${data.trains.length}`;
+                
+                // Initialize map
+                const map = L.map('map').setView([20.5937, 78.9629], 5);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                // Add stations
+                data.stations.forEach(station => {
+                    L.marker([station.lat, station.lon]).addTo(map)
+                        .bindPopup(`<b>${station.name}</b><br>Type: ${station.type}`);
+                });
+                
+                // Add trains
+                data.trains.forEach(train => {
+                    L.marker([train.lat, train.lon], {
+                        icon: L.divIcon({
+                            className: 'train-marker',
+                            html: '🚄',
+                            iconSize: [20, 20]
+                        })
+                    }).addTo(map).bindPopup(`<b>${train.train_number}</b><br>${train.train_type}`);
+                });
+                
+            } catch (error) {
+                statusDiv.className = 'error';
+                statusDiv.innerHTML = `❌ API Error: ${error.message}`;
+                console.error('API Error:', error);
+            }
+        }
+        
+        testAPI();
+    </script>
+</body>
+</html>
