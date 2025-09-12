@@ -98,10 +98,14 @@
             </div>
             <div class="map-container">
                 <div style="margin-bottom: 10px;">
-                    <button onclick="window.railwayApp.initMap()" class="btn">Initialize Map</button>
-                    <button onclick="window.railwayApp.loadMapData()" class="btn btn-secondary">Load Data</button>
+                    <button onclick="initializeMap()" class="btn">Initialize Map</button>
+                    <button onclick="loadMapData()" class="btn btn-secondary">Load Data</button>
+                    <button onclick="refreshMap()" class="btn btn-success">Refresh</button>
                 </div>
-                <div id="railway-map"></div>
+                <div id="railway-map" style="height: 600px; border: 2px solid #e5e7eb; border-radius: 10px;"></div>
+                <div id="map-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                    <strong>Map Status:</strong> <span id="status-text">Ready to initialize</span>
+                </div>
             </div>
         </div>
 
@@ -178,5 +182,228 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/app.js"></script>
+    <script>
+        // Global variables for map
+        let map = null;
+        let mapData = null;
+        let stationMarkers = [];
+        let trainMarkers = [];
+        let trackLines = [];
+
+        // Update status text
+        function updateStatus(message) {
+            const statusText = document.getElementById('status-text');
+            if (statusText) {
+                statusText.textContent = message;
+            }
+            console.log('🗺️ Status:', message);
+        }
+
+        // Initialize the map
+        function initializeMap() {
+            try {
+                updateStatus('Initializing map...');
+                
+                const mapContainer = document.getElementById('railway-map');
+                if (!mapContainer) {
+                    updateStatus('❌ Map container not found!');
+                    return;
+                }
+
+                // Clear existing map if any
+                if (map) {
+                    map.remove();
+                }
+
+                // Create new map
+                map = L.map('railway-map').setView([20.5937, 78.9629], 5);
+                
+                // Add tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                updateStatus('✅ Map initialized successfully!');
+                
+                // Auto-load data after map is ready
+                setTimeout(() => {
+                    loadMapData();
+                }, 500);
+                
+            } catch (error) {
+                updateStatus('❌ Error initializing map: ' + error.message);
+                console.error('Map initialization error:', error);
+            }
+        }
+
+        // Load map data from API
+        async function loadMapData() {
+            try {
+                updateStatus('Loading data from API...');
+                
+                const response = await fetch('http://localhost:8081/api/map-data');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                mapData = await response.json();
+                updateStatus(`✅ Data loaded! Stations: ${mapData.stations.length}, Trains: ${mapData.trains.length}, Tracks: ${mapData.tracks.length}`);
+                
+                // Add data to map
+                addStationsToMap();
+                addTracksToMap();
+                addTrainsToMap();
+                
+                updateStatus(`✅ Map fully loaded with ${mapData.stations.length} stations, ${mapData.tracks.length} tracks, and ${mapData.trains.length} trains!`);
+                
+            } catch (error) {
+                updateStatus('❌ Error loading data: ' + error.message);
+                console.error('Data loading error:', error);
+            }
+        }
+
+        // Add stations to map
+        function addStationsToMap() {
+            if (!map || !mapData) return;
+            
+            // Clear existing station markers
+            stationMarkers.forEach(marker => map.removeLayer(marker));
+            stationMarkers = [];
+            
+            mapData.stations.forEach(station => {
+                const marker = L.marker([station.lat, station.lon]).addTo(map);
+                marker.bindPopup(`
+                    <div style="min-width: 200px;">
+                        <h3 style="margin: 0 0 10px 0; color: #1e3a8a;">${station.name}</h3>
+                        <p style="margin: 5px 0;"><strong>Type:</strong> ${station.type}</p>
+                        <p style="margin: 5px 0;"><strong>Platforms:</strong> ${station.platforms}</p>
+                        <p style="margin: 5px 0;"><strong>ID:</strong> ${station.id}</p>
+                    </div>
+                `);
+                stationMarkers.push(marker);
+            });
+        }
+
+        // Add tracks to map
+        function addTracksToMap() {
+            if (!map || !mapData) return;
+            
+            // Clear existing track lines
+            trackLines.forEach(line => map.removeLayer(line));
+            trackLines = [];
+            
+            mapData.tracks.forEach(track => {
+                const fromStation = mapData.stations.find(s => s.id === track.from_station);
+                const toStation = mapData.stations.find(s => s.id === track.to_station);
+                
+                if (fromStation && toStation) {
+                    const polyline = L.polyline([
+                        [fromStation.lat, fromStation.lon],
+                        [toStation.lat, toStation.lon]
+                    ], {
+                        color: getTrackColor(track.track_type),
+                        weight: getTrackWeight(track.track_type),
+                        opacity: 0.8
+                    }).addTo(map);
+                    
+                    polyline.bindPopup(`
+                        <div style="min-width: 200px;">
+                            <h4 style="margin: 0 0 10px 0;">Track Segment</h4>
+                            <p style="margin: 5px 0;"><strong>From:</strong> ${fromStation.name}</p>
+                            <p style="margin: 5px 0;"><strong>To:</strong> ${toStation.name}</p>
+                            <p style="margin: 5px 0;"><strong>Distance:</strong> ${track.distance} km</p>
+                            <p style="margin: 5px 0;"><strong>Max Speed:</strong> ${track.max_speed} km/h</p>
+                            <p style="margin: 5px 0;"><strong>Type:</strong> ${track.track_type}</p>
+                        </div>
+                    `);
+                    trackLines.push(polyline);
+                }
+            });
+        }
+
+        // Add trains to map
+        function addTrainsToMap() {
+            if (!map || !mapData) return;
+            
+            // Clear existing train markers
+            trainMarkers.forEach(marker => map.removeLayer(marker));
+            trainMarkers = [];
+            
+            mapData.trains.forEach(train => {
+                const trainIcon = L.divIcon({
+                    className: 'train-marker',
+                    html: getTrainIcon(train.train_type),
+                    iconSize: [25, 25],
+                    iconAnchor: [12, 12]
+                });
+                
+                const trainMarker = L.marker([train.lat, train.lon], {
+                    icon: trainIcon
+                }).addTo(map);
+                
+                trainMarker.bindPopup(`
+                    <div style="min-width: 250px;">
+                        <h3 style="margin: 0 0 10px 0; color: #1e3a8a;">${train.train_number}</h3>
+                        <p style="margin: 5px 0;"><strong>Type:</strong> ${train.train_type}</p>
+                        <p style="margin: 5px 0;"><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
+                        <p style="margin: 5px 0;"><strong>Current:</strong> ${train.current_station}</p>
+                        <p style="margin: 5px 0;"><strong>Next:</strong> ${train.next_station}</p>
+                        <p style="margin: 5px 0;"><strong>Speed:</strong> ${train.speed} km/h</p>
+                        <p style="margin: 5px 0;"><strong>Status:</strong> ${train.status}</p>
+                    </div>
+                `);
+                trainMarkers.push(trainMarker);
+            });
+        }
+
+        // Helper functions
+        function getTrackColor(trackType) {
+            const colors = {
+                'main': '#1e3a8a',
+                'suburban': '#dc2626',
+                'branch': '#d97706',
+                'freight': '#6b7280'
+            };
+            return colors[trackType] || '#1e3a8a';
+        }
+
+        function getTrackWeight(trackType) {
+            const weights = {
+                'main': 4,
+                'suburban': 3,
+                'branch': 2,
+                'freight': 2
+            };
+            return weights[trackType] || 3;
+        }
+
+        function getTrainIcon(trainType) {
+            const icons = {
+                'Rajdhani Express': '🚄',
+                'Shatabdi Express': '🚅',
+                'Duronto Express': '🚆',
+                'Vande Bharat Express': '🚈',
+                'Express': '🚂',
+                'Mail': '🚃',
+                'Freight': '🚛',
+                'Local': '🚋'
+            };
+            return icons[trainType] || '🚂';
+        }
+
+        // Refresh map data
+        function refreshMap() {
+            if (map) {
+                loadMapData();
+            } else {
+                updateStatus('❌ Please initialize map first');
+            }
+        }
+
+        // Auto-initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('Ready to initialize map');
+        });
+    </script>
 </body>
 </html>
