@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Traffic Control System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .status.running { background: #4CAF50; }
+        .status.delayed { background: #FF9800; }
+        .status.cancelled { background: #F44336; }
+        .status.scheduled { background: #2196F3; }
+        .train-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .train-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+        }
+        .train-info h4 {
+            margin: 0;
+            color: #ffd700;
+        }
+        .train-info p {
+            margin: 5px 0 0 0;
+            opacity: 0.8;
+        }
+        .controls {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .btn {
+            background: #ffd700;
+            color: #333;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #ffed4e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+        .conflict-item {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .conflict-item h4 {
+            color: #ff6b6b;
+            margin: 0 0 10px 0;
+        }
+        .optimization-result {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .optimization-result h4 {
+            color: #51cf66;
+            margin: 0 0 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚂 Railway Traffic Control System</h1>
+            <p>AI-Powered Train Traffic Control for Maximizing Section Throughput</p>
+            <p>Smart India Hackathon 2025 - Ministry of Railways</p>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h3>📊 Performance Metrics</h3>
+                <div class="metric">
+                    <span>Total Trains:</span>
+                    <span>5</span>
+                </div>
+                <div class="metric">
+                    <span>Running Trains:</span>
+                    <span>2</span>
+                </div>
+                <div class="metric">
+                    <span>Delayed Trains:</span>
+                    <span>0</span>
+                </div>
+                <div class="metric">
+                    <span>Punctuality:</span>
+                    <span>40.0%</span>
+                </div>
+                <div class="metric">
+                    <span>Average Delay:</span>
+                    <span>8.1m</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚡ System Status</h3>
+                <div class="metric">
+                    <span>Optimization Engine:</span>
+                    <span class="status running">Active</span>
+                </div>
+                <div class="metric">
+                    <span>Conflicts Detected:</span>
+                    <span>1</span>
+                </div>
+                <div class="metric">
+                    <span>Throughput Efficiency:</span>
+                    <span>40.0%</span>
+                </div>
+                <div class="metric">
+                    <span>Last Update:</span>
+                    <span>18:31:32</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="train-list">
+            <h3>🚂 Active Trains</h3>
+            
+            <div class="train-item">
+                <div class="train-info">
+                    <h4>12345</h4>
+                    <p>Mumbai Central → Delhi</p>
+                    <p>Type: express | Priority: 8</p>
+                </div>
+                <div>
+                    <span class="status running">running</span>
+                </div>
+            </div>
+            
+            <div class="train-item">
+                <div class="train-info">
+                    <h4>67890</h4>
+                    <p>Mumbai Central → Thane</p>
+                    <p>Type: local | Priority: 5</p>
+                </div>
+                <div>
+                    <span class="status scheduled">scheduled</span>
+                </div>
+            </div>
+            
+            <div class="train-item">
+                <div class="train-info">
+                    <h4>11111</h4>
+                    <p>Chennai → Bangalore</p>
+                    <p>Type: freight | Priority: 6</p>
+                </div>
+                <div>
+                    <span class="status scheduled">scheduled</span>
+                </div>
+            </div>
+            
+            <div class="train-item">
+                <div class="train-info">
+                    <h4>22222</h4>
+                    <p>Delhi → Mumbai Central</p>
+                    <p>Type: express | Priority: 9</p>
+                </div>
+                <div>
+                    <span class="status running">running</span>
+                </div>
+            </div>
+            
+            <div class="train-item">
+                <div class="train-info">
+                    <h4>33333</h4>
+                    <p>Mumbai Central → Thane</p>
+                    <p>Type: special | Priority: 10</p>
+                </div>
+                <div>
+                    <span class="status scheduled">scheduled</span>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="card">
+            <h3>🔍 Detected Conflicts</h3>
+            
+            <div class="conflict-item">
+                <h4>PLATFORM Conflict</h4>
+                <p>Trains: train_2 ↔ train_5</p>
+                <p>Section: Thane</p>
+                <p>Severity: 0.80</p>
+                <p>Resolution Options: 4</p>
+            </div>
+            
+        </div>
+
+        <div class="card">
+            <h3>⚡ Optimization Results</h3>
+            <div class="optimization-result">
+                <h4>Latest Optimization</h4>
+                <p>Status: optimal</p>
+                <p>Total Delay: 10 minutes</p>
+                <p>Conflicts Resolved: 1</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="location.reload()">🔄 Refresh Data</button>
+            <button class="btn" onclick="runOptimization()">⚡ Run Optimization</button>
+            <button class="btn" onclick="showDemo()">🎯 Show Demo</button>
+        </div>
+    </div>
+
+    <script>
+        function runOptimization() {
+            alert('🚀 Running AI-powered optimization...\n\nThis would:\n• Detect conflicts between trains\n• Optimize schedules for maximum throughput\n• Minimize delays and improve punctuality\n• Provide resolution recommendations');
+        }
+
+        function showDemo() {
+            alert('🎯 Railway Traffic Control System Demo\n\nKey Features:\n✅ Real-time conflict detection\n✅ AI-powered optimization algorithms\n✅ Performance metrics and KPIs\n✅ Disruption handling and re-optimization\n✅ What-if simulation scenarios\n✅ Comprehensive monitoring dashboard\n\nRun "python3 working_system.py" in terminal for full demo!');
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>
+    

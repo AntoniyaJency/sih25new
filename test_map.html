@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        #map { height: 500px; width: 100%; border: 2px solid #ccc; }
+        .status { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Railway Map Test</h1>
+    <div class="status" id="status">Loading...</div>
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let mapData;
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+            console.log('Status:', message);
+        }
+        
+        async function loadData() {
+            try {
+                updateStatus('Loading data...');
+                const response = await fetch('http://localhost:8081/api/map-data');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                mapData = await response.json();
+                updateStatus(`✅ Data loaded: ${mapData.stations.length} stations, ${mapData.trains.length} trains, ${mapData.tracks.length} tracks`);
+                
+                // Add stations
+                mapData.stations.forEach(station => {
+                    L.marker([station.lat, station.lon]).addTo(map)
+                        .bindPopup(`<b>${station.name}</b><br>ID: ${station.id}`);
+                });
+                
+                // Add tracks
+                mapData.tracks.forEach(track => {
+                    const fromStation = mapData.stations.find(s => s.id === track.from_station);
+                    const toStation = mapData.stations.find(s => s.id === track.to_station);
+                    
+                    if (fromStation && toStation) {
+                        L.polyline([
+                            [fromStation.lat, fromStation.lon],
+                            [toStation.lat, toStation.lon]
+                        ], { color: 'blue', weight: 2 }).addTo(map);
+                    }
+                });
+                
+                // Add trains
+                mapData.trains.forEach(train => {
+                    const station = mapData.stations.find(s => s.id === train.current_station);
+                    if (station) {
+                        L.marker([station.lat, station.lon], {
+                            icon: L.divIcon({
+                                className: 'train-icon',
+                                html: '🚂',
+                                iconSize: [20, 20]
+                            })
+                        }).addTo(map).bindPopup(`<b>${train.train_number}</b><br>Type: ${train.train_type}<br>Speed: ${train.speed} km/h`);
+                    }
+                });
+                
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+        
+        // Initialize map
+        function initMap() {
+            updateStatus('Initializing map...');
+            map = L.map('map').setView([20.5937, 78.9629], 6);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            updateStatus('Map initialized, loading data...');
+            loadData();
+        }
+        
+        // Start when page loads
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>
