@@ -547,9 +547,37 @@
             console.log('✅ Added train path visualization');
         }
 
-        // Get train icon
+        // Get train icon with enhanced visibility
         function getTrainIcon(train) {
-            return `<span style="font-size: 18px; color: #1e40af; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🚂</span>`;
+            const isMoving = train.speed > 0;
+            const direction = getTrainDirection(train);
+            
+            return `
+                <div class="train-icon-container" style="position: relative;">
+                    <span class="train-emoji" style="font-size: 20px; color: #1e40af; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); display: block;">
+                        🚂
+                    </span>
+                    ${isMoving ? `<div class="movement-indicator" style="position: absolute; top: -5px; right: -5px; width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse 1s infinite;"></div>` : ''}
+                    ${direction ? `<div class="direction-arrow" style="position: absolute; top: 50%; left: -10px; transform: translateY(-50%); font-size: 12px; color: #1e40af;">${direction}</div>` : ''}
+                </div>
+            `;
+        }
+        
+        // Get train direction arrow
+        function getTrainDirection(train) {
+            if (!train.current_station || !train.next_station) return '';
+            
+            // Simple direction based on station names (you can enhance this)
+            const current = train.current_station.toLowerCase();
+            const next = train.next_station.toLowerCase();
+            
+            // Basic directional logic
+            if (current.includes('north') || current.includes('delhi')) return '→';
+            if (current.includes('south') || current.includes('chennai')) return '←';
+            if (current.includes('east') || current.includes('kolkata')) return '↑';
+            if (current.includes('west') || current.includes('mumbai')) return '↓';
+            
+            return '→'; // Default right arrow
         }
 
         // Calculate train position on track
@@ -628,7 +656,7 @@
             return track;
         }
         
-        // Update train positions
+        // Update train positions with enhanced movement
         function updateTrainPositions() {
             if (!mapData || !mapData.trains) return;
             
@@ -638,8 +666,26 @@
                     // Calculate position on track
                     const trackPosition = calculateTrainPositionOnTrack(train);
                     
-                    // Smooth animation to new position
-                    marker.setLatLng([trackPosition.lat, trackPosition.lon], { animate: true, duration: 1.5 });
+                    // Get current position
+                    const currentPos = marker.getLatLng();
+                    const newPos = [trackPosition.lat, trackPosition.lon];
+                    
+                    // Calculate distance moved
+                    const distance = currentPos.distanceTo(newPos);
+                    
+                    // Enhanced animation based on movement
+                    if (distance > 0.001) { // Only animate if train actually moved
+                        // Smooth animation with longer duration for visible movement
+                        marker.setLatLng(newPos, { 
+                            animate: true, 
+                            duration: Math.min(2.0, Math.max(0.5, distance * 1000)) // Dynamic duration based on distance
+                        });
+                        
+                        // Add movement trail effect
+                        addMovementTrail(currentPos, newPos, train.train_number);
+                        
+                        console.log(`🚂 Train ${train.train_number} moving: ${distance.toFixed(4)}km`);
+                    }
                     
                     // Update popup with fresh data
                     marker.bindPopup(`
@@ -651,29 +697,56 @@
                             <p><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
                             <p><strong>Current:</strong> ${train.current_station}</p>
                             <p><strong>Next:</strong> ${train.next_station}</p>
+                            <p><strong>Movement:</strong> ${distance > 0.001 ? 'Moving' : 'Stationary'}</p>
                             ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
                             ${train.rerouting_needed ? '<p style="color: orange;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
                         </div>
                     `);
                     
-                    // Add visual effects for collision risk
+                    // Enhanced visual effects
+                    const element = marker.getElement();
                     if (train.collision_risk) {
-                        marker.getElement().style.animation = 'train-alert 1s infinite';
+                        element.style.animation = 'train-alert 1s infinite';
+                        element.style.filter = 'hue-rotate(0deg) brightness(1.3)';
                         // Voice alert for collision risk
                         if (voiceAlertsEnabled && train.ai_message) {
                             speakAlert(`Collision risk detected for train ${train.train_number}`);
                         }
                     } else if (train.rerouting_needed) {
-                        marker.getElement().style.animation = 'train-warning 1s infinite';
+                        element.style.animation = 'train-warning 1s infinite';
+                        element.style.filter = 'hue-rotate(30deg) brightness(1.2)';
                         // Voice alert for rerouting
                         if (voiceAlertsEnabled && train.ai_message) {
                             speakAlert(`Rerouting needed for train ${train.train_number}`);
                         }
                     } else {
-                        marker.getElement().style.animation = 'train-move 2s infinite';
+                        // Enhanced movement animation
+                        if (distance > 0.001) {
+                            element.style.animation = 'train-move-fast 1s infinite';
+                            element.style.filter = 'brightness(1.1)';
+                        } else {
+                            element.style.animation = 'train-move 2s infinite';
+                            element.style.filter = 'brightness(1)';
+                        }
                     }
                 }
             });
+        }
+        
+        // Add movement trail effect
+        function addMovementTrail(fromPos, toPos, trainNumber) {
+            // Create a temporary trail line
+            const trail = L.polyline([fromPos, toPos], {
+                color: '#ff6b35',
+                weight: 1,
+                opacity: 0.8,
+                dashArray: '5, 5'
+            }).addTo(map);
+            
+            // Remove trail after animation
+            setTimeout(() => {
+                map.removeLayer(trail);
+            }, 2000);
         }
 
         // Start real-time updates
