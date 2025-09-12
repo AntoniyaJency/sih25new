@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Traffic Control System - Smart India Hackathon 2025</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Railway Traffic Control</div>
+            <button class="mobile-menu-toggle">☰</button>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#" class="nav-link" data-page="dashboard">Dashboard</a></li>
+                <li><a href="#" class="nav-link" data-page="map">Live Map</a></li>
+                <li><a href="#" class="nav-link" data-page="trains">Trains</a></li>
+                <li><a href="#" class="nav-link" data-page="analytics">Analytics</a></li>
+                <li><a href="#" class="nav-link" data-page="about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="hero">
+                <h1>AI-Powered Railway Traffic Control</h1>
+                <p>Maximizing Section Throughput Using Intelligent Decision Support System</p>
+                <p>Smart India Hackathon 2025 - Ministry of Railways</p>
+                <a href="#" class="btn" onclick="showPage('dashboard')">View Dashboard</a>
+                <a href="#" class="btn btn-secondary" onclick="showPage('map')">Live Map</a>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <h3>🚂 Real-time Tracking</h3>
+                    <p>Monitor all trains across the Indian railway network with live position updates and movement tracking.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚡ AI Optimization</h3>
+                    <p>Advanced algorithms for conflict detection, route optimization, and throughput maximization.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📊 Analytics Dashboard</h3>
+                    <p>Comprehensive KPIs, performance metrics, and predictive analytics for better decision making.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🎯 Simulation Engine</h3>
+                    <p>What-if scenarios and disruption handling with rapid re-optimization capabilities.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page">
+            <h2>System Dashboard</h2>
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-stations">-</div>
+                    <div class="stat-label">Total Stations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-trains">-</div>
+                    <div class="stat-label">Active Trains</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-tracks">-</div>
+                    <div class="stat-label">Track Segments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="system-efficiency">-</div>
+                    <div class="stat-label">System Efficiency</div>
+                </div>
+            </div>
+
+            <div class="train-list">
+                <h3>Recent Train Activity</h3>
+                <div id="recent-trains">
+                    <div class="loading">Loading train data...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Map Page -->
+        <div id="map" class="page">
+            <h2>Live Railway Map</h2>
+            <div class="map-container">
+                <div id="railway-map"></div>
+            </div>
+        </div>
+
+        <!-- Trains Page -->
+        <div id="trains" class="page">
+            <h2>Train Management</h2>
+            <div class="train-list">
+                <div id="all-trains">
+                    <div class="loading">Loading train information...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div id="analytics" class="page">
+            <h2>Performance Analytics</h2>
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-number">95.2%</div>
+                    <div class="stat-label">Punctuality Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">87.5%</div>
+                    <div class="stat-label">Throughput Efficiency</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Conflicts Resolved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">2.3 min</div>
+                    <div class="stat-label">Average Delay</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div id="about" class="page">
+            <h2>About the System</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <h3>🎯 Mission</h3>
+                    <p>To revolutionize railway traffic control through AI-powered optimization, ensuring maximum efficiency and safety across India's vast railway network.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔧 Technology</h3>
+                    <p>Built with FastAPI, React, Leaflet.js, and advanced optimization algorithms using Google OR-Tools for real-time decision support.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📈 Impact</h3>
+                    <p>Reducing delays, maximizing throughput, and providing intelligent decision support for railway traffic controllers nationwide.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🚀 Future</h3>
+                    <p>Integration with existing railway control systems, machine learning enhancements, and predictive analytics for proactive management.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Railway Traffic Control System - Smart India Hackathon</p>
+        <p>Ministry of Railways | AI-Powered Decision Support System</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
