@@ -590,14 +590,31 @@ class RailwayMapSystem:
     
     def _advance_to_next_station(self, train_id, train):
         """Move train to next station in route"""
-        # Simple route progression
-        current_station = train.current_station
+        # Move train to next station
+        train.current_station = train.next_station
+        
+        # Find next station in route
         available_tracks = [t for t in self.tracks.values() 
-                          if t.from_station == current_station]
+                          if t.from_station == train.current_station]
         if available_tracks:
-            next_track = available_tracks[0]
-            train.next_station = next_track.to_station
-            train.current_station = next_track.to_station
+            # Choose a track that leads towards destination
+            destination = train.destination
+            best_track = None
+            
+            # Try to find a track that gets closer to destination
+            for track in available_tracks:
+                if track.to_station == destination:
+                    best_track = track
+                    break
+            
+            # If no direct track to destination, choose first available track
+            if not best_track:
+                best_track = available_tracks[0]
+            
+            train.next_station = best_track.to_station
+        else:
+            # If no tracks available, stay at current station
+            train.next_station = train.current_station
     
     def _update_train_coordinates(self, train_id, train, position):
         """Update train coordinates based on current track"""
