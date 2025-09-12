@@ -726,10 +726,13 @@ body {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 20px;
-    margin-bottom: 20px;
+    margin: 20px auto;
+    max-width: 1200px;
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .control-section {
@@ -751,7 +754,23 @@ body {
 .control-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 12px;
+    justify-content: center;
+}
+
+.control-buttons .btn {
+    min-width: 140px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.control-buttons .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .station-selection-panel {
@@ -759,7 +778,10 @@ body {
     border: 1px solid #0ea5e9;
     border-radius: 12px;
     padding: 20px;
-    margin-bottom: 20px;
+    margin: 20px auto;
+    max-width: 1200px;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .station-selection-panel h4 {
@@ -807,8 +829,24 @@ body {
 
 .station-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
+    justify-content: center;
+}
+
+.station-actions .btn {
+    min-width: 120px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.station-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .alert-panel {
@@ -829,7 +867,9 @@ body {
 
 .map-area {
     position: relative;
-    margin-bottom: 20px;
+    margin: 20px auto;
+    max-width: 1200px;
+    width: 100%;
 }
 
 .railway-map {
@@ -838,13 +878,17 @@ body {
     border-radius: 12px;
     position: relative;
     background: #f9fafb;
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .status-panels {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
-    margin-top: 20px;
+    margin: 20px auto;
+    max-width: 1200px;
+    width: 100%;
 }
 
 .status-panel {
@@ -897,10 +941,24 @@ body {
     border-radius: 4px;
 }
 
+/* Page Layout Improvements */
+.page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .map-controls-panel {
         grid-template-columns: 1fr;
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .station-selection-panel {
+        margin: 10px;
+        padding: 15px;
     }
     
     .station-controls {
@@ -914,10 +972,19 @@ body {
     
     .status-panels {
         grid-template-columns: 1fr;
+        margin: 10px;
     }
     
     .control-buttons {
         justify-content: center;
+    }
+    
+    .map-area {
+        margin: 10px;
+    }
+    
+    .railway-map {
+        height: 400px;
     }
 }
 
