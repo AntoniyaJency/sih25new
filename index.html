@@ -1098,27 +1098,23 @@
                 
                 // Focus map on selected station with enhanced view
                 if (map && selectedStation) {
-                    // Smooth transition to station without wobbling
+                    // Direct view change without animation to prevent wobbling
                     map.setView([selectedStation.lat, selectedStation.lon], 12, {
-                        animate: true,
-                        duration: 1.0,
-                        easeLinearity: 0.1
+                        animate: false
                     });
                     
-                    // Wait for map to stabilize before adding elements
-                    setTimeout(() => {
-                        // Highlight the selected station
-                        highlightStation(selectedStation);
-                        
-                        // Show connected tracks and paths
-                        showStationTracksAndPaths(selectedStation);
-                        
-                        // Start live monitoring panel
-                        startLiveStationMonitoring(selectedStation);
-                        
-                        // Start AI section controller for this station
-                        startAISectionController(selectedStation);
-                    }, 1000);
+                    // Add elements immediately without delay
+                    // Highlight the selected station
+                    highlightStation(selectedStation);
+                    
+                    // Show connected tracks and paths
+                    showStationTracksAndPaths(selectedStation);
+                    
+                    // Start live monitoring panel
+                    startLiveStationMonitoring(selectedStation);
+                    
+                    // Start AI section controller for this station
+                    startAISectionController(selectedStation);
                 }
             } else {
                 clearStationFocus();
@@ -1274,49 +1270,6 @@
             updateStatus('📡 Live monitoring stopped');
         }
 
-        // Add Train Path Indicators
-        function addTrainPathIndicators(track, fromStation, toStation) {
-            if (!map || !mapData) return;
-            
-            // Find trains on this track
-            const trainsOnTrack = mapData.trains.filter(train => train.current_track === track.id);
-            
-            trainsOnTrack.forEach(train => {
-                // Calculate position along track
-                const progress = train.progress / 100;
-                const lat = fromStation.lat + (toStation.lat - fromStation.lat) * progress;
-                const lon = fromStation.lon + (toStation.lon - fromStation.lon) * progress;
-                
-                // Create small train path indicator
-                const pathIcon = L.divIcon({
-                    className: 'train-path-indicator',
-                    html: `<div style="font-size: 12px; color: #1e40af;">🚂</div>`,
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8]
-                });
-                
-                const pathMarker = L.marker([lat, lon], {
-                    icon: pathIcon
-                }).addTo(map);
-                
-                // Store reference for removal
-                if (!window.trainPathIndicators) {
-                    window.trainPathIndicators = [];
-                }
-                window.trainPathIndicators.push(pathMarker);
-                
-                // Add popup with train info
-                pathMarker.bindPopup(`
-                    <div style="min-width: 200px;">
-                        <h4 style="margin: 0 0 8px 0; color: #1e40af;">${train.train_number}</h4>
-                        <p style="margin: 3px 0;"><strong>Type:</strong> ${train.train_type}</p>
-                        <p style="margin: 3px 0;"><strong>Speed:</strong> ${train.speed} km/h</p>
-                        <p style="margin: 3px 0;"><strong>Progress:</strong> ${train.progress.toFixed(1)}%</p>
-                        <p style="margin: 3px 0;"><strong>Status:</strong> <span style="color: #059669;">${train.status}</span></p>
-                    </div>
-                `);
-            });
-        }
 
         // Start AI Section Controller for selected station
         function startAISectionController(station) {
@@ -1609,9 +1562,6 @@
                         dashArray: '10, 5'
                     }).addTo(map);
                     
-                    // Add animated train path indicators
-                    addTrainPathIndicators(track, fromStation, toStation);
-                    
                     // Add animated markers for trains on this track
                     addTrainMarkersOnTrack(track, fromStation, toStation);
                     
@@ -1640,24 +1590,27 @@
         function addTrainMarkersOnTrack(track, fromStation, toStation) {
             if (!mapData) return;
             
-            // Find trains on this track
+            // Find trains on this track or connected to this station
             const trainsOnTrack = mapData.trains.filter(train => 
-                (train.current_station === track.from_station && train.next_station === track.to_station) ||
-                (train.current_station === track.to_station && train.next_station === track.from_station)
+                train.current_track === track.id ||
+                train.current_station === track.from_station ||
+                train.current_station === track.to_station ||
+                train.next_station === track.from_station ||
+                train.next_station === track.to_station
             );
             
             trainsOnTrack.forEach(train => {
                 // Calculate train position on track
-                const progress = train.progress || 0;
+                const progress = (train.progress || 0) / 100;
                 const lat = fromStation.lat + (toStation.lat - fromStation.lat) * progress;
                 const lon = fromStation.lon + (toStation.lon - fromStation.lon) * progress;
                 
                 // Create animated train marker
                 const trainIcon = L.divIcon({
                     className: 'train-marker-on-track',
-                    html: `<div style="background: transparent; color: ${getTrainStatusColor(train)}; font-size: 24px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); animation: train-move 3s infinite;">${getTrainIcon(train.train_type, getTrainStatusColor(train))}</div>`,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
+                    html: `<div style="font-size: 18px; color: #1e40af; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🚂</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
                 });
                 
                 const trainMarker = L.marker([lat, lon], {
@@ -1706,12 +1659,6 @@
                 window.stationTrainMarkers = [];
             }
             
-            if (window.trainPathIndicators) {
-                window.trainPathIndicators.forEach(marker => {
-                    if (map) map.removeLayer(marker);
-                });
-                window.trainPathIndicators = [];
-            }
         }
 
         // Toggle station monitoring
