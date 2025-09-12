@@ -1042,26 +1042,26 @@
                 tracks: [
                     // Golden Quadrilateral - Main trunk routes
                     // Delhi-Mumbai via Jaipur-Ajmer route
-                    {"from": {"id": "DLI", "lat": 28.6448, "lon": 77.2194}, "to": {"id": "GZB", "lat": 28.6692, "lon": 77.4538}},
-                    {"from": {"id": "GZB", "lat": 28.6692, "lon": 77.4538}, "to": {"id": "MB", "lat": 28.8386, "lon": 78.7733}},
-                    {"from": {"id": "MB", "lat": 28.8386, "lon": 78.7733}, "to": {"id": "BE", "lat": 28.3670, "lon": 79.4304}},
-                    {"from": {"id": "BE", "lat": 28.3670, "lon": 79.4304}, "to": {"id": "LKO", "lat": 26.8393, "lon": 80.9231}},
-                    {"from": {"id": "LKO", "lat": 26.8393, "lon": 80.9231}, "to": {"id": "CNB", "lat": 26.4499, "lon": 80.3319}},
-                    {"from": {"id": "CNB", "lat": 26.4499, "lon": 80.3319}, "to": {"id": "JHS", "lat": 25.4484, "lon": 78.5685}},
-                    {"from": {"id": "JHS", "lat": 25.4484, "lon": 78.5685}, "to": {"id": "BPL", "lat": 23.2599, "lon": 77.4126}},
-                    {"from": {"id": "BPL", "lat": 23.2599, "lon": 77.4126}, "to": {"id": "NGP", "lat": 21.1458, "lon": 79.0882}},
-                    {"from": {"id": "NGP", "lat": 21.1458, "lon": 79.0882}, "to": {"id": "BSL", "lat": 21.0542, "lon": 75.7849}},
-                    {"from": {"id": "BSL", "lat": 21.0542, "lon": 75.7849}, "to": {"id": "MMR", "lat": 20.2437, "lon": 74.4378}},
-                    {"from": {"id": "MMR", "lat": 20.2437, "lon": 74.4378}, "to": {"id": "KYN", "lat": 19.2437, "lon": 73.1305}},
-                    {"from": {"id": "KYN", "lat": 19.2437, "lon": 73.1305}, "to": {"id": "BCT", "lat": 19.0176, "lon": 72.8562}},
+                    {"id": "DLI-GZB", "from": {"id": "DLI", "lat": 28.6448, "lon": 77.2194}, "to": {"id": "GZB", "lat": 28.6692, "lon": 77.4538}, "distance": 25, "max_speed": 160, "type": "main"},
+                    {"id": "GZB-MB", "from": {"id": "GZB", "lat": 28.6692, "lon": 77.4538}, "to": {"id": "MB", "lat": 28.8386, "lon": 78.7733}, "distance": 140, "max_speed": 130, "type": "main"},
+                    {"id": "MB-BE", "from": {"id": "MB", "lat": 28.8386, "lon": 78.7733}, "to": {"id": "BE", "lat": 28.3670, "lon": 79.4304}, "distance": 90, "max_speed": 120, "type": "main"},
+                    {"id": "BE-LKO", "from": {"id": "BE", "lat": 28.3670, "lon": 79.4304}, "to": {"id": "LKO", "lat": 26.8393, "lon": 80.9231}, "distance": 250, "max_speed": 110, "type": "main"},
+                    {"id": "LKO-CNB", "from": {"id": "LKO", "lat": 26.8393, "lon": 80.9231}, "to": {"id": "CNB", "lat": 26.4499, "lon": 80.3319}, "distance": 75, "max_speed": 130, "type": "main"},
+                    {"id": "CNB-JHS", "from": {"id": "CNB", "lat": 26.4499, "lon": 80.3319}, "to": {"id": "JHS", "lat": 25.4484, "lon": 78.5685}, "distance": 295, "max_speed": 130, "type": "main"},
+                    {"id": "JHS-BPL", "from": {"id": "JHS", "lat": 25.4484, "lon": 78.5685}, "to": {"id": "BPL", "lat": 23.2599, "lon": 77.4126}, "distance": 180, "max_speed": 130, "type": "main"},
+                    {"id": "BPL-NGP", "from": {"id": "BPL", "lat": 23.2599, "lon": 77.4126}, "to": {"id": "NGP", "lat": 21.1458, "lon": 79.0882}, "distance": 350, "max_speed": 120, "type": "main"},
+                    {"id": "NGP-BSL", "from": {"id": "NGP", "lat": 21.1458, "lon": 79.0882}, "to": {"id": "BSL", "lat": 21.0542, "lon": 75.7849}, "distance": 140, "max_speed": 110, "type": "main"},
+                    {"id": "BSL-MMR", "from": {"id": "BSL", "lat": 21.0542, "lon": 75.7849}, "to": {"id": "MMR", "lat": 20.2437, "lon": 74.4378}, "distance": 65, "max_speed": 100, "type": "main"},
+                    {"id": "MMR-KYN", "from": {"id": "MMR", "lat": 20.2437, "lon": 74.4378}, "to": {"id": "KYN", "lat": 19.2437, "lon": 73.1305}, "distance": 180, "max_speed": 100, "type": "main"},
+                    {"id": "KYN-BCT", "from": {"id": "KYN", "lat": 19.2437, "lon": 73.1305}, "to": {"id": "BCT", "lat": 19.0176, "lon": 72.8562}, "distance": 54, "max_speed": 80, "type": "suburban"},
                     
                     // Delhi-Mumbai via Kota-Ratlam route  
-                    {"from": {"id": "DLI", "lat": 28.6448, "lon": 77.2194}, "to": {"id": "JP", "lat": 26.9196, "lon": 75.7878}},
-                    {"from": {"id": "JP", "lat": 26.9196, "lon": 75.7878}, "to": {"id": "AII", "lat": 26.4499, "lon": 74.6399}},
-                    {"from": {"id": "AII", "lat": 26.4499, "lon": 74.6399}, "to": {"id": "KTA", "lat": 25.2138, "lon": 75.8648}},
-                    {"from": {"id": "KTA", "lat": 25.2138, "lon": 75.8648}, "to": {"id": "RTM", "lat": 23.3315, "lon": 75.0367}},
-                    {"from": {"id": "RTM", "lat": 23.3315, "lon": 75.0367}, "to": {"id": "UJN", "lat": 23.1765, "lon": 75.7885}},
-                    {"from": {"id": "UJN", "lat": 23.1765, "lon": 75.7885}, "to": {"id": "BPL", "lat": 23.2599, "lon": 77.4126}},
+                    {"id": "DLI-JP", "from": {"id": "DLI", "lat": 28.6448, "lon": 77.2194}, "to": {"id": "JP", "lat": 26.9196, "lon": 75.7878}, "distance": 308, "max_speed": 130, "type": "main"},
+                    {"id": "JP-AII", "from": {"id": "JP", "lat": 26.9196, "lon": 75.7878}, "to": {"id": "AII", "lat": 26.4499, "lon": 74.6399}, "distance": 135, "max_speed": 110, "type": "main"},
+                    {"id": "AII-KTA", "from": {"id": "AII", "lat": 26.4499, "lon": 74.6399}, "to": {"id": "KTA", "lat": 25.2138, "lon": 75.8648}, "distance": 195, "max_speed": 130, "type": "main"},
+                    {"id": "KTA-RTM", "from": {"id": "KTA", "lat": 25.2138, "lon": 75.8648}, "to": {"id": "RTM", "lat": 23.3315, "lon": 75.0367}, "distance": 108, "max_speed": 120, "type": "main"},
+                    {"id": "RTM-UJN", "from": {"id": "RTM", "lat": 23.3315, "lon": 75.0367}, "to": {"id": "UJN", "lat": 23.1765, "lon": 75.7885}, "distance": 90, "max_speed": 100, "type": "main"},
+                    {"id": "UJN-BPL", "from": {"id": "UJN", "lat": 23.1765, "lon": 75.7885}, "to": {"id": "BPL", "lat": 23.2599, "lon": 77.4126}, "distance": 185, "max_speed": 110, "type": "main"},
                     
                     // Delhi-Chennai main line
                     {"from": {"id": "DLI", "lat": 28.6448, "lon": 77.2194}, "to": {"id": "AGR", "lat": 27.1767, "lon": 78.0081}},
@@ -1242,6 +1242,7 @@
                     }
                 ],
                 collisions: [],
+                rerouting: [],
                 timestamp: new Date().toISOString()
             };
             
@@ -1254,8 +1255,8 @@
             // Update real-time data display
             updateRealTimeDataDisplay();
             
-            // Start real-time updates (simulated)
-            startRealTimeUpdates();
+            // Start simulated real-time updates (mimics local backend)
+            startSimulatedRealTimeUpdates();
             
             // Populate station dropdown
             populateStationDropdown();
@@ -1645,6 +1646,47 @@
             setTimeout(() => {
                 map.removeLayer(trail);
             }, 2000);
+        }
+
+        // Simulated real-time updates (mimics local backend behavior)
+        function startSimulatedRealTimeUpdates() {
+            if (window.simulatedUpdateInterval) {
+                clearInterval(window.simulatedUpdateInterval);
+            }
+            
+            console.log('🔄 Starting simulated real-time updates...');
+            
+            // Update every 3 seconds (same as local backend)
+            window.simulatedUpdateInterval = setInterval(() => {
+                if (!mapData || !mapData.trains) return;
+                
+                // Simulate train movement and updates
+                mapData.trains.forEach(train => {
+                    // Simulate progress changes
+                    train.progress = Math.min(1.0, train.progress + Math.random() * 0.1);
+                    
+                    // Simulate speed variations
+                    train.speed = Math.max(80, Math.min(160, train.speed + (Math.random() - 0.5) * 10));
+                    
+                    // Simulate delay changes
+                    train.delay_minutes = Math.max(0, train.delay_minutes + (Math.random() - 0.7) * 2);
+                    
+                    // Simulate collision risks and rerouting
+                    if (Math.random() < 0.05) { // 5% chance
+                        train.collision_risk = Math.random() < 0.5;
+                        train.rerouting_needed = Math.random() < 0.3;
+                    }
+                    
+                    // Update timestamp
+                    mapData.timestamp = new Date().toISOString();
+                });
+                
+                // Update the map with new positions
+                updateTrainPositions();
+                updateRealTimeDataDisplay();
+                
+                console.log('🔄 Simulated update completed');
+            }, 3000); // 3 second intervals
         }
 
         // Start real-time updates
