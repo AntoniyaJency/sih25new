@@ -118,6 +118,7 @@
                             </select>
                         </div>
                         <button onclick="clearStationFocus()" class="btn btn-secondary" id="clear-station-btn" style="display: none;">Clear Focus</button>
+                        <button onclick="populateStationDropdown()" class="btn btn-info">🔄 Load Stations</button>
                         <button onclick="toggleStationMonitoring()" class="btn" id="monitor-btn">📡 Start Monitoring</button>
                     </div>
                 </div>
@@ -914,18 +915,49 @@
         }
 
         // Populate station dropdown
-        function populateStationDropdown() {
+        async function populateStationDropdown() {
             const stationSelect = document.getElementById('station-select');
-            if (!stationSelect || !mapData) return;
+            
+            if (!stationSelect) {
+                updateStatus('❌ Station dropdown not found');
+                return;
+            }
+            
+            // If mapData is not available, fetch it directly
+            if (!mapData) {
+                try {
+                    const response = await fetch('http://localhost:8081/api/map-data');
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        stationSelect.innerHTML = '<option value="">Select a station to monitor...</option>';
+                        
+                        data.stations.forEach((station) => {
+                            const option = document.createElement('option');
+                            option.value = station.id;
+                            option.textContent = `${station.name} (${station.id})`;
+                            stationSelect.appendChild(option);
+                        });
+                        
+                        updateStatus(`✅ Station dropdown loaded with ${data.stations.length} stations`);
+                        return;
+                    }
+                } catch (error) {
+                    updateStatus('❌ Error loading stations: ' + error.message);
+                    return;
+                }
+            }
             
             stationSelect.innerHTML = '<option value="">Select a station to monitor...</option>';
             
-            mapData.stations.forEach(station => {
+            mapData.stations.forEach((station) => {
                 const option = document.createElement('option');
                 option.value = station.id;
                 option.textContent = `${station.name} (${station.id})`;
                 stationSelect.appendChild(option);
             });
+            
+            updateStatus(`✅ Station dropdown loaded with ${mapData.stations.length} stations`);
         }
 
         // Select station for monitoring
@@ -1187,6 +1219,10 @@
         // Auto-initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             updateStatus('Ready to initialize map');
+            // Auto-populate station dropdown
+            setTimeout(() => {
+                populateStationDropdown();
+            }, 1000);
         });
     </script>
 </body>
