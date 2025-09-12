@@ -950,6 +950,52 @@ body {
     background-color: transparent;
 }
 
+/* Station Highlight Marker */
+.station-highlight-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Station Popup Styles */
+.station-popup {
+    text-align: left;
+    min-width: 200px;
+}
+
+.station-popup h4 {
+    margin: 0 0 8px 0;
+    color: #1e40af;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.station-popup p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #374151;
+}
+
+.station-popup .status-active {
+    color: #059669;
+    font-weight: 600;
+}
+
+/* Pulse animation for station highlight */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(239, 68, 68, 1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+    }
+}
+
 .station-input-group {
     flex: 1;
     min-width: 250px;

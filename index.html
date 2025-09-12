@@ -1265,20 +1265,76 @@
         }
 
         // Station selection
-        function selectStation() {
-            const select = document.getElementById('station-select');
-            const stationId = select.value;
+        function selectStation(stationId = null) {
+            // If no stationId provided, try to get from old dropdown (for backward compatibility)
+            if (!stationId) {
+                const select = document.getElementById('station-select');
+                if (select) {
+                    stationId = select.value;
+                }
+            }
             
             if (stationId) {
                 const station = mapData.stations.find(s => s.id === stationId);
                 if (station) {
                     selectedStation = station;
+                    console.log('🎯 Station selected:', station.name, station.id);
+                    
+                    // Focus map on selected station
                     map.setView([station.lat, station.lon], 12, { animate: false });
+                    
+                    // Highlight the station on the map
+                    highlightStationOnMap(station);
+                    
+                    // Start monitoring
                     startLiveStationMonitoring(station);
+                    
+                    updateStatus(`📍 Monitoring station: ${station.name}`);
+                } else {
+                    console.error('❌ Station not found:', stationId);
                 }
             } else {
                 clearStationFocus();
             }
+        }
+        
+        // Highlight station on map
+        function highlightStationOnMap(station) {
+            // Remove existing highlights
+            if (window.stationHighlight) {
+                map.removeLayer(window.stationHighlight);
+            }
+            
+            // Add highlight marker
+            const highlightIcon = L.divIcon({
+                className: 'station-highlight-marker',
+                html: `<div style="
+                    width: 20px;
+                    height: 20px;
+                    background: #ef4444;
+                    border: 3px solid #ffffff;
+                    border-radius: 50%;
+                    box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+                    animation: pulse 1.5s infinite;
+                "></div>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            window.stationHighlight = L.marker([station.lat, station.lon], {
+                icon: highlightIcon,
+                zIndexOffset: 1000
+            }).addTo(map);
+            
+            // Add popup with station info
+            window.stationHighlight.bindPopup(`
+                <div class="station-popup">
+                    <h4>📍 ${station.name}</h4>
+                    <p><strong>Station ID:</strong> ${station.id}</p>
+                    <p><strong>Coordinates:</strong> ${station.lat.toFixed(4)}, ${station.lon.toFixed(4)}</p>
+                    <p><strong>Status:</strong> <span class="status-active">Active Monitoring</span></p>
+                </div>
+            `).openPopup();
         }
 
         // Start live station monitoring
@@ -1405,12 +1461,22 @@
         // Clear station focus
         function clearStationFocus() {
             selectedStation = null;
+            
+            // Clear search input
             const searchInput = document.getElementById('station-search');
             if (searchInput) {
                 searchInput.value = '';
             }
+            
+            // Remove station highlight from map
+            if (window.stationHighlight) {
+                map.removeLayer(window.stationHighlight);
+                window.stationHighlight = null;
+            }
+            
             hideDropdown();
             closeLiveMonitor();
+            updateStatus('📍 Station monitoring cleared');
         }
 
         // Populate station dropdown
