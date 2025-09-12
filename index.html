@@ -617,21 +617,38 @@
 
         // Update live station data
         function updateLiveStationData(station) {
-            if (!mapData) return;
+            if (!mapData || !mapData.trains) return;
             
-            // Find trains at or approaching this station
-            const trainsAtStation = mapData.trains.filter(train => 
-                train.current_station === station.id ||
-                train.next_station === station.id ||
-                train.origin === station.id ||
-                train.destination === station.id
-            );
+            console.log('🔍 Updating station data for:', station.name, station.id);
+            console.log('🚂 Total trains available:', mapData.trains.length);
+            
+            // Find trains at or approaching this station - improved filtering
+            const trainsAtStation = mapData.trains.filter(train => {
+                const isAtStation = train.current_station === station.id;
+                const isNextStation = train.next_station === station.id;
+                const isOrigin = train.origin === station.id;
+                const isDestination = train.destination === station.id;
+                
+                if (isAtStation || isNextStation || isOrigin || isDestination) {
+                    console.log(`🚂 Train ${train.train_number} found at ${station.name}:`, {
+                        current_station: train.current_station,
+                        next_station: train.next_station,
+                        origin: train.origin,
+                        destination: train.destination,
+                        reason: isAtStation ? 'current' : isNextStation ? 'next' : isOrigin ? 'origin' : 'destination'
+                    });
+                }
+                
+                return isAtStation || isNextStation || isOrigin || isDestination;
+            });
             
             // Find connected tracks
             const connectedTracks = mapData.tracks.filter(track => 
                 track.from.lat === station.lat && track.from.lon === station.lon ||
                 track.to.lat === station.lat && track.to.lon === station.lon
             );
+            
+            console.log(`📊 Found ${trainsAtStation.length} trains and ${connectedTracks.length} tracks for ${station.name}`);
             
             // Update display
             document.getElementById('monitor-tracks-count').textContent = connectedTracks.length;
@@ -646,37 +663,53 @@
         function updateLiveTrainsList(trains, tracks) {
             const container = document.getElementById('live-trains-container');
             
+            console.log('📋 Updating trains list with:', trains.length, 'trains');
+            
             if (trains.length === 0) {
-                container.innerHTML = '<div class="no-trains">No trains at this station</div>';
+                container.innerHTML = '<div class="no-trains"><p>🚂 No trains at this station</p><p>Try selecting a different station or wait for trains to arrive</p></div>';
                 return;
             }
             
-            container.innerHTML = trains.map(train => `
-                <div class="train-item">
-                    <div class="train-header">
-                        <span class="train-number">${train.train_number}</span>
-                        <span class="train-name">${train.train_type}</span>
-                        <span class="train-status ${train.status.toLowerCase()}">${train.status}</span>
+            container.innerHTML = trains.map(train => {
+                // Determine train location status
+                let locationStatus = '';
+                if (train.current_station === train.origin) {
+                    locationStatus = '🚉 At Origin Station';
+                } else if (train.current_station === train.destination) {
+                    locationStatus = '🏁 At Destination';
+                } else if (train.next_station === train.origin) {
+                    locationStatus = '🚂 Approaching Station';
+                } else {
+                    locationStatus = `🚂 Current: ${train.current_station}`;
+                }
+                
+                return `
+                    <div class="train-item">
+                        <div class="train-header">
+                            <span class="train-number">${train.train_number}</span>
+                            <span class="train-name">${train.train_type}</span>
+                            <span class="train-status ${train.status.toLowerCase()}">${train.status}</span>
+                        </div>
+                        <div class="train-details">
+                            <div class="train-route">
+                                <span class="route-from">${train.origin}</span>
+                                <span class="route-arrow">→</span>
+                                <span class="route-to">${train.destination}</span>
+                            </div>
+                            <div class="train-location">
+                                <span class="location-text">${locationStatus}</span>
+                            </div>
+                            <div class="train-metrics">
+                                <div class="metric">Speed: ${train.speed} km/h</div>
+                                <div class="metric">Progress: ${Math.round(train.progress * 100)}%</div>
+                                <div class="metric">Delay: ${train.delay_minutes || 0} min</div>
+                            </div>
+                            ${train.collision_risk ? '<span class="alert-badge collision">⚠️ Collision Risk</span>' : ''}
+                            ${train.rerouting_needed ? '<span class="alert-badge rerouting">🔄 Rerouting Needed</span>' : ''}
+                        </div>
                     </div>
-                    <div class="train-details">
-                        <div class="train-route">
-                            <span class="route-from">${train.origin}</span>
-                            <span class="route-arrow">→</span>
-                            <span class="route-to">${train.destination}</span>
-                        </div>
-                        <div class="train-location">
-                            <span class="location-text">Current: ${train.current_station}</span>
-                        </div>
-                        <div class="train-metrics">
-                            <div class="metric">Speed: ${train.speed} km/h</div>
-                            <div class="metric">Progress: ${Math.round(train.progress * 100)}%</div>
-                            <div class="metric">Delay: ${train.delay_minutes || 0} min</div>
-                        </div>
-                        ${train.collision_risk ? '<span class="alert-badge collision">⚠️ Collision Risk</span>' : ''}
-                        ${train.rerouting_needed ? '<span class="alert-badge rerouting">🔄 Rerouting Needed</span>' : ''}
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Close live monitor

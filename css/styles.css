@@ -1048,6 +1048,23 @@ body {
     overflow: hidden;
 }
 
+.no-trains {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.no-trains p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.no-trains p:first-child {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
 .monitor-header {
     background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     color: white;
