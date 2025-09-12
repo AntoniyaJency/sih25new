@@ -545,7 +545,13 @@ class RailwayMapSystem:
                 "lon": position["lon"],
                 "speed": position["speed"],
                 "status": position["status"],
-                "progress": position["progress"]
+                "progress": position["progress"],
+                "collision_risk": position.get("collision_risk", False),
+                "rerouting_needed": position.get("rerouting_needed", False),
+                "ai_message": position.get("ai_message", ""),
+                "section_id": self._get_section_id(train.current_station),
+                "priority": self._get_train_priority(train.train_type),
+                "delay_minutes": position.get("delay_minutes", 0)
             })
         
         return {
@@ -682,6 +688,87 @@ class RailwayMapSystem:
                     "timestamp": datetime.now().isoformat()
                 })
         return alerts
+    
+    def _get_section_id(self, station_id):
+        """Get section ID for a station (simplified section mapping)"""
+        # Map stations to railway sections
+        section_mapping = {
+            'NDLS': 'NORTH_DELHI', 'DLI': 'NORTH_DELHI', 'NZM': 'SOUTH_DELHI',
+            'CSMT': 'MUMBAI_CENTRAL', 'BDTS': 'MUMBAI_WESTERN', 'LTT': 'MUMBAI_CENTRAL',
+            'HWH': 'KOLKATA_HOWRAH', 'KOAA': 'KOLKATA_SEALDAH', 'SDAH': 'KOLKATA_SEALDAH',
+            'MAS': 'CHENNAI_CENTRAL', 'MSB': 'CHENNAI_CENTRAL', 'TBM': 'CHENNAI_CENTRAL',
+            'SBC': 'BANGALORE_CITY', 'YPR': 'BANGALORE_YESVANTPUR', 'KJM': 'BANGALORE_CITY',
+            'GIMB': 'GUJARAT_NORTH', 'ADI': 'AHMEDABAD', 'BRC': 'VADODARA',
+            'JP': 'JAIPUR', 'JU': 'JODHPUR', 'BIKANER': 'BIKANER',
+            'LKO': 'LUCKNOW', 'CNB': 'KANPUR', 'GZB': 'GHAZIABAD',
+            'PNBE': 'PATNA', 'GAY': 'GAYA', 'MFP': 'MUZAFFARPUR',
+            'ASN': 'ASANSOL', 'DGR': 'DURGAPUR', 'BWN': 'BURDWAN',
+            'PUNE': 'PUNE', 'KOP': 'KOLHAPUR', 'SUR': 'SURAT',
+            'HYB': 'HYDERABAD', 'SC': 'SECUNDERABAD', 'KZJ': 'KAZIPET',
+            'BZA': 'VIJAYAWADA', 'RJY': 'RAJAHMUNDRY', 'VSKP': 'VISAKHAPATNAM',
+            'TVC': 'THIRUVANANTHAPURAM', 'QLN': 'KOLLAM', 'ALLP': 'ALLEPPEY',
+            'CAN': 'KANNUR', 'CLT': 'KOZHIKODE', 'TCR': 'THRISSUR'
+        }
+        return section_mapping.get(station_id, 'UNKNOWN_SECTION')
+    
+    def _get_train_priority(self, train_type):
+        """Get priority level for train type"""
+        priority_mapping = {
+            'Rajdhani Express': 1,  # Highest priority
+            'Vande Bharat Express': 1,
+            'Shatabdi Express': 2,
+            'Duronto Express': 2,
+            'Express': 3,
+            'Mail': 4,
+            'Freight': 5,
+            'Local': 6  # Lowest priority
+        }
+        return priority_mapping.get(train_type, 3)
+    
+    def get_section_status(self):
+        """Get status of all railway sections"""
+        sections = {}
+        for train_id, train in self.trains.items():
+            section_id = self._get_section_id(train.current_station)
+            if section_id not in sections:
+                sections[section_id] = {
+                    "section_id": section_id,
+                    "trains": [],
+                    "total_trains": 0,
+                    "delayed_trains": 0,
+                    "collision_risks": 0,
+                    "rerouting_needed": 0,
+                    "avg_delay": 0
+                }
+            
+            position = self.positions[train_id]
+            sections[section_id]["trains"].append({
+                "train_number": train.train_number,
+                "train_type": train.train_type,
+                "current_station": train.current_station,
+                "status": position["status"],
+                "delay_minutes": position.get("delay_minutes", 0),
+                "collision_risk": position.get("collision_risk", False),
+                "rerouting_needed": position.get("rerouting_needed", False)
+            })
+            sections[section_id]["total_trains"] += 1
+            
+            if position.get("delay_minutes", 0) > 0:
+                sections[section_id]["delayed_trains"] += 1
+            
+            if position.get("collision_risk", False):
+                sections[section_id]["collision_risks"] += 1
+            
+            if position.get("rerouting_needed", False):
+                sections[section_id]["rerouting_needed"] += 1
+        
+        # Calculate average delays
+        for section_id, section in sections.items():
+            if section["total_trains"] > 0:
+                total_delay = sum(train["delay_minutes"] for train in section["trains"])
+                section["avg_delay"] = round(total_delay / section["total_trains"], 1)
+        
+        return sections
 
 # Global system instance
 railway_map = RailwayMapSystem()
@@ -1273,6 +1360,16 @@ def create_map_api():
                 
                 map_data = railway_map.get_map_data()
                 self.wfile.write(json.dumps(map_data).encode())
+                
+            elif self.path == '/api/section-status':
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                
+                section_data = railway_map.get_section_status()
+                self.wfile.write(json.dumps(section_data).encode())
+                
             else:
                 self.send_response(404)
                 self.end_headers()

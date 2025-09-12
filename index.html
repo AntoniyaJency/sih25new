@@ -104,6 +104,8 @@
                     <button onclick="toggleFullscreen()" class="btn btn-warning">Fullscreen</button>
                     <button onclick="toggleVoiceAlerts()" class="btn" id="voice-btn">🔊 Voice Alerts</button>
                     <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Live Movement</button>
+                    <button onclick="showSectionController()" class="btn" id="controller-btn">🎛️ Section Controller</button>
+                    <button onclick="showAllTrains()" class="btn" id="trains-btn">🚂 All Trains</button>
                 </div>
                 
                 <!-- Alert Panel -->
@@ -117,6 +119,24 @@
                 <!-- AI Message Overlay -->
                 <div id="ai-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; display: none; max-width: 300px; z-index: 1000;">
                     <div id="ai-message"></div>
+                </div>
+                
+                <!-- Section Controller Panel -->
+                <div id="section-controller" style="position: absolute; top: 10px; right: 10px; background: white; border: 2px solid #1e3a8a; border-radius: 10px; padding: 15px; display: none; max-width: 400px; max-height: 600px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #1e3a8a;">🎛️ Section Controller</h3>
+                        <button onclick="hideSectionController()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                    </div>
+                    <div id="section-list"></div>
+                </div>
+                
+                <!-- All Trains Panel -->
+                <div id="all-trains-panel" style="position: absolute; bottom: 10px; left: 10px; background: white; border: 2px solid #059669; border-radius: 10px; padding: 15px; display: none; max-width: 500px; max-height: 400px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #059669;">🚂 All Trains Status</h3>
+                        <button onclick="hideAllTrains()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                    </div>
+                    <div id="trains-list"></div>
                 </div>
                 
                 <div id="map-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
@@ -348,10 +368,18 @@
                     icon: trainIcon
                 }).addTo(map);
                 
-                // Enhanced popup with AI messages
+                // Enhanced popup with AI messages and section info
                 let popupContent = `
-                    <div style="min-width: 280px;">
+                    <div style="min-width: 320px;">
                         <h3 style="margin: 0 0 10px 0; color: #1e3a8a;">${train.train_number}</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="background: ${getPriorityColor(train.priority)}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+                                Priority ${train.priority}
+                            </span>
+                            <span style="background: ${getSectionColor(train.section_id)}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+                                ${train.section_id.replace(/_/g, ' ')}
+                            </span>
+                        </div>
                         <p style="margin: 5px 0;"><strong>Type:</strong> ${train.train_type}</p>
                         <p style="margin: 5px 0;"><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
                         <p style="margin: 5px 0;"><strong>Current:</strong> ${train.current_station}</p>
@@ -359,6 +387,7 @@
                         <p style="margin: 5px 0;"><strong>Speed:</strong> ${train.speed} km/h</p>
                         <p style="margin: 5px 0;"><strong>Status:</strong> ${train.status}</p>
                         <p style="margin: 5px 0;"><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
+                        ${train.delay_minutes > 0 ? `<p style="margin: 5px 0; color: #dc2626;"><strong>Delay:</strong> ${train.delay_minutes} min</p>` : ''}
                 `;
                 
                 if (train.ai_message) {
@@ -598,6 +627,259 @@
                 updateStatus('❌ Error loading data: ' + error.message);
                 console.error('Data loading error:', error);
             }
+        }
+
+        // Show Section Controller
+        function showSectionController() {
+            const panel = document.getElementById('section-controller');
+            if (panel) {
+                panel.style.display = 'block';
+                loadSectionData();
+                updateStatus('✅ Section Controller opened');
+            }
+        }
+
+        // Hide Section Controller
+        function hideSectionController() {
+            const panel = document.getElementById('section-controller');
+            if (panel) {
+                panel.style.display = 'none';
+            }
+        }
+
+        // Show All Trains Panel
+        function showAllTrains() {
+            const panel = document.getElementById('all-trains-panel');
+            if (panel) {
+                panel.style.display = 'block';
+                loadTrainsData();
+                updateStatus('✅ All Trains panel opened');
+            }
+        }
+
+        // Hide All Trains Panel
+        function hideAllTrains() {
+            const panel = document.getElementById('all-trains-panel');
+            if (panel) {
+                panel.style.display = 'none';
+            }
+        }
+
+        // Load Section Data
+        async function loadSectionData() {
+            try {
+                const response = await fetch('http://localhost:8081/api/section-status');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const sectionData = await response.json();
+                displaySectionData(sectionData);
+                
+            } catch (error) {
+                console.error('Error loading section data:', error);
+                updateStatus('❌ Error loading section data: ' + error.message);
+            }
+        }
+
+        // Display Section Data
+        function displaySectionData(sections) {
+            const sectionList = document.getElementById('section-list');
+            if (!sectionList) return;
+            
+            sectionList.innerHTML = '';
+            
+            Object.values(sections).forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.style.cssText = `
+                    margin-bottom: 15px; padding: 12px; border-radius: 8px;
+                    border-left: 4px solid ${getSectionColor(section)};
+                    background: ${getSectionBackground(section)};
+                `;
+                
+                sectionDiv.innerHTML = `
+                    <h4 style="margin: 0 0 8px 0; color: #1e3a8a;">${section.section_id.replace(/_/g, ' ')}</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
+                        <div><strong>Total Trains:</strong> ${section.total_trains}</div>
+                        <div><strong>Delayed:</strong> ${section.delayed_trains}</div>
+                        <div><strong>Collision Risks:</strong> ${section.collision_risks}</div>
+                        <div><strong>Rerouting:</strong> ${section.rerouting_needed}</div>
+                        <div><strong>Avg Delay:</strong> ${section.avg_delay} min</div>
+                        <div><strong>Status:</strong> ${getSectionStatus(section)}</div>
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <strong>Trains:</strong>
+                        <div style="max-height: 100px; overflow-y: auto; font-size: 12px;">
+                            ${section.trains.map(train => `
+                                <div style="margin: 2px 0; padding: 2px 4px; background: rgba(0,0,0,0.05); border-radius: 3px;">
+                                    ${train.train_number} (${train.train_type}) - ${train.current_station}
+                                    ${train.collision_risk ? ' 🚨' : ''} ${train.rerouting_needed ? ' 🔄' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                sectionList.appendChild(sectionDiv);
+            });
+        }
+
+        // Load Trains Data
+        function loadTrainsData() {
+            if (!mapData || !mapData.trains) return;
+            
+            const trainsList = document.getElementById('trains-list');
+            if (!trainsList) return;
+            
+            trainsList.innerHTML = '';
+            
+            // Sort trains by priority and status
+            const sortedTrains = mapData.trains.sort((a, b) => {
+                if (a.collision_risk !== b.collision_risk) {
+                    return a.collision_risk ? -1 : 1;
+                }
+                if (a.rerouting_needed !== b.rerouting_needed) {
+                    return a.rerouting_needed ? -1 : 1;
+                }
+                return a.priority - b.priority;
+            });
+            
+            sortedTrains.forEach(train => {
+                const trainDiv = document.createElement('div');
+                trainDiv.style.cssText = `
+                    margin-bottom: 8px; padding: 10px; border-radius: 6px;
+                    border-left: 4px solid ${getTrainStatusColor(train)};
+                    background: ${getTrainBackground(train)};
+                    cursor: pointer;
+                `;
+                
+                trainDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${train.train_number}</strong> (${train.train_type})
+                            ${train.collision_risk ? ' 🚨' : ''} ${train.rerouting_needed ? ' 🔄' : ''}
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            Priority: ${train.priority}
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; margin-top: 4px;">
+                        <div><strong>Route:</strong> ${train.origin} → ${train.destination}</div>
+                        <div><strong>Current:</strong> ${train.current_station} → ${train.next_station}</div>
+                        <div><strong>Speed:</strong> ${train.speed} km/h | <strong>Progress:</strong> ${Math.round(train.progress * 100)}%</div>
+                        <div><strong>Section:</strong> ${train.section_id.replace(/_/g, ' ')}</div>
+                        ${train.delay_minutes > 0 ? `<div style="color: #dc2626;"><strong>Delay:</strong> ${train.delay_minutes} min</div>` : ''}
+                        ${train.ai_message ? `<div style="color: #d97706; font-style: italic;">🤖 ${train.ai_message}</div>` : ''}
+                    </div>
+                `;
+                
+                // Click to focus on train
+                trainDiv.addEventListener('click', () => {
+                    if (map) {
+                        map.setView([train.lat, train.lon], 8);
+                        // Open popup for this train
+                        const marker = trainMarkers.find(m => m.getLatLng().lat === train.lat && m.getLatLng().lng === train.lon);
+                        if (marker) {
+                            marker.openPopup();
+                        }
+                    }
+                });
+                
+                trainsList.appendChild(trainDiv);
+            });
+        }
+
+        // Helper functions for styling
+        function getSectionColor(section) {
+            if (section.collision_risks > 0) return '#dc2626';
+            if (section.rerouting_needed > 0) return '#d97706';
+            if (section.delayed_trains > section.total_trains * 0.5) return '#f59e0b';
+            return '#059669';
+        }
+
+        function getSectionBackground(section) {
+            if (section.collision_risks > 0) return '#fef2f2';
+            if (section.rerouting_needed > 0) return '#fef3c7';
+            if (section.delayed_trains > section.total_trains * 0.5) return '#fffbeb';
+            return '#f0fdf4';
+        }
+
+        function getSectionStatus(section) {
+            if (section.collision_risks > 0) return '🚨 CRITICAL';
+            if (section.rerouting_needed > 0) return '🔄 REROUTING';
+            if (section.delayed_trains > section.total_trains * 0.5) return '⚠️ DELAYED';
+            return '✅ NORMAL';
+        }
+
+        function getTrainStatusColor(train) {
+            if (train.collision_risk) return '#dc2626';
+            if (train.rerouting_needed) return '#d97706';
+            if (train.delay_minutes > 15) return '#f59e0b';
+            return '#059669';
+        }
+
+        function getTrainBackground(train) {
+            if (train.collision_risk) return '#fef2f2';
+            if (train.rerouting_needed) return '#fef3c7';
+            if (train.delay_minutes > 15) return '#fffbeb';
+            return '#f0fdf4';
+        }
+
+        function getPriorityColor(priority) {
+            const colors = {
+                1: '#dc2626',  // Highest priority - Red
+                2: '#d97706',  // High priority - Orange
+                3: '#059669',  // Medium priority - Green
+                4: '#2563eb',  // Low priority - Blue
+                5: '#6b7280',  // Lower priority - Gray
+                6: '#9ca3af'   // Lowest priority - Light Gray
+            };
+            return colors[priority] || '#059669';
+        }
+
+        function getSectionColor(sectionId) {
+            const colors = {
+                'NORTH_DELHI': '#dc2626',
+                'SOUTH_DELHI': '#d97706',
+                'MUMBAI_CENTRAL': '#059669',
+                'MUMBAI_WESTERN': '#2563eb',
+                'KOLKATA_HOWRAH': '#7c3aed',
+                'KOLKATA_SEALDAH': '#db2777',
+                'CHENNAI_CENTRAL': '#0891b2',
+                'BANGALORE_CITY': '#16a34a',
+                'BANGALORE_YESVANTPUR': '#ca8a04',
+                'GUJARAT_NORTH': '#dc2626',
+                'AHMEDABAD': '#d97706',
+                'VADODARA': '#059669',
+                'JAIPUR': '#2563eb',
+                'JODHPUR': '#7c3aed',
+                'BIKANER': '#db2777',
+                'LUCKNOW': '#0891b2',
+                'KANPUR': '#16a34a',
+                'GHAZIABAD': '#ca8a04',
+                'PATNA': '#dc2626',
+                'GAYA': '#d97706',
+                'MUZAFFARPUR': '#059669',
+                'ASANSOL': '#2563eb',
+                'DURGAPUR': '#7c3aed',
+                'BURDWAN': '#db2777',
+                'PUNE': '#0891b2',
+                'KOLHAPUR': '#16a34a',
+                'SURAT': '#ca8a04',
+                'HYDERABAD': '#dc2626',
+                'SECUNDERABAD': '#d97706',
+                'KAZIPET': '#059669',
+                'VIJAYAWADA': '#2563eb',
+                'RAJAHMUNDRY': '#7c3aed',
+                'VISAKHAPATNAM': '#db2777',
+                'THIRUVANANTHAPURAM': '#0891b2',
+                'KOLLAM': '#16a34a',
+                'ALLEPPEY': '#ca8a04',
+                'KANNUR': '#dc2626',
+                'KOZHIKODE': '#d97706',
+                'THRISSUR': '#059669'
+            };
+            return colors[sectionId] || '#6b7280';
         }
 
         // Auto-initialize when page loads
