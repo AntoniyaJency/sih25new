@@ -1,0 +1,36 @@
+{
+  "name": "railway-traffic-control",
+  "version": "1.0.0",
+  "description": "AI-powered train traffic control system for maximizing section throughput",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.0.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "@types/node": "20.9.0",
+    "@types/react": "18.2.37",
+    "@types/react-dom": "18.2.15",
+    "typescript": "5.2.2",
+    "tailwindcss": "3.3.5",
+    "autoprefixer": "10.4.16",
+    "postcss": "8.4.31",
+    "recharts": "2.8.0",
+    "react-hook-form": "7.47.0",
+    "axios": "1.6.0",
+    "socket.io-client": "4.7.4",
+    "date-fns": "2.30.0",
+    "lucide-react": "0.292.0",
+    "clsx": "2.0.0",
+    "class-variance-authority": "0.7.0"
+  },
+  "devDependencies": {
+    "eslint": "8.53.0",
+    "eslint-config-next": "14.0.3"
+  }
+}

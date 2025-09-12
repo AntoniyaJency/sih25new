@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Traffic Control System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .status.running { background: #4CAF50; }
+        .status.delayed { background: #FF9800; }
+        .status.cancelled { background: #F44336; }
+        .train-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .train-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+        }
+        .train-info h4 {
+            margin: 0;
+            color: #ffd700;
+        }
+        .train-info p {
+            margin: 5px 0 0 0;
+            opacity: 0.8;
+        }
+        .controls {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .btn {
+            background: #ffd700;
+            color: #333;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #ffed4e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+        .api-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(76, 175, 80, 0.9);
+            border-radius: 25px;
+            font-weight: bold;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffd700;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="api-status" id="apiStatus">🟢 API Connected</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🚂 Railway Traffic Control System</h1>
+            <p>AI-Powered Train Traffic Control for Maximizing Section Throughput</p>
+            <p>Smart India Hackathon 2025 - Ministry of Railways</p>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h3>📊 Performance Metrics</h3>
+                <div class="metric">
+                    <span>Total Trains:</span>
+                    <span id="totalTrains">-</span>
+                </div>
+                <div class="metric">
+                    <span>Running Trains:</span>
+                    <span id="runningTrains">-</span>
+                </div>
+                <div class="metric">
+                    <span>Delayed Trains:</span>
+                    <span id="delayedTrains">-</span>
+                </div>
+                <div class="metric">
+                    <span>Punctuality:</span>
+                    <span id="punctuality">-</span>
+                </div>
+                <div class="metric">
+                    <span>Average Delay:</span>
+                    <span id="avgDelay">-</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚡ System Status</h3>
+                <div class="metric">
+                    <span>Optimization Engine:</span>
+                    <span class="status running">Active</span>
+                </div>
+                <div class="metric">
+                    <span>Conflicts Detected:</span>
+                    <span id="conflicts">-</span>
+                </div>
+                <div class="metric">
+                    <span>Throughput Efficiency:</span>
+                    <span id="throughput">-</span>
+                </div>
+                <div class="metric">
+                    <span>Last Update:</span>
+                    <span id="lastUpdate">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="train-list">
+            <h3>🚂 Active Trains</h3>
+            <div id="trainList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading train data...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="refreshData()">🔄 Refresh Data</button>
+            <button class="btn" onclick="runOptimization()">⚡ Run Optimization</button>
+            <button class="btn" onclick="showDemo()">🎯 Show Demo</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        async function checkApiStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    document.getElementById('apiStatus').textContent = '🟢 API Connected';
+                    document.getElementById('apiStatus').style.background = 'rgba(76, 175, 80, 0.9)';
+                } else {
+                    throw new Error('API not responding');
+                }
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = '🔴 API Disconnected';
+                document.getElementById('apiStatus').style.background = 'rgba(244, 67, 54, 0.9)';
+            }
+        }
+
+        async function loadMetrics() {
+            try {
+                const response = await fetch(`${API_BASE}/api/metrics`);
+                const data = await response.json();
+                
+                document.getElementById('totalTrains').textContent = data.total_trains;
+                document.getElementById('runningTrains').textContent = data.running_trains;
+                document.getElementById('delayedTrains').textContent = data.delayed_trains;
+                document.getElementById('punctuality').textContent = data.punctuality_percentage + '%';
+                document.getElementById('avgDelay').textContent = data.average_delay_minutes + 'm';
+                document.getElementById('conflicts').textContent = data.conflicts_detected;
+                document.getElementById('throughput').textContent = data.throughput_efficiency + '%';
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error('Error loading metrics:', error);
+            }
+        }
+
+        async function loadTrains() {
+            try {
+                const response = await fetch(`${API_BASE}/api/trains`);
+                const trains = await response.json();
+                
+                const trainList = document.getElementById('trainList');
+                trainList.innerHTML = '';
+                
+                trains.forEach(train => {
+                    const trainItem = document.createElement('div');
+                    trainItem.className = 'train-item';
+                    trainItem.innerHTML = `
+                        <div class="train-info">
+                            <h4>${train.train_number}</h4>
+                            <p>${train.origin} → ${train.destination}</p>
+                            <p>Type: ${train.train_type} | Priority: ${train.priority}</p>
+                        </div>
+                        <div>
+                            <span class="status ${train.status}">${train.status}</span>
+                        </div>
+                    `;
+                    trainList.appendChild(trainItem);
+                });
+            } catch (error) {
+                console.error('Error loading trains:', error);
+                document.getElementById('trainList').innerHTML = '<p>Error loading train data</p>';
+            }
+        }
+
+        async function refreshData() {
+            await checkApiStatus();
+            await loadMetrics();
+            await loadTrains();
+        }
+
+        function runOptimization() {
+            alert('🚀 Running AI-powered optimization...\n\nThis would:\n• Detect conflicts between trains\n• Optimize schedules for maximum throughput\n• Minimize delays and improve punctuality\n• Provide resolution recommendations');
+        }
+
+        function showDemo() {
+            alert('🎯 Railway Traffic Control System Demo\n\nKey Features:\n✅ Real-time conflict detection\n✅ AI-powered optimization algorithms\n✅ Performance metrics and KPIs\n✅ Disruption handling and re-optimization\n✅ What-if simulation scenarios\n✅ Comprehensive monitoring dashboard\n\nRun "python3 demo.py" in terminal for full demo!');
+        }
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+            // Refresh data every 30 seconds
+            setInterval(refreshData, 30000);
+        });
+    </script>
+</body>
+</html>
