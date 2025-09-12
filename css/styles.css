@@ -862,21 +862,6 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.alert-panel {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    display: none;
-}
-
-.alert-panel h4 {
-    margin: 0 0 10px 0;
-    color: #dc2626;
-    font-size: 16px;
-    font-weight: 600;
-}
 
 .map-area {
     position: relative;
