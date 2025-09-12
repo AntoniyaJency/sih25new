@@ -165,6 +165,15 @@
                     <div id="station-paths"></div>
                 </div>
                 
+                <!-- AI Controller Panel -->
+                <div id="ai-controller-panel" style="position: absolute; top: 10px; right: 10px; background: white; border: 2px solid #7c3aed; border-radius: 10px; padding: 15px; display: none; max-width: 500px; max-height: 600px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #7c3aed;">🤖 AI Section Controller</h3>
+                        <button onclick="hideAIControllerPanel()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                    </div>
+                    <div id="ai-controller-content"></div>
+                </div>
+                
                 <div id="map-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
                     <strong>Map Status:</strong> <span id="status-text">Ready to initialize</span>
                 </div>
@@ -968,14 +977,21 @@
             if (stationSelect.value) {
                 selectedStation = mapData.stations.find(s => s.id === stationSelect.value);
                 clearBtn.style.display = 'inline-block';
-                updateStatus(`✅ Selected station: ${selectedStation.name}`);
+                updateStatus(`✅ Selected station: ${selectedStation.name} - Focusing view and loading tracks...`);
                 
-                // Focus map on selected station
+                // Focus map on selected station with enhanced view
                 if (map && selectedStation) {
-                    map.setView([selectedStation.lat, selectedStation.lon], 10);
+                    // Set zoom level to show connected tracks
+                    map.setView([selectedStation.lat, selectedStation.lon], 12);
                     
                     // Highlight the selected station
                     highlightStation(selectedStation);
+                    
+                    // Show connected tracks and paths
+                    showStationTracksAndPaths(selectedStation);
+                    
+                    // Start AI section controller for this station
+                    startAISectionController(selectedStation);
                 }
             } else {
                 clearStationFocus();
@@ -991,10 +1007,232 @@
             stationSelect.value = '';
             clearBtn.style.display = 'none';
             
-            // Remove station highlight
+            // Remove station highlight and track highlights
             removeStationHighlight();
+            removeTrackHighlights();
+            
+            // Stop AI section controller
+            stopAISectionController();
             
             updateStatus('✅ Station focus cleared');
+        }
+
+        // Start AI Section Controller for selected station
+        function startAISectionController(station) {
+            updateStatus(`🤖 Starting AI Section Controller for ${station.name}...`);
+            
+            // Create AI controller panel
+            showAIControllerPanel(station);
+            
+            // Start real-time AI analysis
+            startAIAnalysis(station);
+        }
+
+        // Stop AI Section Controller
+        function stopAISectionController() {
+            if (window.aiControllerInterval) {
+                clearInterval(window.aiControllerInterval);
+                window.aiControllerInterval = null;
+            }
+            
+            // Hide AI controller panel
+            hideAIControllerPanel();
+            
+            updateStatus('✅ AI Section Controller stopped');
+        }
+
+        // Show AI Controller Panel
+        function showAIControllerPanel(station) {
+            const aiPanel = document.getElementById('ai-controller-panel');
+            if (aiPanel) {
+                aiPanel.style.display = 'block';
+                updateAIControllerDisplay(station);
+            }
+        }
+
+        // Hide AI Controller Panel
+        function hideAIControllerPanel() {
+            const aiPanel = document.getElementById('ai-controller-panel');
+            if (aiPanel) {
+                aiPanel.style.display = 'none';
+            }
+        }
+
+        // Update AI Controller Display
+        function updateAIControllerDisplay(station) {
+            const aiPanel = document.getElementById('ai-controller-panel');
+            if (!aiPanel || !mapData) return;
+            
+            // Find trains in this station's section
+            const stationSection = station.section_id || 'UNKNOWN';
+            const trainsInSection = mapData.trains.filter(train => 
+                train.section_id === stationSection
+            );
+            
+            // Calculate AI metrics
+            const totalTrains = trainsInSection.length;
+            const delayedTrains = trainsInSection.filter(train => train.delay_minutes > 0).length;
+            const collisionRisks = trainsInSection.filter(train => train.collision_risk).length;
+            const reroutingNeeded = trainsInSection.filter(train => train.rerouting_needed).length;
+            const avgDelay = trainsInSection.length > 0 ? 
+                trainsInSection.reduce((sum, train) => sum + train.delay_minutes, 0) / trainsInSection.length : 0;
+            
+            // AI recommendations
+            const aiRecommendations = generateAIRecommendations(trainsInSection, station);
+            
+            aiPanel.innerHTML = `
+                <div style="margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #7c3aed;">
+                    <h4 style="margin: 0 0 8px 0; color: #7c3aed;">🤖 AI Section Controller - ${station.name}</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
+                        <div><strong>Section:</strong> ${stationSection}</div>
+                        <div><strong>Total Trains:</strong> ${totalTrains}</div>
+                        <div><strong>Delayed:</strong> ${delayedTrains}</div>
+                        <div><strong>Collision Risks:</strong> ${collisionRisks}</div>
+                        <div><strong>Rerouting Needed:</strong> ${reroutingNeeded}</div>
+                        <div><strong>Avg Delay:</strong> ${avgDelay.toFixed(1)} min</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: #7c3aed;">🎯 AI Recommendations</h4>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${aiRecommendations.map(rec => `
+                            <div style="margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 4px solid ${rec.color}; background: ${rec.background};">
+                                <div style="font-weight: 600; margin-bottom: 4px;">${rec.icon} ${rec.title}</div>
+                                <div style="font-size: 12px; color: #6b7280;">${rec.description}</div>
+                                <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">Priority: ${rec.priority}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: #7c3aed;">📊 Real-Time Metrics</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+                        <div style="padding: 8px; background: #f0f9ff; border-radius: 4px;">
+                            <strong>Throughput:</strong> ${calculateThroughput(trainsInSection)} trains/hour
+                        </div>
+                        <div style="padding: 8px; background: #f0fdf4; border-radius: 4px;">
+                            <strong>Efficiency:</strong> ${calculateEfficiency(trainsInSection)}%
+                        </div>
+                        <div style="padding: 8px; background: #fef3c7; border-radius: 4px;">
+                            <strong>Safety Score:</strong> ${calculateSafetyScore(trainsInSection)}/100
+                        </div>
+                        <div style="padding: 8px; background: #f3e8ff; border-radius: 4px;">
+                            <strong>AI Confidence:</strong> ${calculateAIConfidence(trainsInSection)}%
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="font-size: 11px; color: #9ca3af; text-align: center;">
+                    Last updated: ${new Date().toLocaleTimeString()}
+                </div>
+            `;
+        }
+
+        // Generate AI Recommendations
+        function generateAIRecommendations(trains, station) {
+            const recommendations = [];
+            
+            // Check for collision risks
+            const collisionTrains = trains.filter(train => train.collision_risk);
+            if (collisionTrains.length > 0) {
+                recommendations.push({
+                    icon: '🚨',
+                    title: 'CRITICAL: Collision Risk Detected',
+                    description: `${collisionTrains.length} train(s) at collision risk. Immediate action required.`,
+                    priority: 'HIGH',
+                    color: '#dc2626',
+                    background: '#fef2f2'
+                });
+            }
+            
+            // Check for delays
+            const delayedTrains = trains.filter(train => train.delay_minutes > 15);
+            if (delayedTrains.length > 0) {
+                recommendations.push({
+                    icon: '⏰',
+                    title: 'Delay Management Required',
+                    description: `${delayedTrains.length} train(s) with significant delays. Consider rerouting.`,
+                    priority: 'MEDIUM',
+                    color: '#d97706',
+                    background: '#fef3c7'
+                });
+            }
+            
+            // Check for rerouting needs
+            const reroutingTrains = trains.filter(train => train.rerouting_needed);
+            if (reroutingTrains.length > 0) {
+                recommendations.push({
+                    icon: '🔄',
+                    title: 'Rerouting Optimization',
+                    description: `${reroutingTrains.length} train(s) need rerouting for optimal efficiency.`,
+                    priority: 'MEDIUM',
+                    color: '#059669',
+                    background: '#f0fdf4'
+                });
+            }
+            
+            // Check throughput optimization
+            if (trains.length > 8) {
+                recommendations.push({
+                    icon: '📈',
+                    title: 'High Traffic Density',
+                    description: 'Station at high capacity. Monitor closely for bottlenecks.',
+                    priority: 'LOW',
+                    color: '#7c3aed',
+                    background: '#f3e8ff'
+                });
+            }
+            
+            // Default recommendation if no issues
+            if (recommendations.length === 0) {
+                recommendations.push({
+                    icon: '✅',
+                    title: 'All Systems Normal',
+                    description: 'No immediate actions required. Traffic flowing smoothly.',
+                    priority: 'LOW',
+                    color: '#059669',
+                    background: '#f0fdf4'
+                });
+            }
+            
+            return recommendations;
+        }
+
+        // Calculate throughput
+        function calculateThroughput(trains) {
+            return Math.round(trains.length * 2.5); // Simplified calculation
+        }
+
+        // Calculate efficiency
+        function calculateEfficiency(trains) {
+            const onTimeTrains = trains.filter(train => train.delay_minutes <= 5).length;
+            return trains.length > 0 ? Math.round((onTimeTrains / trains.length) * 100) : 100;
+        }
+
+        // Calculate safety score
+        function calculateSafetyScore(trains) {
+            const riskTrains = trains.filter(train => train.collision_risk).length;
+            return Math.max(0, 100 - (riskTrains * 20));
+        }
+
+        // Calculate AI confidence
+        function calculateAIConfidence(trains) {
+            const dataQuality = trains.length > 0 ? Math.min(100, trains.length * 10) : 50;
+            return Math.round(dataQuality);
+        }
+
+        // Start AI Analysis
+        function startAIAnalysis(station) {
+            // Update AI controller every 3 seconds
+            window.aiControllerInterval = setInterval(() => {
+                if (selectedStation && mapData) {
+                    updateAIControllerDisplay(station);
+                    // Update track visualization with new train positions
+                    showStationTracksAndPaths(station);
+                }
+            }, 3000);
         }
 
         // Highlight selected station
@@ -1035,6 +1273,132 @@
             if (window.highlightMarker && map) {
                 map.removeLayer(window.highlightMarker);
                 window.highlightMarker = null;
+            }
+        }
+
+        // Show station tracks and paths with enhanced visualization
+        function showStationTracksAndPaths(station) {
+            if (!map || !mapData) return;
+            
+            // Remove existing track highlights
+            removeTrackHighlights();
+            
+            // Find all tracks connected to this station
+            const connectedTracks = mapData.tracks.filter(track => 
+                track.from_station === station.id || track.to_station === station.id
+            );
+            
+            updateStatus(`🎯 Showing ${connectedTracks.length} connected tracks for ${station.name}`);
+            
+            // Create enhanced track visualization
+            connectedTracks.forEach((track, index) => {
+                const fromStation = mapData.stations.find(s => s.id === track.from_station);
+                const toStation = mapData.stations.find(s => s.id === track.to_station);
+                
+                if (fromStation && toStation) {
+                    // Create enhanced track line with animation
+                    const trackLine = L.polyline([
+                        [fromStation.lat, fromStation.lon],
+                        [toStation.lat, toStation.lon]
+                    ], {
+                        color: getTrackColor(track.type),
+                        weight: getTrackWeight(track.type) + 2,
+                        opacity: 0.8,
+                        className: 'station-track-highlight'
+                    }).addTo(map);
+                    
+                    // Add animated markers for trains on this track
+                    addTrainMarkersOnTrack(track, fromStation, toStation);
+                    
+                    // Store reference for removal
+                    if (!window.stationTrackHighlights) {
+                        window.stationTrackHighlights = [];
+                    }
+                    window.stationTrackHighlights.push(trackLine);
+                    
+                    // Add track info popup
+                    trackLine.bindPopup(`
+                        <div style="min-width: 250px;">
+                            <h4 style="margin: 0 0 10px 0; color: ${getTrackColor(track.type)};">🛤️ ${track.type} Track</h4>
+                            <p style="margin: 5px 0;"><strong>From:</strong> ${fromStation.name}</p>
+                            <p style="margin: 5px 0;"><strong>To:</strong> ${toStation.name}</p>
+                            <p style="margin: 5px 0;"><strong>Distance:</strong> ${track.distance} km</p>
+                            <p style="margin: 5px 0;"><strong>Max Speed:</strong> ${track.max_speed} km/h</p>
+                            <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #059669;">Active</span></p>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        // Add train markers on specific track
+        function addTrainMarkersOnTrack(track, fromStation, toStation) {
+            if (!mapData) return;
+            
+            // Find trains on this track
+            const trainsOnTrack = mapData.trains.filter(train => 
+                (train.current_station === track.from_station && train.next_station === track.to_station) ||
+                (train.current_station === track.to_station && train.next_station === track.from_station)
+            );
+            
+            trainsOnTrack.forEach(train => {
+                // Calculate train position on track
+                const progress = train.progress || 0;
+                const lat = fromStation.lat + (toStation.lat - fromStation.lat) * progress;
+                const lon = fromStation.lon + (toStation.lon - fromStation.lon) * progress;
+                
+                // Create animated train marker
+                const trainIcon = L.divIcon({
+                    className: 'train-marker-on-track',
+                    html: `<div style="background: transparent; color: ${getTrainStatusColor(train)}; font-size: 24px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); animation: train-move 3s infinite;">${getTrainIcon(train.train_type, getTrainStatusColor(train))}</div>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+                
+                const trainMarker = L.marker([lat, lon], {
+                    icon: trainIcon
+                }).addTo(map);
+                
+                // Enhanced train popup
+                trainMarker.bindPopup(`
+                    <div style="min-width: 280px;">
+                        <h3 style="margin: 0 0 10px 0; color: ${getTrainStatusColor(train)};">${getTrainIcon(train.train_type)} ${train.train_number}</h3>
+                        <p style="margin: 5px 0;"><strong>Type:</strong> ${train.train_type}</p>
+                        <p style="margin: 5px 0;"><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
+                        <p style="margin: 5px 0;"><strong>Current:</strong> ${train.current_station}</p>
+                        <p style="margin: 5px 0;"><strong>Next:</strong> ${train.next_station}</p>
+                        <p style="margin: 5px 0;"><strong>Speed:</strong> ${train.speed} km/h</p>
+                        <p style="margin: 5px 0;"><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
+                        <p style="margin: 5px 0;"><strong>Priority:</strong> ${train.priority}</p>
+                        ${train.delay_minutes > 0 ? `<p style="margin: 5px 0; color: #dc2626;"><strong>Delay:</strong> ${train.delay_minutes} min</p>` : ''}
+                        ${train.collision_risk ? '<p style="margin: 5px 0; color: #dc2626;"><strong>⚠️ Collision Risk</strong></p>' : ''}
+                        ${train.rerouting_needed ? '<p style="margin: 5px 0; color: #d97706;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
+                        ${train.ai_message ? `<p style="margin: 5px 0; color: #7c3aed; font-style: italic;"><strong>🤖 AI:</strong> ${train.ai_message}</p>` : ''}
+                    </div>
+                `);
+                
+                // Store reference for removal
+                if (!window.stationTrainMarkers) {
+                    window.stationTrainMarkers = [];
+                }
+                window.stationTrainMarkers.push(trainMarker);
+            });
+        }
+
+        // Remove track highlights
+        function removeTrackHighlights() {
+            if (window.stationTrackHighlights) {
+                window.stationTrackHighlights.forEach(track => {
+                    if (map) map.removeLayer(track);
+                });
+                window.stationTrackHighlights = [];
+            }
+            
+            if (window.stationTrainMarkers) {
+                window.stationTrainMarkers.forEach(marker => {
+                    if (map) map.removeLayer(marker);
+                });
+                window.stationTrainMarkers = [];
             }
         }
 

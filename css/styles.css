@@ -693,6 +693,33 @@ body {
     100% { transform: scale(1); opacity: 1; }
 }
 
+/* Train movement animation */
+@keyframes train-move {
+    0% { transform: translateX(0px) scale(1); }
+    25% { transform: translateX(2px) scale(1.05); }
+    50% { transform: translateX(0px) scale(1); }
+    75% { transform: translateX(-2px) scale(0.95); }
+    100% { transform: translateX(0px) scale(1); }
+}
+
+/* Station track highlight styles */
+.station-track-highlight {
+    stroke-dasharray: 10, 5;
+    animation: track-pulse 2s infinite;
+}
+
+@keyframes track-pulse {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 15; }
+}
+
+/* Train marker on track styles */
+.train-marker-on-track {
+    background: transparent !important;
+    border: none !important;
+    animation: train-move 3s infinite;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
