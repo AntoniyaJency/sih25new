@@ -419,7 +419,7 @@
             console.log('🚉 Adding stations to map...');
             
             mapData.stations.forEach(station => {
-                const stationMarker = L.marker([station.latitude, station.longitude], {
+                const stationMarker = L.marker([station.lat, station.lon], {
                     icon: L.divIcon({
                         className: 'station-marker',
                         html: '🚉',
@@ -431,9 +431,9 @@
                 stationMarker.bindPopup(`
                     <div class="station-popup">
                         <h4>${station.name}</h4>
-                        <p><strong>Code:</strong> ${station.code}</p>
-                        <p><strong>State:</strong> ${station.state}</p>
-                        <p><strong>Zone:</strong> ${station.zone}</p>
+                        <p><strong>Code:</strong> ${station.id}</p>
+                        <p><strong>Type:</strong> ${station.type}</p>
+                        <p><strong>Platforms:</strong> ${station.platforms}</p>
                     </div>
                 `);
                 
@@ -450,31 +450,26 @@
             console.log('🛤️ Adding tracks to map...');
             
             mapData.tracks.forEach(track => {
-                const fromStation = mapData.stations.find(s => s.id === track.from_station);
-                const toStation = mapData.stations.find(s => s.id === track.to_station);
+                const trackLine = L.polyline([
+                    [track.from.lat, track.from.lon],
+                    [track.to.lat, track.to.lon]
+                ], {
+                    color: '#1e40af',
+                    weight: 3,
+                    opacity: 0.7,
+                    dashArray: '5, 5'
+                }).addTo(map);
                 
-                if (fromStation && toStation) {
-                    const trackLine = L.polyline([
-                        [fromStation.latitude, fromStation.longitude],
-                        [toStation.latitude, toStation.longitude]
-                    ], {
-                        color: '#1e40af',
-                        weight: 3,
-                        opacity: 0.7,
-                        dashArray: '5, 5'
-                    }).addTo(map);
-                    
-                    trackLine.bindPopup(`
-                        <div class="track-popup">
-                            <h4>Track ${track.id}</h4>
-                            <p><strong>From:</strong> ${fromStation.name}</p>
-                            <p><strong>To:</strong> ${toStation.name}</p>
-                            <p><strong>Length:</strong> ${track.length} km</p>
-                        </div>
-                    `);
-                    
-                    trackLines.push(trackLine);
-                }
+                trackLine.bindPopup(`
+                    <div class="track-popup">
+                        <h4>Track ${track.id}</h4>
+                        <p><strong>Distance:</strong> ${track.distance} km</p>
+                        <p><strong>Max Speed:</strong> ${track.max_speed} km/h</p>
+                        <p><strong>Type:</strong> ${track.type}</p>
+                    </div>
+                `);
+                
+                trackLines.push(trackLine);
             });
             
             console.log(`✅ Added ${mapData.tracks.length} tracks to map`);
@@ -487,7 +482,7 @@
             console.log('🚂 Adding trains to map...');
             
             mapData.trains.forEach(train => {
-                const trainMarker = L.marker([train.position.latitude, train.position.longitude], {
+                const trainMarker = L.marker([train.lat, train.lon], {
                     icon: L.divIcon({
                         className: 'train-marker',
                         html: getTrainIcon(train),
@@ -498,11 +493,13 @@
                 
                 trainMarker.bindPopup(`
                     <div class="train-popup">
-                        <h4>${train.train_number} - ${train.train_name}</h4>
+                        <h4>${train.train_number} - ${train.train_type}</h4>
                         <p><strong>Speed:</strong> ${train.speed} km/h</p>
-                        <p><strong>Progress:</strong> ${train.progress}%</p>
+                        <p><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
                         <p><strong>Status:</strong> ${train.status}</p>
                         <p><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
+                        ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
+                        ${train.rerouting_needed ? '<p style="color: orange;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
                     </div>
                 `);
                 
@@ -525,7 +522,7 @@
             mapData.trains.forEach(train => {
                 const marker = trainMarkers.find(m => m.trainNumber === train.train_number);
                 if (marker) {
-                    marker.setLatLng([train.position.latitude, train.position.longitude]);
+                    marker.setLatLng([train.lat, train.lon]);
                 }
             });
         }
@@ -561,7 +558,7 @@
                 const station = mapData.stations.find(s => s.id === stationId);
                 if (station) {
                     selectedStation = station;
-                    map.setView([station.latitude, station.longitude], 12, { animate: false });
+                    map.setView([station.lat, station.lon], 12, { animate: false });
                     startLiveStationMonitoring(station);
                 }
             } else {
@@ -599,7 +596,8 @@
             
             // Find connected tracks
             const connectedTracks = mapData.tracks.filter(track => 
-                track.from_station === station.id || track.to_station === station.id
+                track.from.lat === station.lat && track.from.lon === station.lon ||
+                track.to.lat === station.lat && track.to.lon === station.lon
             );
             
             // Update display
@@ -624,7 +622,7 @@
                 <div class="train-item">
                     <div class="train-header">
                         <span class="train-number">${train.train_number}</span>
-                        <span class="train-name">${train.train_name}</span>
+                        <span class="train-name">${train.train_type}</span>
                         <span class="train-status ${train.status.toLowerCase()}">${train.status}</span>
                     </div>
                     <div class="train-details">
@@ -638,8 +636,8 @@
                         </div>
                         <div class="train-metrics">
                             <div class="metric">Speed: ${train.speed} km/h</div>
-                            <div class="metric">Progress: ${train.progress}%</div>
-                            <div class="metric">Delay: ${train.delay || 0} min</div>
+                            <div class="metric">Progress: ${Math.round(train.progress * 100)}%</div>
+                            <div class="metric">Delay: ${train.delay_minutes || 0} min</div>
                         </div>
                         ${train.collision_risk ? '<span class="alert-badge collision">⚠️ Collision Risk</span>' : ''}
                         ${train.rerouting_needed ? '<span class="alert-badge rerouting">🔄 Rerouting Needed</span>' : ''}
@@ -672,7 +670,7 @@
                 mapData.stations.forEach(station => {
                     const option = document.createElement('option');
                     option.value = station.id;
-                    option.textContent = `${station.name} (${station.code})`;
+                    option.textContent = `${station.name} (${station.id})`;
                     select.appendChild(option);
                 });
             }
