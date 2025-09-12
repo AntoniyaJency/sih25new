@@ -1187,17 +1187,28 @@
             const statusEl = document.getElementById('monitor-status');
             const trainsContainer = document.getElementById('live-trains-container');
             
-            // Find trains on connected tracks
+            // Find trains on connected tracks and at the station
             const connectedTracks = mapData.tracks.filter(track => 
                 track.from_station === station.id || track.to_station === station.id
             );
             
-            const connectedTrackIds = connectedTracks.map(track => track.id);
-            const stationTrains = mapData.trains.filter(train => 
-                connectedTrackIds.includes(train.current_track) || 
-                train.current_station === station.id ||
-                train.next_station === station.id
-            );
+            // Get all trains related to this station
+            const stationTrains = mapData.trains.filter(train => {
+                // Trains currently at this station
+                if (train.current_station === station.id) return true;
+                
+                // Trains approaching this station
+                if (train.next_station === station.id) return true;
+                
+                // Trains on tracks connected to this station
+                const connectedTrackIds = connectedTracks.map(track => track.id);
+                if (connectedTrackIds.includes(train.current_track)) return true;
+                
+                // Trains that have this station in their route
+                if (train.origin === station.id || train.destination === station.id) return true;
+                
+                return false;
+            });
             
             // Update train count
             if (trainsCountEl) {
@@ -1222,33 +1233,47 @@
             if (!container) return;
             
             if (trains.length === 0) {
-                container.innerHTML = '<div class="no-trains">No trains currently on connected tracks</div>';
+                container.innerHTML = '<div class="no-trains">No trains currently at or approaching this station</div>';
                 return;
             }
             
             container.innerHTML = trains.map(train => {
-                const track = tracks.find(t => t.id === train.current_track);
                 const fromStation = mapData.stations.find(s => s.id === train.current_station);
                 const toStation = mapData.stations.find(s => s.id === train.next_station);
+                const originStation = mapData.stations.find(s => s.id === train.origin);
+                const destStation = mapData.stations.find(s => s.id === train.destination);
+                
+                // Determine train location status
+                let locationStatus = '';
+                if (train.current_station === train.next_station) {
+                    locationStatus = `At ${fromStation ? fromStation.name : train.current_station}`;
+                } else {
+                    locationStatus = `From ${fromStation ? fromStation.name : train.current_station} to ${toStation ? toStation.name : train.next_station}`;
+                }
                 
                 return `
                     <div class="train-item">
                         <div class="train-header">
-                            <span class="train-number">${train.number}</span>
-                            <span class="train-name">${train.name}</span>
+                            <span class="train-number">${train.train_number}</span>
+                            <span class="train-name">${train.train_type}</span>
                             <span class="train-status ${train.status}">${train.status}</span>
                         </div>
                         <div class="train-details">
                             <div class="train-route">
-                                <span class="route-from">${fromStation ? fromStation.name : 'Unknown'}</span>
+                                <span class="route-from">${originStation ? originStation.name : train.origin}</span>
                                 <span class="route-arrow">→</span>
-                                <span class="route-to">${toStation ? toStation.name : 'Unknown'}</span>
+                                <span class="route-to">${destStation ? destStation.name : train.destination}</span>
+                            </div>
+                            <div class="train-location">
+                                <span class="location-text">📍 ${locationStatus}</span>
                             </div>
                             <div class="train-metrics">
                                 <span class="metric">Speed: ${train.speed} km/h</span>
                                 <span class="metric">Progress: ${train.progress.toFixed(1)}%</span>
-                                <span class="metric">Delay: ${train.delay || 0} min</span>
+                                <span class="metric">Delay: ${train.delay_minutes || 0} min</span>
                             </div>
+                            ${train.collision_risk ? '<div class="alert-badge collision">⚠️ Collision Risk</div>' : ''}
+                            ${train.rerouting_needed ? '<div class="alert-badge rerouting">🔄 Rerouting Needed</div>' : ''}
                         </div>
                     </div>
                 `;

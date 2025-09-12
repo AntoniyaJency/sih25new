@@ -1213,6 +1213,38 @@ body {
     font-style: italic;
 }
 
+.train-location {
+    margin: 8px 0;
+}
+
+.location-text {
+    font-size: 13px;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.alert-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin: 4px 4px 0 0;
+    text-transform: uppercase;
+}
+
+.alert-badge.collision {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-badge.rerouting {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fed7aa;
+}
+
 /* Train Movement Animations */
 .train-marker {
     transition: all 0.5s ease-in-out;

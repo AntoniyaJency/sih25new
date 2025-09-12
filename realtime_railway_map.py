@@ -575,12 +575,12 @@ class RailwayMapSystem:
         if train_id in self.positions:
             position = self.positions[train_id]
             
-            # Update progress based on speed
-            speed_factor = position["speed"] / 100.0  # Normalize speed
-            position["progress"] += speed_factor * 0.02  # Small increment
+            # Update progress based on speed (more realistic movement)
+            speed_factor = position["speed"] / 100.0  # Normalize speed (100 km/h max)
+            position["progress"] += speed_factor * 0.1  # Much larger increment for visible movement
             
+            # Ensure progress stays within bounds
             if position["progress"] >= 1.0:
-                # Train reached destination station
                 position["progress"] = 0.0
                 # Move to next station in route
                 self._advance_to_next_station(train_id, train)
