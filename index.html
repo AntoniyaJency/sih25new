@@ -97,32 +97,86 @@
                 <p class="page-description">Interactive map showing real-time train positions and railway network</p>
             </div>
             
-            <!-- Map Controls Panel -->
-            <div class="map-controls-panel">
-                <div class="control-section">
-                    <h4>Map Controls</h4>
-                    <div class="control-buttons">
-                        <button onclick="initializeMap()" class="btn btn-primary">🗺️ Initialize Map</button>
-                        <button onclick="loadMapData()" class="btn btn-secondary">📊 Load Data</button>
-                        <button onclick="refreshMap()" class="btn btn-success">🔄 Refresh</button>
-                        <button onclick="forceUpdateTrains()" class="btn btn-info">🚂 Force Update</button>
+            <!-- Main Map Layout -->
+            <div class="map-layout">
+                <!-- Left Sidebar -->
+                <div class="map-sidebar">
+                    <!-- Map Controls -->
+                    <div class="sidebar-section">
+                        <h4>🎮 Map Controls</h4>
+                        <div class="control-grid">
+                            <button onclick="initializeMap()" class="btn btn-primary">🗺️ Initialize</button>
+                            <button onclick="loadMapData()" class="btn btn-secondary">📊 Load Data</button>
+                            <button onclick="refreshMap()" class="btn btn-success">🔄 Refresh</button>
+                            <button onclick="forceUpdateTrains()" class="btn btn-info">🚂 Update</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Display Options -->
+                    <div class="sidebar-section">
+                        <h4>⚙️ Display Options</h4>
+                        <div class="control-grid">
+                            <button onclick="toggleFullscreen()" class="btn btn-warning">📺 Fullscreen</button>
+                            <button onclick="toggleVoiceAlerts()" class="btn" id="voice-btn">🔊 Voice</button>
+                            <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Movement</button>
+                            <button onclick="showSectionController()" class="btn" id="controller-btn">🎛️ Controller</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Station Monitoring -->
+                    <div class="sidebar-section">
+                        <h4>📡 Station Monitoring</h4>
+                        <div class="station-controls">
+                            <select id="station-select" onchange="selectStation()" class="form-select">
+                                <option value="">Select station to monitor...</option>
+                            </select>
+                            <div class="station-buttons">
+                                <button onclick="populateStationDropdown()" class="btn btn-secondary">🔄 Load</button>
+                                <button onclick="clearStationFocus()" class="btn btn-outline">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- System Status -->
+                    <div class="sidebar-section">
+                        <h4>📊 System Status</h4>
+                        <div id="status-display" class="status-display">Ready</div>
                     </div>
                 </div>
                 
-                <div class="control-section">
-                    <h4>Display Options</h4>
-                    <div class="control-buttons">
-                        <button onclick="toggleFullscreen()" class="btn btn-warning">📺 Fullscreen</button>
-                        <button onclick="toggleVoiceAlerts()" class="btn" id="voice-btn">🔊 Voice Alerts</button>
-                        <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Live Movement</button>
+                <!-- Main Map Area -->
+                <div class="map-main">
+                    <div id="railway-map" class="railway-map"></div>
+                    
+                    <!-- AI Message Overlay -->
+                    <div id="ai-overlay" class="ai-overlay">
+                        <div id="ai-message"></div>
                     </div>
                 </div>
                 
-                <div class="control-section">
-                    <h4>Analysis Tools</h4>
-                    <div class="control-buttons">
-                        <button onclick="showSectionController()" class="btn" id="controller-btn">🎛️ Section Controller</button>
-                        <button onclick="showAllTrains()" class="btn" id="trains-btn">🚂 All Trains</button>
+                <!-- Right Panel -->
+                <div class="map-right-panel">
+                    <!-- Real-Time Data -->
+                    <div class="panel-section">
+                        <h4>📈 Real-Time Data</h4>
+                        <div id="real-time-data" class="real-time-data">
+                            <div class="data-item">
+                                <span class="data-label">Active Trains:</span>
+                                <span id="active-trains-count" class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Total Stations:</span>
+                                <span id="total-stations-count" class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Track Segments:</span>
+                                <span id="track-segments-count" class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">System Status:</span>
+                                <span id="system-status" class="data-value">Online</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
