@@ -176,7 +176,6 @@
                             <button onclick="toggleFullscreen()" class="btn btn-warning">📺 Fullscreen</button>
                             <button onclick="toggleVoiceAlerts()" class="btn" id="voice-btn">🔊 Voice</button>
                             <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Movement</button>
-                            <button onclick="showSectionController()" class="btn" id="controller-btn">🎛️ Controller</button>
                         </div>
                     </div>
                     
@@ -280,13 +279,6 @@
             </div>
             
             <!-- AI Controller Panel -->
-            <div id="ai-controller-panel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 2px solid #dc2626; border-radius: 10px; padding: 20px; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 style="margin: 0; color: #dc2626;">🎛️ AI Section Controller</h3>
-                    <button onclick="hideAIControllerPanel()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
-                </div>
-                <div id="ai-controller-content"></div>
-            </div>
         </div>
 
         <!-- Trains Page -->
@@ -723,6 +715,26 @@
             if (pageId === 'trains' && mapData && mapData.trains) {
                 setTimeout(() => refreshTrainData(), 100);
                 setupTrainSearchListeners();
+            }
+            
+            // Auto-load analytics data if on analytics page
+            if (pageId === 'analytics') {
+                setTimeout(() => {
+                    refreshAnalytics();
+                    // Set up auto-refresh every 5 seconds
+                    if (window.analyticsInterval) {
+                        clearInterval(window.analyticsInterval);
+                    }
+                    window.analyticsInterval = setInterval(() => {
+                        refreshAnalytics();
+                    }, 5000);
+                }, 100);
+            } else {
+                // Clear analytics interval when leaving analytics page
+                if (window.analyticsInterval) {
+                    clearInterval(window.analyticsInterval);
+                    window.analyticsInterval = null;
+                }
             }
         }
         
@@ -1633,162 +1645,8 @@
             }
         }
 
-        function showSectionController() {
-            console.log('🎛️ Controller button clicked!');
-            const panel = document.getElementById('ai-controller-panel');
-            console.log('Panel found:', panel);
-            
-            if (panel) {
-                panel.style.display = 'block';
-                console.log('Panel displayed');
-                
-                // Load section controller data
-                loadSectionControllerData();
-                
-                updateStatus('🎛️ Section Controller activated');
-                console.log('🎛️ Section Controller activated');
-            } else {
-                console.error('❌ AI Controller Panel not found!');
-                updateStatus('❌ Controller panel not found');
-            }
-        }
         
-        // Load section controller data
-        function loadSectionControllerData() {
-            console.log('📊 Loading section controller data...');
-            console.log('MapData available:', !!mapData);
-            console.log('Trains available:', mapData ? mapData.trains?.length : 0);
-            
-            if (!mapData || !mapData.trains) {
-                console.log('❌ No map data or trains available');
-                // Show loading message instead of empty state
-                const container = document.getElementById('ai-controller-content');
-                if (container) {
-                    container.innerHTML = '<p>Loading section data...</p>';
-                }
-                return;
-            }
-            
-            // Get section status
-            fetch('http://localhost:8081/api/section-status')
-                .then(response => response.json())
-                .then(data => {
-                    updateSectionControllerDisplay(data);
-                })
-                .catch(error => {
-                    console.error('❌ Section controller data error:', error);
-                    // Fallback to local data - create sections based on routes
-                    console.log('🔄 Using fallback section data from trains');
-                    const sections = {};
-                    
-                    mapData.trains.forEach(train => {
-                        // Create section based on route (origin-destination)
-                        const sectionKey = `${train.origin}-${train.destination}`;
-                        if (!sections[sectionKey]) {
-                            sections[sectionKey] = {
-                                id: sectionKey,
-                                name: `${train.origin} to ${train.destination}`,
-                                trains: [],
-                                status: 'normal',
-                                priority: train.train_type.includes('Rajdhani') ? 3 : 
-                                         train.train_type.includes('Shatabdi') ? 2 : 1,
-                                throughput: 0,
-                                delays: 0
-                            };
-                        }
-                        sections[sectionKey].trains.push(train);
-                        if (train.delay_minutes > 0) sections[sectionKey].delays++;
-                    });
-                    
-                    // Calculate throughput for each section
-                    Object.values(sections).forEach(section => {
-                        section.throughput = section.trains.length;
-                        section.status = section.delays > section.trains.length / 2 ? 'delayed' : 'normal';
-                    });
-                    
-                    updateSectionControllerDisplay({
-                        sections: sections,
-                        alerts: mapData.collisions || [],
-                        timestamp: new Date().toISOString()
-                    });
-                });
-        }
-        
-        // Update section controller display
-        function updateSectionControllerDisplay(data) {
-            const container = document.getElementById('ai-controller-content');
-            
-            if (!data || !data.sections) {
-                console.log('❌ No section data in response:', data);
-                container.innerHTML = '<p>No section data available</p>';
-                return;
-            }
-            
-            console.log('✅ Section data received:', Object.keys(data.sections).length, 'sections');
-            
-            const sections = Object.values(data.sections);
-            
-            container.innerHTML = `
-                <div class="section-overview">
-                    <h4>📊 Section Overview</h4>
-                    <div class="section-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Total Sections:</span>
-                            <span class="stat-value">${sections.length}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Active Trains:</span>
-                            <span class="stat-value">${sections.reduce((sum, section) => sum + section.trains.length, 0)}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Alerts:</span>
-                            <span class="stat-value">${data.alerts ? data.alerts.length : 0}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="section-list">
-                    <h4>🚉 Section Details</h4>
-                    ${sections.map(section => `
-                        <div class="section-item">
-                            <div class="section-header">
-                                <span class="section-name">${section.name}</span>
-                                <span class="section-status ${section.status}">${section.status}</span>
-                            </div>
-                            <div class="section-details">
-                                <div class="section-info">
-                                    <span>Trains: ${section.trains.length}</span>
-                                    <span>Priority: ${section.priority}</span>
-                                </div>
-                                <div class="section-trains">
-                                    ${section.trains.slice(0, 3).map(train => `
-                                        <span class="train-badge">${train.train_number}</span>
-                                    `).join('')}
-                                    ${section.trains.length > 3 ? `<span class="more-trains">+${section.trains.length - 3} more</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                ${data.alerts && data.alerts.length > 0 ? `
-                    <div class="section-alerts">
-                        <h4>⚠️ Active Alerts</h4>
-                        ${data.alerts.map(alert => `
-                            <div class="alert-item">
-                                <span class="alert-train">${alert.train_number}</span>
-                                <span class="alert-message">${alert.message}</span>
-                                <span class="alert-severity ${alert.severity}">${alert.severity}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : ''}
-            `;
-        }
 
-        function hideAIControllerPanel() {
-            document.getElementById('ai-controller-panel').style.display = 'none';
-        }
         
         // Refresh train data for trains page
         function refreshTrainData(searchTerm = '', filterType = 'all') {
@@ -1891,9 +1749,222 @@
         // Refresh analytics data
         function refreshAnalytics() {
             console.log('📊 Refreshing analytics data...');
-            // Analytics data is mostly static in this demo
-            // In a real implementation, this would fetch fresh data from the backend
-            console.log('✅ Analytics refreshed');
+            
+            if (!mapData || !mapData.trains) {
+                console.log('❌ No train data available for analytics');
+                return;
+            }
+            
+            // Update real-time analytics with live data
+            updatePerformanceTrends();
+            updateTrainPerformanceMetrics();
+            updateStationAnalytics();
+            updateAlertAnalysis();
+            updateRoutePerformance();
+            updateAIOptimizationImpact();
+            
+            console.log('✅ Analytics refreshed with live data');
+        }
+        
+        // Update performance trends chart with real data
+        function updatePerformanceTrends() {
+            if (!mapData.trains) return;
+            
+            const trains = mapData.trains;
+            const avgSpeed = trains.reduce((sum, train) => sum + (train.speed || 0), 0) / trains.length;
+            const onTimeRate = trains.filter(t => (t.delay_minutes || 0) <= 0).length / trains.length * 100;
+            const efficiency = trains.filter(t => t.status === 'running' || t.status === 'in_transit').length / trains.length * 100;
+            
+            // Update chart data points
+            const dataPoints = document.querySelectorAll('.chart-line .data-point');
+            const speeds = [avgSpeed * 0.9, avgSpeed * 1.05, avgSpeed * 0.95, avgSpeed * 1.1, avgSpeed];
+            
+            dataPoints.forEach((point, index) => {
+                if (speeds[index]) {
+                    const height = Math.min(Math.max((speeds[index] / 150) * 100, 20), 90);
+                    point.style.height = height + '%';
+                    point.title = Math.round(speeds[index]) + ' km/h';
+                }
+            });
+        }
+        
+        // Update train performance metrics
+        function updateTrainPerformanceMetrics() {
+            if (!mapData.trains) return;
+            
+            const trains = mapData.trains;
+            const totalTrains = trains.length;
+            const onTimeTrains = trains.filter(t => (t.delay_minutes || 0) <= 0).length;
+            const delayedTrains = trains.filter(t => (t.delay_minutes || 0) > 0).length;
+            const avgSpeed = trains.reduce((sum, train) => sum + (train.speed || 0), 0) / totalTrains;
+            const punctualityRate = (onTimeTrains / totalTrains * 100).toFixed(1);
+            
+            // Update metrics
+            const metricElements = {
+                'Punctuality Rate': punctualityRate + '%',
+                'Average Speed': Math.round(avgSpeed) + ' km/h',
+                'On-Time Trains': onTimeTrains,
+                'Delayed Trains': delayedTrains
+            };
+            
+            Object.entries(metricElements).forEach(([name, value]) => {
+                const element = Array.from(document.querySelectorAll('.metric-name')).find(el => el.textContent === name);
+                if (element) {
+                    const valueElement = element.nextElementSibling;
+                    if (valueElement) {
+                        valueElement.textContent = value;
+                    }
+                }
+            });
+        }
+        
+        // Update station analytics
+        function updateStationAnalytics() {
+            if (!mapData.stations || !mapData.trains) return;
+            
+            // Calculate station delays
+            const stationDelays = {};
+            mapData.stations.forEach(station => {
+                const trainsAtStation = mapData.trains.filter(train => 
+                    train.current_station === station.id || train.next_station === station.id
+                );
+                const avgDelay = trainsAtStation.length > 0 
+                    ? trainsAtStation.reduce((sum, train) => sum + (train.delay_minutes || 0), 0) / trainsAtStation.length
+                    : 0;
+                stationDelays[station.name] = {
+                    trains: trainsAtStation.length,
+                    avgDelay: Math.round(avgDelay)
+                };
+            });
+            
+            // Update station list
+            const stationList = document.querySelector('.station-list');
+            if (stationList) {
+                stationList.innerHTML = Object.entries(stationDelays)
+                    .sort((a, b) => b[1].trains - a[1].trains)
+                    .slice(0, 5)
+                    .map(([name, data]) => `
+                        <div class="station-item">
+                            <span class="station-name">${name}</span>
+                            <span class="station-trains">${data.trains} trains</span>
+                            <span class="station-delay ${data.avgDelay > 5 ? 'high' : data.avgDelay > 0 ? 'medium' : 'low'}">${data.avgDelay}min</span>
+                        </div>
+                    `).join('');
+            }
+        }
+        
+        // Update alert analysis
+        function updateAlertAnalysis() {
+            if (!mapData.trains) return;
+            
+            const trains = mapData.trains;
+            const collisionAlerts = trains.filter(t => t.collision_risk).length;
+            const reroutingAlerts = trains.filter(t => t.rerouting_needed).length;
+            const delayAlerts = trains.filter(t => (t.delay_minutes || 0) > 15).length;
+            
+            // Update alert statistics
+            const alertStats = document.querySelector('.alert-stats');
+            if (alertStats) {
+                alertStats.innerHTML = `
+                    <div class="alert-type">
+                        <span class="alert-icon">⚠️</span>
+                        <span class="alert-name">Collision Risk</span>
+                        <span class="alert-count">${collisionAlerts}</span>
+                    </div>
+                    <div class="alert-type">
+                        <span class="alert-icon">🔄</span>
+                        <span class="alert-name">Rerouting</span>
+                        <span class="alert-count">${reroutingAlerts}</span>
+                    </div>
+                    <div class="alert-type">
+                        <span class="alert-icon">⏰</span>
+                        <span class="alert-name">Major Delays</span>
+                        <span class="alert-count">${delayAlerts}</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Update route performance
+        function updateRoutePerformance() {
+            if (!mapData.trains) return;
+            
+            // Calculate route performance
+            const routeStats = {};
+            mapData.trains.forEach(train => {
+                const routeKey = `${train.origin}-${train.destination}`;
+                if (!routeStats[routeKey]) {
+                    routeStats[routeKey] = {
+                        trains: 0,
+                        onTime: 0,
+                        delayed: 0,
+                        avgSpeed: 0,
+                        totalSpeed: 0
+                    };
+                }
+                routeStats[routeKey].trains++;
+                routeStats[routeKey].totalSpeed += train.speed || 0;
+                routeStats[routeKey].avgSpeed = routeStats[routeKey].totalSpeed / routeStats[routeKey].trains;
+                
+                if ((train.delay_minutes || 0) <= 0) {
+                    routeStats[routeKey].onTime++;
+                } else {
+                    routeStats[routeKey].delayed++;
+                }
+            });
+            
+            // Update route list
+            const routeList = document.querySelector('.route-list');
+            if (routeList) {
+                routeList.innerHTML = Object.entries(routeStats)
+                    .sort((a, b) => b[1].trains - a[1].trains)
+                    .slice(0, 5)
+                    .map(([route, stats]) => {
+                        const onTimeRate = (stats.onTime / stats.trains * 100).toFixed(1);
+                        return `
+                            <div class="route-item">
+                                <span class="route-name">${route}</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${onTimeRate}%"></div>
+                                </div>
+                                <span class="progress-text">${onTimeRate}%</span>
+                            </div>
+                        `;
+                    }).join('');
+            }
+        }
+        
+        // Update AI optimization impact
+        function updateAIOptimizationImpact() {
+            if (!mapData.trains) return;
+            
+            const trains = mapData.trains;
+            const totalTrains = trains.length;
+            const aiOptimized = trains.filter(t => t.rerouting_needed || t.collision_risk).length;
+            const efficiencyGain = Math.min(aiOptimized * 2.5, 15); // Simulated efficiency gain
+            const delayReduction = Math.min(aiOptimized * 1.8, 12); // Simulated delay reduction
+            
+            // Update AI metrics
+            const aiMetrics = document.querySelector('.ai-metrics');
+            if (aiMetrics) {
+                aiMetrics.innerHTML = `
+                    <div class="ai-metric">
+                        <h4>Optimized Trains</h4>
+                        <div class="ai-value">${aiOptimized}/${totalTrains}</div>
+                        <div class="ai-description">AI-assisted routing</div>
+                    </div>
+                    <div class="ai-metric">
+                        <h4>Efficiency Gain</h4>
+                        <div class="ai-value">+${efficiencyGain.toFixed(1)}%</div>
+                        <div class="ai-description">Throughput improvement</div>
+                    </div>
+                    <div class="ai-metric">
+                        <h4>Delay Reduction</h4>
+                        <div class="ai-value">-${delayReduction.toFixed(1)}%</div>
+                        <div class="ai-description">Average delay reduction</div>
+                    </div>
+                `;
+            }
         }
 
         // Utility functions
