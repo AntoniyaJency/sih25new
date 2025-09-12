@@ -123,6 +123,8 @@ body {
     min-height: calc(100vh - 80px);
     position: relative;
     z-index: 1;
+    display: block;
+    width: 100%;
 }
 
 .page {
@@ -541,9 +543,11 @@ body {
     padding: 3rem 2rem;
     margin-top: 4rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
+    position: static;
     z-index: 1;
     clear: both;
+    width: 100%;
+    display: block;
 }
 
 .footer p {
