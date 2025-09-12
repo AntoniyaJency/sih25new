@@ -1007,19 +1007,35 @@
         }
 
         function showSectionController() {
+            console.log('🎛️ Controller button clicked!');
             const panel = document.getElementById('ai-controller-panel');
-            panel.style.display = 'block';
+            console.log('Panel found:', panel);
             
-            // Load section controller data
-            loadSectionControllerData();
-            
-            updateStatus('🎛️ Section Controller activated');
-            console.log('🎛️ Section Controller activated');
+            if (panel) {
+                panel.style.display = 'block';
+                console.log('Panel displayed');
+                
+                // Load section controller data
+                loadSectionControllerData();
+                
+                updateStatus('🎛️ Section Controller activated');
+                console.log('🎛️ Section Controller activated');
+            } else {
+                console.error('❌ AI Controller Panel not found!');
+                updateStatus('❌ Controller panel not found');
+            }
         }
         
         // Load section controller data
         function loadSectionControllerData() {
-            if (!mapData || !mapData.trains) return;
+            console.log('📊 Loading section controller data...');
+            console.log('MapData available:', !!mapData);
+            console.log('Trains available:', mapData ? mapData.trains?.length : 0);
+            
+            if (!mapData || !mapData.trains) {
+                console.log('❌ No map data or trains available');
+                return;
+            }
             
             // Get section status
             fetch('http://localhost:8081/api/section-status')
@@ -1053,7 +1069,7 @@
         
         // Update section controller display
         function updateSectionControllerDisplay(data) {
-            const container = document.getElementById('section-controller-content');
+            const container = document.getElementById('ai-controller-content');
             
             if (!data.sections) {
                 container.innerHTML = '<p>No section data available</p>';
