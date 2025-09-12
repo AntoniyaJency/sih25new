@@ -148,6 +148,39 @@
                     </div>
                 </div>
                 
+                <!-- Live Station Monitoring Panel -->
+                <div id="live-station-monitor" class="live-station-monitor" style="display: none;">
+                    <div class="monitor-header">
+                        <h4>📡 Live Station Monitoring</h4>
+                        <button onclick="closeLiveMonitor()" class="btn btn-secondary">✕ Close</button>
+                    </div>
+                    <div class="monitor-content">
+                        <div class="station-info">
+                            <h5 id="monitor-station-name">Station Name</h5>
+                            <div class="station-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Connected Tracks:</span>
+                                    <span id="monitor-tracks-count" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Active Trains:</span>
+                                    <span id="monitor-trains-count" class="stat-value">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Monitoring Status:</span>
+                                    <span id="monitor-status" class="stat-value">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="live-trains-list">
+                            <h6>🚂 Live Train Movements</h6>
+                            <div id="live-trains-container" class="trains-container">
+                                <div class="loading">Loading live train data...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Map Area -->
                 <div class="map-area">
                     <div id="railway-map" class="railway-map"></div>
@@ -1058,7 +1091,7 @@
             if (stationSelect.value) {
                 selectedStation = mapData.stations.find(s => s.id === stationSelect.value);
                 clearBtn.style.display = 'inline-block';
-                updateStatus(`✅ Selected station: ${selectedStation.name} - Focusing view and loading tracks...`);
+                updateStatus(`✅ Selected station: ${selectedStation.name} - Starting live monitoring...`);
                 
                 // Focus map on selected station with enhanced view
                 if (map && selectedStation) {
@@ -1070,6 +1103,9 @@
                     
                     // Show connected tracks and paths
                     showStationTracksAndPaths(selectedStation);
+                    
+                    // Start live monitoring panel
+                    startLiveStationMonitoring(selectedStation);
                     
                     // Start AI section controller for this station
                     startAISectionController(selectedStation);
@@ -1096,6 +1132,136 @@
             stopAISectionController();
             
             updateStatus('✅ Station focus cleared');
+            
+            // Close live monitoring panel
+            closeLiveMonitor();
+        }
+
+        // Start Live Station Monitoring
+        function startLiveStationMonitoring(station) {
+            const monitorPanel = document.getElementById('live-station-monitor');
+            const stationNameEl = document.getElementById('monitor-station-name');
+            const tracksCountEl = document.getElementById('monitor-tracks-count');
+            const trainsCountEl = document.getElementById('monitor-trains-count');
+            const statusEl = document.getElementById('monitor-status');
+            
+            if (!monitorPanel) return;
+            
+            // Show monitoring panel
+            monitorPanel.style.display = 'block';
+            
+            // Update station info
+            stationNameEl.textContent = station.name;
+            
+            // Count connected tracks
+            const connectedTracks = mapData.tracks.filter(track => 
+                track.from_station === station.id || track.to_station === station.id
+            );
+            tracksCountEl.textContent = connectedTracks.length;
+            
+            // Start live updates
+            updateLiveStationData(station);
+            
+            // Set up interval for live updates
+            if (window.liveMonitorInterval) {
+                clearInterval(window.liveMonitorInterval);
+            }
+            window.liveMonitorInterval = setInterval(() => {
+                updateLiveStationData(station);
+            }, 2000); // Update every 2 seconds
+            
+            updateStatus(`📡 Live monitoring started for ${station.name}`);
+        }
+
+        // Update Live Station Data
+        function updateLiveStationData(station) {
+            if (!mapData || !station) return;
+            
+            const trainsCountEl = document.getElementById('monitor-trains-count');
+            const statusEl = document.getElementById('monitor-status');
+            const trainsContainer = document.getElementById('live-trains-container');
+            
+            // Find trains on connected tracks
+            const connectedTracks = mapData.tracks.filter(track => 
+                track.from_station === station.id || track.to_station === station.id
+            );
+            
+            const connectedTrackIds = connectedTracks.map(track => track.id);
+            const stationTrains = mapData.trains.filter(train => 
+                connectedTrackIds.includes(train.current_track) || 
+                train.current_station === station.id ||
+                train.next_station === station.id
+            );
+            
+            // Update train count
+            if (trainsCountEl) {
+                trainsCountEl.textContent = stationTrains.length;
+            }
+            
+            // Update status
+            if (statusEl) {
+                statusEl.textContent = 'Live';
+                statusEl.style.color = '#059669';
+            }
+            
+            // Update live trains list
+            if (trainsContainer) {
+                updateLiveTrainsList(stationTrains, connectedTracks);
+            }
+        }
+
+        // Update Live Trains List
+        function updateLiveTrainsList(trains, tracks) {
+            const container = document.getElementById('live-trains-container');
+            if (!container) return;
+            
+            if (trains.length === 0) {
+                container.innerHTML = '<div class="no-trains">No trains currently on connected tracks</div>';
+                return;
+            }
+            
+            container.innerHTML = trains.map(train => {
+                const track = tracks.find(t => t.id === train.current_track);
+                const fromStation = mapData.stations.find(s => s.id === train.current_station);
+                const toStation = mapData.stations.find(s => s.id === train.next_station);
+                
+                return `
+                    <div class="train-item">
+                        <div class="train-header">
+                            <span class="train-number">${train.number}</span>
+                            <span class="train-name">${train.name}</span>
+                            <span class="train-status ${train.status}">${train.status}</span>
+                        </div>
+                        <div class="train-details">
+                            <div class="train-route">
+                                <span class="route-from">${fromStation ? fromStation.name : 'Unknown'}</span>
+                                <span class="route-arrow">→</span>
+                                <span class="route-to">${toStation ? toStation.name : 'Unknown'}</span>
+                            </div>
+                            <div class="train-metrics">
+                                <span class="metric">Speed: ${train.speed} km/h</span>
+                                <span class="metric">Progress: ${train.progress.toFixed(1)}%</span>
+                                <span class="metric">Delay: ${train.delay || 0} min</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Close Live Monitor
+        function closeLiveMonitor() {
+            const monitorPanel = document.getElementById('live-station-monitor');
+            if (monitorPanel) {
+                monitorPanel.style.display = 'none';
+            }
+            
+            if (window.liveMonitorInterval) {
+                clearInterval(window.liveMonitorInterval);
+                window.liveMonitorInterval = null;
+            }
+            
+            updateStatus('📡 Live monitoring stopped');
         }
 
         // Start AI Section Controller for selected station

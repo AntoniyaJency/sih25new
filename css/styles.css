@@ -1031,3 +1031,184 @@ body {
 .p-1 { padding: 0.5rem; }
 .p-2 { padding: 1rem; }
 .p-3 { padding: 1.5rem; }
+
+/* Live Station Monitoring Panel */
+.live-station-monitor {
+    background: white;
+    border: 2px solid #0ea5e9;
+    border-radius: 12px;
+    margin: 20px auto;
+    max-width: 1200px;
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.monitor-header {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.monitor-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.monitor-content {
+    padding: 20px;
+}
+
+.station-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #0ea5e9;
+}
+
+.station-info h5 {
+    margin: 0 0 15px 0;
+    color: #0c4a6e;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.station-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.station-stats .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.station-stats .stat-item:last-child {
+    border-bottom: none;
+}
+
+.live-trains-list h6 {
+    margin: 0 0 15px 0;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trains-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.train-item {
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+    background: white;
+    margin-bottom: 1px;
+    transition: background-color 0.2s;
+}
+
+.train-item:hover {
+    background: #f8fafc;
+}
+
+.train-item:last-child {
+    border-bottom: none;
+}
+
+.train-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.train-number {
+    font-weight: 600;
+    color: #1e40af;
+    font-size: 14px;
+}
+
+.train-name {
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+    flex: 1;
+    margin-left: 10px;
+}
+
+.train-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.train-status.running {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.train-status.stopped {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.train-status.delayed {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.train-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.train-route {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.route-arrow {
+    color: #0ea5e9;
+    font-weight: bold;
+}
+
+.train-metrics {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.metric {
+    font-size: 12px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.no-trains {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+}
