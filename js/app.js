@@ -103,7 +103,8 @@ class RailwayApp {
                 await this.loadDashboardData();
                 break;
             case 'map':
-                this.initMap();
+                // Small delay to ensure DOM is ready
+                setTimeout(() => this.initMap(), 100);
                 break;
             case 'trains':
                 await this.loadTrainsData();

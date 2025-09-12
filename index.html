@@ -97,6 +97,10 @@
                 <p class="page-description">Interactive map showing real-time train positions and railway network</p>
             </div>
             <div class="map-container">
+                <div style="margin-bottom: 10px;">
+                    <button onclick="window.railwayApp.initMap()" class="btn">Initialize Map</button>
+                    <button onclick="window.railwayApp.loadMapData()" class="btn btn-secondary">Load Data</button>
+                </div>
                 <div id="railway-map"></div>
             </div>
         </div>
