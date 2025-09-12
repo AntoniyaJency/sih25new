@@ -56,7 +56,7 @@
         <!-- Dashboard Page -->
         <div id="dashboard" class="page">
             <div class="page-header">
-                <h2>📊 Dashboard</h2>
+                <h2>Dashboard</h2>
                 <p class="page-description">Real-time overview of railway operations and system performance</p>
             </div>
             
@@ -150,7 +150,7 @@
         <!-- Live Map Page -->
         <div id="map" class="page">
             <div class="page-header">
-                <h2>🗺️ Live Railway Map</h2>
+                <h2>Live Railway Map</h2>
                 <p class="page-description">Interactive map showing real-time train positions and railway network across India</p>
             </div>
             
@@ -184,6 +184,7 @@
                     <div class="sidebar-section">
                         <h4>📡 Station Monitoring</h4>
                         <div class="station-controls">
+                            <input type="text" id="station-search" placeholder="Search stations..." class="search-input" oninput="filterStations()">
                             <select id="station-select" onchange="selectStation()" class="form-select">
                                 <option value="">Select station to monitor...</option>
                             </select>
@@ -284,7 +285,7 @@
         <!-- Trains Page -->
         <div id="trains" class="page">
             <div class="page-header">
-                <h2>🚂 Train Management</h2>
+                <h2>Train Management</h2>
                 <p class="page-description">Monitor and manage all active trains across the railway network</p>
             </div>
             
@@ -331,7 +332,7 @@
         <!-- Analytics Page -->
         <div id="analytics" class="page">
             <div class="page-header">
-                <h2>📊 Analytics</h2>
+                <h2>Analytics</h2>
                 <p class="page-description">Comprehensive analytics and performance metrics</p>
             </div>
             
@@ -515,7 +516,7 @@
         <!-- About Page -->
         <div id="about" class="page">
             <div class="page-header">
-                <h2>ℹ️ About Railway Traffic Control System</h2>
+                <h2>About Railway Traffic Control System</h2>
                 <p class="page-description">AI-Powered Decision Support System for Maximizing Section Throughput</p>
             </div>
             
@@ -714,6 +715,29 @@
             // Auto-load train data if on trains page
             if (pageId === 'trains' && mapData && mapData.trains) {
                 setTimeout(() => refreshTrainData(), 100);
+                setupTrainSearchListeners();
+            }
+        }
+        
+        // Setup train search and filter event listeners
+        function setupTrainSearchListeners() {
+            const searchInput = document.getElementById('train-search');
+            const filterSelect = document.getElementById('train-filter');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value;
+                    const filterType = filterSelect ? filterSelect.value : 'all';
+                    refreshTrainData(searchTerm, filterType);
+                });
+            }
+            
+            if (filterSelect) {
+                filterSelect.addEventListener('change', function() {
+                    const filterType = this.value;
+                    const searchTerm = searchInput ? searchInput.value : '';
+                    refreshTrainData(searchTerm, filterType);
+                });
             }
         }
 
@@ -1381,16 +1405,43 @@
         // Populate station dropdown
         function populateStationDropdown() {
             const select = document.getElementById('station-select');
+            const searchInput = document.getElementById('station-search');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
             select.innerHTML = '<option value="">Select station to monitor...</option>';
             
             if (mapData && mapData.stations) {
-                mapData.stations.forEach(station => {
+                let filteredStations = mapData.stations;
+                
+                // Apply search filter if there's a search term
+                if (searchTerm) {
+                    filteredStations = mapData.stations.filter(station => 
+                        station.name.toLowerCase().includes(searchTerm) ||
+                        station.id.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                filteredStations.forEach(station => {
                     const option = document.createElement('option');
                     option.value = station.id;
                     option.textContent = `${station.name} (${station.id})`;
                     select.appendChild(option);
                 });
+                
+                // Show count of filtered results
+                if (searchTerm && filteredStations.length === 0) {
+                    const noResultsOption = document.createElement('option');
+                    noResultsOption.value = '';
+                    noResultsOption.textContent = 'No stations found';
+                    noResultsOption.disabled = true;
+                    select.appendChild(noResultsOption);
+                }
             }
+        }
+        
+        // Filter stations based on search input
+        function filterStations() {
+            populateStationDropdown();
         }
 
         // Toggle functions
@@ -1490,6 +1541,11 @@
             
             if (!mapData || !mapData.trains) {
                 console.log('❌ No map data or trains available');
+                // Show loading message instead of empty state
+                const container = document.getElementById('ai-controller-content');
+                if (container) {
+                    container.innerHTML = '<p>Loading section data...</p>';
+                }
                 return;
             }
             
@@ -1501,22 +1557,37 @@
                 })
                 .catch(error => {
                     console.error('❌ Section controller data error:', error);
-                    // Fallback to local data
+                    // Fallback to local data - create sections based on routes
+                    console.log('🔄 Using fallback section data from trains');
+                    const sections = {};
+                    
+                    mapData.trains.forEach(train => {
+                        // Create section based on route (origin-destination)
+                        const sectionKey = `${train.origin}-${train.destination}`;
+                        if (!sections[sectionKey]) {
+                            sections[sectionKey] = {
+                                id: sectionKey,
+                                name: `${train.origin} to ${train.destination}`,
+                                trains: [],
+                                status: 'normal',
+                                priority: train.train_type.includes('Rajdhani') ? 3 : 
+                                         train.train_type.includes('Shatabdi') ? 2 : 1,
+                                throughput: 0,
+                                delays: 0
+                            };
+                        }
+                        sections[sectionKey].trains.push(train);
+                        if (train.delay_minutes > 0) sections[sectionKey].delays++;
+                    });
+                    
+                    // Calculate throughput for each section
+                    Object.values(sections).forEach(section => {
+                        section.throughput = section.trains.length;
+                        section.status = section.delays > section.trains.length / 2 ? 'delayed' : 'normal';
+                    });
+                    
                     updateSectionControllerDisplay({
-                        sections: mapData.trains.reduce((acc, train) => {
-                            const section = train.section_id || 'UNKNOWN_SECTION';
-                            if (!acc[section]) {
-                                acc[section] = {
-                                    id: section,
-                                    name: section.replace('_', ' '),
-                                    trains: [],
-                                    status: 'normal',
-                                    priority: 0
-                                };
-                            }
-                            acc[section].trains.push(train);
-                            return acc;
-                        }, {}),
+                        sections: sections,
                         alerts: mapData.collisions || [],
                         timestamp: new Date().toISOString()
                     });
@@ -1527,10 +1598,13 @@
         function updateSectionControllerDisplay(data) {
             const container = document.getElementById('ai-controller-content');
             
-            if (!data.sections) {
+            if (!data || !data.sections) {
+                console.log('❌ No section data in response:', data);
                 container.innerHTML = '<p>No section data available</p>';
                 return;
             }
+            
+            console.log('✅ Section data received:', Object.keys(data.sections).length, 'sections');
             
             const sections = Object.values(data.sections);
             
@@ -1597,7 +1671,7 @@
         }
         
         // Refresh train data for trains page
-        function refreshTrainData() {
+        function refreshTrainData(searchTerm = '', filterType = 'all') {
             console.log('🚂 Refreshing train data...');
             if (!mapData || !mapData.trains) {
                 console.log('❌ No map data available');
@@ -1605,7 +1679,41 @@
             }
             
             const trainsGrid = document.getElementById('trains-grid');
-            const trains = mapData.trains;
+            let trains = mapData.trains;
+            
+            // Apply search filter
+            if (searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
+                trains = trains.filter(train => 
+                    train.train_number.toLowerCase().includes(searchLower) ||
+                    train.train_type.toLowerCase().includes(searchLower) ||
+                    train.origin.toLowerCase().includes(searchLower) ||
+                    train.destination.toLowerCase().includes(searchLower) ||
+                    train.current_station.toLowerCase().includes(searchLower)
+                );
+            }
+            
+            // Apply type filter
+            if (filterType !== 'all') {
+                trains = trains.filter(train => {
+                    switch(filterType) {
+                        case 'running':
+                            return train.status === 'running' || train.status === 'in_transit';
+                        case 'delayed':
+                            return train.delay_minutes > 0;
+                        case 'on-time':
+                            return train.delay_minutes <= 0;
+                        case 'rajdhani':
+                            return train.train_type.toLowerCase().includes('rajdhani');
+                        case 'shatabdi':
+                            return train.train_type.toLowerCase().includes('shatabdi');
+                        case 'mail':
+                            return train.train_type.toLowerCase().includes('mail') || train.train_type.toLowerCase().includes('express');
+                        default:
+                            return true;
+                    }
+                });
+            }
             
             // Update stats
             const totalTrains = trains.length;
