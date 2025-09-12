@@ -104,6 +104,7 @@
                     <button onclick="toggleFullscreen()" class="btn btn-warning">Fullscreen</button>
                     <button onclick="toggleVoiceAlerts()" class="btn" id="voice-btn">🔊 Voice Alerts</button>
                     <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Live Movement</button>
+                    <button onclick="forceUpdateTrains()" class="btn btn-primary">🚂 Force Update</button>
                     <button onclick="showSectionController()" class="btn" id="controller-btn">🎛️ Section Controller</button>
                     <button onclick="showAllTrains()" class="btn" id="trains-btn">🚂 All Trains</button>
                 </div>
@@ -176,6 +177,17 @@
                 
                 <div id="map-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
                     <strong>Map Status:</strong> <span id="status-text">Ready to initialize</span>
+                </div>
+                
+                <!-- Real-time Data Display -->
+                <div id="realtime-data" style="margin-top: 10px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid #1e40af;">
+                    <h4 style="margin: 0 0 10px 0; color: #1e40af;">📊 Real-Time Data</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px;">
+                        <div><strong>Last Update:</strong> <span id="last-update">Never</span></div>
+                        <div><strong>Active Trains:</strong> <span id="active-trains">0</span></div>
+                        <div><strong>Moving Trains:</strong> <span id="moving-trains">0</span></div>
+                        <div><strong>System Status:</strong> <span id="system-status">Offline</span></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -400,6 +412,14 @@
             trainMarkers = [];
             
             mapData.trains.forEach(train => {
+                // Calculate train position on track
+                const trainPosition = calculateTrainPosition(train);
+                
+                if (!trainPosition) {
+                    console.log(`⚠️ Could not calculate position for train ${train.train_number}`);
+                    return;
+                }
+                
                 // Determine marker style based on alerts
                 let markerClass = 'train-marker';
                 let markerColor = '';
@@ -419,7 +439,7 @@
                     iconAnchor: [15, 15]
                 });
                 
-                const trainMarker = L.marker([train.lat, train.lon], {
+                const trainMarker = L.marker([trainPosition.lat, trainPosition.lon], {
                     icon: trainIcon
                 }).addTo(map);
                 
@@ -1608,6 +1628,10 @@
                 initializeMap();
                 setTimeout(() => {
                     loadMapData();
+                    // Start real-time updates after data is loaded
+                    setTimeout(() => {
+                        startRealTimeUpdates();
+                    }, 2000);
                 }, 1000);
             }, 500);
             
@@ -1616,6 +1640,158 @@
                 populateStationDropdown();
             }, 2000);
         });
+
+        // Real-time update system
+        let realTimeUpdateInterval = null;
+        let lastUpdateTime = 0;
+
+        function startRealTimeUpdates() {
+            if (realTimeUpdateInterval) {
+                clearInterval(realTimeUpdateInterval);
+            }
+            
+            console.log('🔄 Starting real-time updates...');
+            updateStatus('🔄 Starting real-time train movement updates...');
+            
+            // Update every 2 seconds
+            realTimeUpdateInterval = setInterval(async () => {
+                await updateTrainPositions();
+            }, 2000);
+        }
+
+        function stopRealTimeUpdates() {
+            if (realTimeUpdateInterval) {
+                clearInterval(realTimeUpdateInterval);
+                realTimeUpdateInterval = null;
+                console.log('⏹️ Real-time updates stopped');
+                updateStatus('⏹️ Real-time updates stopped');
+            }
+        }
+
+        async function updateTrainPositions() {
+            try {
+                console.log('🔄 Updating train positions...');
+                
+                const response = await fetch('http://localhost:8081/api/map-data');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const newData = await response.json();
+                
+                // Update global mapData
+                mapData = newData;
+                
+                // Update train positions on map
+                updateTrainMarkers();
+                
+                // Update station monitoring if active
+                if (selectedStation && stationMonitoringEnabled) {
+                    updateStationTrains();
+                    updateStationPaths();
+                }
+                
+                // Update AI controller if active
+                if (selectedStation && window.aiControllerInterval) {
+                    updateAIControllerDisplay(selectedStation);
+                }
+                
+                lastUpdateTime = Date.now();
+                console.log(`✅ Train positions updated at ${new Date().toLocaleTimeString()}`);
+                
+                // Update real-time data display
+                updateRealTimeDataDisplay(newData);
+                
+            } catch (error) {
+                console.error('❌ Error updating train positions:', error);
+                updateStatus('❌ Error updating train positions: ' + error.message);
+            }
+        }
+
+        function updateTrainMarkers() {
+            if (!map || !mapData) return;
+            
+            console.log('🚂 Updating train markers...');
+            
+            // Remove existing train markers
+            trainMarkers.forEach(marker => map.removeLayer(marker));
+            trainMarkers = [];
+            
+            // Add updated train markers
+            addTrainsToMap();
+        }
+
+        // Calculate train position on track
+        function calculateTrainPosition(train) {
+            if (!mapData) return null;
+            
+            // Find the track the train is on
+            const track = mapData.tracks.find(t => 
+                (t.from_station === train.current_station && t.to_station === train.next_station) ||
+                (t.from_station === train.next_station && t.to_station === train.current_station)
+            );
+            
+            if (!track) {
+                // If no track found, use station position
+                const station = mapData.stations.find(s => s.id === train.current_station);
+                return station ? { lat: station.lat, lon: station.lon } : null;
+            }
+            
+            // Find station coordinates
+            const fromStation = mapData.stations.find(s => s.id === track.from_station);
+            const toStation = mapData.stations.find(s => s.id === track.to_station);
+            
+            if (!fromStation || !toStation) return null;
+            
+            // Calculate position based on progress
+            const progress = train.progress || 0;
+            const lat = fromStation.lat + (toStation.lat - fromStation.lat) * progress;
+            const lon = fromStation.lon + (toStation.lon - fromStation.lon) * progress;
+            
+            return { lat, lon };
+        }
+
+        // Update real-time data display
+        function updateRealTimeDataDisplay(data) {
+            const lastUpdateEl = document.getElementById('last-update');
+            const activeTrainsEl = document.getElementById('active-trains');
+            const movingTrainsEl = document.getElementById('moving-trains');
+            const systemStatusEl = document.getElementById('system-status');
+            
+            if (lastUpdateEl) {
+                lastUpdateEl.textContent = new Date().toLocaleTimeString();
+            }
+            
+            if (activeTrainsEl && data.trains) {
+                activeTrainsEl.textContent = data.trains.length;
+            }
+            
+            if (movingTrainsEl && data.trains) {
+                const movingTrains = data.trains.filter(train => 
+                    train.status === 'running' && train.speed > 0
+                ).length;
+                movingTrainsEl.textContent = movingTrains;
+            }
+            
+            if (systemStatusEl) {
+                systemStatusEl.textContent = 'Online';
+                systemStatusEl.style.color = '#059669';
+            }
+        }
+
+        // Force update trains (manual refresh)
+        async function forceUpdateTrains() {
+            console.log('🚂 Force updating trains...');
+            updateStatus('🚂 Force updating train positions...');
+            
+            try {
+                await updateTrainPositions();
+                updateStatus('✅ Train positions force updated successfully');
+            } catch (error) {
+                console.error('❌ Error force updating trains:', error);
+                updateStatus('❌ Error force updating trains: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>
