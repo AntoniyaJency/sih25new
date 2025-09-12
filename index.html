@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Railway Traffic Control System - Smart India Hackathon 2025</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -56,7 +59,10 @@
 
         <!-- Dashboard Page -->
         <div id="dashboard" class="page">
-            <h2>System Dashboard</h2>
+            <div class="page-header">
+                <h2>System Dashboard</h2>
+                <p class="page-description">Real-time monitoring and control of the railway traffic system</p>
+            </div>
             <div class="dashboard-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="total-stations">-</div>
@@ -86,7 +92,10 @@
 
         <!-- Live Map Page -->
         <div id="map" class="page">
-            <h2>Live Railway Map</h2>
+            <div class="page-header">
+                <h2>Live Railway Map</h2>
+                <p class="page-description">Interactive map showing real-time train positions and railway network</p>
+            </div>
             <div class="map-container">
                 <div id="railway-map"></div>
             </div>
@@ -94,7 +103,10 @@
 
         <!-- Trains Page -->
         <div id="trains" class="page">
-            <h2>Train Management</h2>
+            <div class="page-header">
+                <h2>Train Management</h2>
+                <p class="page-description">Monitor and manage all active trains across the railway network</p>
+            </div>
             <div class="train-list">
                 <div id="all-trains">
                     <div class="loading">Loading train information...</div>
@@ -104,7 +116,10 @@
 
         <!-- Analytics Page -->
         <div id="analytics" class="page">
-            <h2>Performance Analytics</h2>
+            <div class="page-header">
+                <h2>Performance Analytics</h2>
+                <p class="page-description">Comprehensive performance metrics and system analytics</p>
+            </div>
             <div class="dashboard-grid">
                 <div class="stat-card">
                     <div class="stat-number">95.2%</div>
@@ -127,7 +142,10 @@
 
         <!-- About Page -->
         <div id="about" class="page">
-            <h2>About the System</h2>
+            <div class="page-header">
+                <h2>About the System</h2>
+                <p class="page-description">Learn about our AI-powered railway traffic control technology</p>
+            </div>
             <div class="features">
                 <div class="feature-card">
                     <h3>🎯 Mission</h3>
