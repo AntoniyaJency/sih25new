@@ -97,7 +97,7 @@
                 <p class="page-description">Interactive map showing real-time train positions and railway network</p>
             </div>
             <div class="map-container">
-                <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                     <button onclick="initializeMap()" class="btn">Initialize Map</button>
                     <button onclick="loadMapData()" class="btn btn-secondary">Load Data</button>
                     <button onclick="refreshMap()" class="btn btn-success">Refresh</button>
@@ -106,6 +106,20 @@
                     <button onclick="toggleLiveMovement()" class="btn" id="movement-btn">▶️ Live Movement</button>
                     <button onclick="showSectionController()" class="btn" id="controller-btn">🎛️ Section Controller</button>
                     <button onclick="showAllTrains()" class="btn" id="trains-btn">🚂 All Trains</button>
+                </div>
+                
+                <!-- Station Selection -->
+                <div style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label for="station-select" style="font-weight: 600; color: #1e3a8a;">🎯 Monitor Station:</label>
+                            <select id="station-select" onchange="selectStation()" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 200px;">
+                                <option value="">Select a station to monitor...</option>
+                            </select>
+                        </div>
+                        <button onclick="clearStationFocus()" class="btn btn-secondary" id="clear-station-btn" style="display: none;">Clear Focus</button>
+                        <button onclick="toggleStationMonitoring()" class="btn" id="monitor-btn">📡 Start Monitoring</button>
+                    </div>
                 </div>
                 
                 <!-- Alert Panel -->
@@ -137,6 +151,17 @@
                         <button onclick="hideAllTrains()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
                     </div>
                     <div id="trains-list"></div>
+                </div>
+                
+                <!-- Station Monitoring Panel -->
+                <div id="station-monitoring-panel" style="position: absolute; top: 10px; left: 10px; background: white; border: 2px solid #7c3aed; border-radius: 10px; padding: 15px; display: none; max-width: 600px; max-height: 700px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #7c3aed;">📡 Station Monitoring</h3>
+                        <button onclick="hideStationMonitoring()" style="background: #dc2626; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                    </div>
+                    <div id="station-info"></div>
+                    <div id="station-trains"></div>
+                    <div id="station-paths"></div>
                 </div>
                 
                 <div id="map-status" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
@@ -229,6 +254,9 @@
         let voiceAlertsEnabled = false;
         let updateInterval = null;
         let speechSynthesis = window.speechSynthesis;
+        let selectedStation = null;
+        let stationMonitoringEnabled = false;
+        let stationUpdateInterval = null;
 
         // Update status text
         function updateStatus(message) {
@@ -609,6 +637,9 @@
                 addTracksToMap();
                 addTrainsToMap();
                 
+                // Populate station dropdown
+                populateStationDropdown();
+                
                 // Update alerts
                 if (mapData.collisions || mapData.rerouting) {
                     updateAlertPanel(mapData.collisions || [], mapData.rerouting || []);
@@ -880,6 +911,277 @@
                 'THRISSUR': '#059669'
             };
             return colors[sectionId] || '#6b7280';
+        }
+
+        // Populate station dropdown
+        function populateStationDropdown() {
+            const stationSelect = document.getElementById('station-select');
+            if (!stationSelect || !mapData) return;
+            
+            stationSelect.innerHTML = '<option value="">Select a station to monitor...</option>';
+            
+            mapData.stations.forEach(station => {
+                const option = document.createElement('option');
+                option.value = station.id;
+                option.textContent = `${station.name} (${station.id})`;
+                stationSelect.appendChild(option);
+            });
+        }
+
+        // Select station for monitoring
+        function selectStation() {
+            const stationSelect = document.getElementById('station-select');
+            const clearBtn = document.getElementById('clear-station-btn');
+            
+            if (stationSelect.value) {
+                selectedStation = mapData.stations.find(s => s.id === stationSelect.value);
+                clearBtn.style.display = 'inline-block';
+                updateStatus(`✅ Selected station: ${selectedStation.name}`);
+                
+                // Focus map on selected station
+                if (map && selectedStation) {
+                    map.setView([selectedStation.lat, selectedStation.lon], 10);
+                    
+                    // Highlight the selected station
+                    highlightStation(selectedStation);
+                }
+            } else {
+                clearStationFocus();
+            }
+        }
+
+        // Clear station focus
+        function clearStationFocus() {
+            selectedStation = null;
+            const stationSelect = document.getElementById('station-select');
+            const clearBtn = document.getElementById('clear-station-btn');
+            
+            stationSelect.value = '';
+            clearBtn.style.display = 'none';
+            
+            // Remove station highlight
+            removeStationHighlight();
+            
+            updateStatus('✅ Station focus cleared');
+        }
+
+        // Highlight selected station
+        function highlightStation(station) {
+            // Remove existing highlights
+            removeStationHighlight();
+            
+            if (map) {
+                // Create a special marker for the selected station
+                const highlightIcon = L.divIcon({
+                    className: 'station-highlight',
+                    html: `<div style="background: #7c3aed; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 0 10px rgba(124, 58, 237, 0.8);">🎯</div>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+                
+                const highlightMarker = L.marker([station.lat, station.lon], {
+                    icon: highlightIcon
+                }).addTo(map);
+                
+                highlightMarker.bindPopup(`
+                    <div style="min-width: 200px;">
+                        <h3 style="margin: 0 0 10px 0; color: #7c3aed;">🎯 ${station.name}</h3>
+                        <p style="margin: 5px 0;"><strong>ID:</strong> ${station.id}</p>
+                        <p style="margin: 5px 0;"><strong>Type:</strong> ${station.type}</p>
+                        <p style="margin: 5px 0;"><strong>Platforms:</strong> ${station.platforms}</p>
+                        <p style="margin: 5px 0;"><strong>Status:</strong> Monitoring Active</p>
+                    </div>
+                `);
+                
+                // Store reference for removal
+                window.highlightMarker = highlightMarker;
+            }
+        }
+
+        // Remove station highlight
+        function removeStationHighlight() {
+            if (window.highlightMarker && map) {
+                map.removeLayer(window.highlightMarker);
+                window.highlightMarker = null;
+            }
+        }
+
+        // Toggle station monitoring
+        function toggleStationMonitoring() {
+            if (!selectedStation) {
+                updateStatus('❌ Please select a station first');
+                return;
+            }
+            
+            stationMonitoringEnabled = !stationMonitoringEnabled;
+            const monitorBtn = document.getElementById('monitor-btn');
+            const panel = document.getElementById('station-monitoring-panel');
+            
+            if (stationMonitoringEnabled) {
+                monitorBtn.textContent = '⏸️ Stop Monitoring';
+                monitorBtn.style.backgroundColor = '#dc2626';
+                panel.style.display = 'block';
+                startStationMonitoring();
+                updateStatus(`✅ Started monitoring ${selectedStation.name}`);
+            } else {
+                monitorBtn.textContent = '📡 Start Monitoring';
+                monitorBtn.style.backgroundColor = '';
+                panel.style.display = 'none';
+                stopStationMonitoring();
+                updateStatus('✅ Stopped station monitoring');
+            }
+        }
+
+        // Start station monitoring
+        function startStationMonitoring() {
+            if (stationUpdateInterval) {
+                clearInterval(stationUpdateInterval);
+            }
+            
+            // Initial load
+            loadStationMonitoringData();
+            
+            // Update every 2 seconds
+            stationUpdateInterval = setInterval(() => {
+                loadStationMonitoringData();
+            }, 2000);
+        }
+
+        // Stop station monitoring
+        function stopStationMonitoring() {
+            if (stationUpdateInterval) {
+                clearInterval(stationUpdateInterval);
+                stationUpdateInterval = null;
+            }
+        }
+
+        // Load station monitoring data
+        function loadStationMonitoringData() {
+            if (!selectedStation || !mapData) return;
+            
+            // Update station info
+            updateStationInfo();
+            
+            // Update trains at station
+            updateStationTrains();
+            
+            // Update train paths
+            updateStationPaths();
+        }
+
+        // Update station information
+        function updateStationInfo() {
+            const stationInfo = document.getElementById('station-info');
+            if (!stationInfo || !selectedStation) return;
+            
+            stationInfo.innerHTML = `
+                <div style="margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #7c3aed;">
+                    <h4 style="margin: 0 0 8px 0; color: #7c3aed;">📡 ${selectedStation.name}</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
+                        <div><strong>Station ID:</strong> ${selectedStation.id}</div>
+                        <div><strong>Type:</strong> ${selectedStation.type}</div>
+                        <div><strong>Platforms:</strong> ${selectedStation.platforms}</div>
+                        <div><strong>Coordinates:</strong> ${selectedStation.lat.toFixed(4)}, ${selectedStation.lon.toFixed(4)}</div>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                        Last updated: ${new Date().toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update trains at station
+        function updateStationTrains() {
+            const stationTrains = document.getElementById('station-trains');
+            if (!stationTrains || !selectedStation || !mapData) return;
+            
+            // Find trains at this station
+            const trainsAtStation = mapData.trains.filter(train => 
+                train.current_station === selectedStation.id || 
+                train.next_station === selectedStation.id
+            );
+            
+            stationTrains.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: #7c3aed;">🚂 Trains at Station (${trainsAtStation.length})</h4>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${trainsAtStation.length > 0 ? 
+                            trainsAtStation.map(train => `
+                                <div style="margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 4px solid ${getTrainStatusColor(train)}; background: ${getTrainBackground(train)};">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong>${train.train_number}</strong> (${train.train_type})
+                                            ${train.collision_risk ? ' 🚨' : ''} ${train.rerouting_needed ? ' 🔄' : ''}
+                                        </div>
+                                        <div style="font-size: 12px; color: #666;">
+                                            Priority: ${train.priority}
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 12px; margin-top: 4px;">
+                                        <div><strong>Route:</strong> ${train.origin} → ${train.destination}</div>
+                                        <div><strong>Status:</strong> ${train.current_station === selectedStation.id ? 'At Station' : 'Approaching'}</div>
+                                        <div><strong>Speed:</strong> ${train.speed} km/h | <strong>Progress:</strong> ${Math.round(train.progress * 100)}%</div>
+                                        ${train.delay_minutes > 0 ? `<div style="color: #dc2626;"><strong>Delay:</strong> ${train.delay_minutes} min</div>` : ''}
+                                        ${train.ai_message ? `<div style="color: #d97706; font-style: italic;">🤖 ${train.ai_message}</div>` : ''}
+                                    </div>
+                                </div>
+                            `).join('') :
+                            '<div style="text-align: center; color: #6b7280; padding: 20px;">No trains currently at this station</div>'
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update station paths
+        function updateStationPaths() {
+            const stationPaths = document.getElementById('station-paths');
+            if (!stationPaths || !selectedStation || !mapData) return;
+            
+            // Find tracks connected to this station
+            const connectedTracks = mapData.tracks.filter(track => 
+                track.from_station === selectedStation.id || track.to_station === selectedStation.id
+            );
+            
+            stationPaths.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: #7c3aed;">🛤️ Connected Tracks (${connectedTracks.length})</h4>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${connectedTracks.map(track => {
+                            const fromStation = mapData.stations.find(s => s.id === track.from_station);
+                            const toStation = mapData.stations.find(s => s.id === track.to_station);
+                            const isFromStation = track.from_station === selectedStation.id;
+                            
+                            return `
+                                <div style="margin-bottom: 8px; padding: 10px; border-radius: 6px; border-left: 4px solid ${getTrackColor(track.type)}; background: #f8fafc;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">
+                                        ${isFromStation ? '⬇️' : '⬆️'} ${isFromStation ? toStation.name : fromStation.name}
+                                    </div>
+                                    <div style="font-size: 12px; color: #6b7280;">
+                                        <div><strong>Distance:</strong> ${track.distance} km</div>
+                                        <div><strong>Max Speed:</strong> ${track.max_speed} km/h</div>
+                                        <div><strong>Type:</strong> ${track.type}</div>
+                                        <div><strong>Direction:</strong> ${isFromStation ? 'Outbound' : 'Inbound'}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Hide station monitoring panel
+        function hideStationMonitoring() {
+            const panel = document.getElementById('station-monitoring-panel');
+            if (panel) {
+                panel.style.display = 'none';
+            }
+            stopStationMonitoring();
+            stationMonitoringEnabled = false;
+            const monitorBtn = document.getElementById('monitor-btn');
+            monitorBtn.textContent = '📡 Start Monitoring';
+            monitorBtn.style.backgroundColor = '';
         }
 
         // Auto-initialize when page loads

@@ -680,6 +680,19 @@ body {
     border-left-color: #d97706;
 }
 
+/* Station highlight styles */
+.station-highlight {
+    background: transparent !important;
+    border: none !important;
+    animation: pulse-purple 2s infinite;
+}
+
+@keyframes pulse-purple {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
