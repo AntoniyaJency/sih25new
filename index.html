@@ -541,8 +541,16 @@
                     // Add visual effects for collision risk
                     if (train.collision_risk) {
                         marker.getElement().style.animation = 'train-alert 1s infinite';
+                        // Voice alert for collision risk
+                        if (voiceAlertsEnabled && train.ai_message) {
+                            speakAlert(`Collision risk detected for train ${train.train_number}`);
+                        }
                     } else if (train.rerouting_needed) {
                         marker.getElement().style.animation = 'train-warning 1s infinite';
+                        // Voice alert for rerouting
+                        if (voiceAlertsEnabled && train.ai_message) {
+                            speakAlert(`Rerouting needed for train ${train.train_number}`);
+                        }
                     } else {
                         marker.getElement().style.animation = 'train-move 2s infinite';
                     }
@@ -762,6 +770,27 @@
             const btn = document.getElementById('voice-btn');
             btn.textContent = voiceAlertsEnabled ? '🔊 Voice ON' : '🔊 Voice';
             btn.style.backgroundColor = voiceAlertsEnabled ? '#059669' : '';
+            
+            if (voiceAlertsEnabled) {
+                updateStatus('🔊 Voice alerts enabled');
+                console.log('🔊 Voice alerts enabled');
+                // Test voice synthesis
+                speakAlert('Voice alerts are now enabled');
+            } else {
+                updateStatus('🔇 Voice alerts disabled');
+                console.log('🔇 Voice alerts disabled');
+            }
+        }
+        
+        // Voice synthesis function
+        function speakAlert(message) {
+            if (voiceAlertsEnabled && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+                utterance.volume = 0.7;
+                speechSynthesis.speak(utterance);
+            }
         }
 
         function toggleLiveMovement() {
@@ -769,10 +798,135 @@
             const btn = document.getElementById('movement-btn');
             btn.textContent = liveMovementEnabled ? '⏸️ Pause' : '▶️ Movement';
             btn.style.backgroundColor = liveMovementEnabled ? '#059669' : '';
+            
+            if (liveMovementEnabled) {
+                // Start real-time updates
+                startRealTimeUpdates();
+                updateStatus('🚂 Live movement started');
+                console.log('🚂 Live movement enabled');
+            } else {
+                // Stop real-time updates
+                if (realTimeUpdateInterval) {
+                    clearInterval(realTimeUpdateInterval);
+                    realTimeUpdateInterval = null;
+                }
+                updateStatus('⏸️ Live movement paused');
+                console.log('⏸️ Live movement paused');
+            }
         }
 
         function showSectionController() {
-            document.getElementById('ai-controller-panel').style.display = 'block';
+            const panel = document.getElementById('ai-controller-panel');
+            panel.style.display = 'block';
+            
+            // Load section controller data
+            loadSectionControllerData();
+            
+            updateStatus('🎛️ Section Controller activated');
+            console.log('🎛️ Section Controller activated');
+        }
+        
+        // Load section controller data
+        function loadSectionControllerData() {
+            if (!mapData || !mapData.trains) return;
+            
+            // Get section status
+            fetch('http://localhost:8081/api/section-status')
+                .then(response => response.json())
+                .then(data => {
+                    updateSectionControllerDisplay(data);
+                })
+                .catch(error => {
+                    console.error('❌ Section controller data error:', error);
+                    // Fallback to local data
+                    updateSectionControllerDisplay({
+                        sections: mapData.trains.reduce((acc, train) => {
+                            const section = train.section_id || 'UNKNOWN_SECTION';
+                            if (!acc[section]) {
+                                acc[section] = {
+                                    id: section,
+                                    name: section.replace('_', ' '),
+                                    trains: [],
+                                    status: 'normal',
+                                    priority: 0
+                                };
+                            }
+                            acc[section].trains.push(train);
+                            return acc;
+                        }, {}),
+                        alerts: mapData.collisions || [],
+                        timestamp: new Date().toISOString()
+                    });
+                });
+        }
+        
+        // Update section controller display
+        function updateSectionControllerDisplay(data) {
+            const container = document.getElementById('section-controller-content');
+            
+            if (!data.sections) {
+                container.innerHTML = '<p>No section data available</p>';
+                return;
+            }
+            
+            const sections = Object.values(data.sections);
+            
+            container.innerHTML = `
+                <div class="section-overview">
+                    <h4>📊 Section Overview</h4>
+                    <div class="section-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Sections:</span>
+                            <span class="stat-value">${sections.length}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Active Trains:</span>
+                            <span class="stat-value">${sections.reduce((sum, section) => sum + section.trains.length, 0)}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Alerts:</span>
+                            <span class="stat-value">${data.alerts ? data.alerts.length : 0}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-list">
+                    <h4>🚉 Section Details</h4>
+                    ${sections.map(section => `
+                        <div class="section-item">
+                            <div class="section-header">
+                                <span class="section-name">${section.name}</span>
+                                <span class="section-status ${section.status}">${section.status}</span>
+                            </div>
+                            <div class="section-details">
+                                <div class="section-info">
+                                    <span>Trains: ${section.trains.length}</span>
+                                    <span>Priority: ${section.priority}</span>
+                                </div>
+                                <div class="section-trains">
+                                    ${section.trains.slice(0, 3).map(train => `
+                                        <span class="train-badge">${train.train_number}</span>
+                                    `).join('')}
+                                    ${section.trains.length > 3 ? `<span class="more-trains">+${section.trains.length - 3} more</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${data.alerts && data.alerts.length > 0 ? `
+                    <div class="section-alerts">
+                        <h4>⚠️ Active Alerts</h4>
+                        ${data.alerts.map(alert => `
+                            <div class="alert-item">
+                                <span class="alert-train">${alert.train_number}</span>
+                                <span class="alert-message">${alert.message}</span>
+                                <span class="alert-severity ${alert.severity}">${alert.severity}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            `;
         }
 
         function hideAIControllerPanel() {
