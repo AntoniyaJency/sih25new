@@ -832,33 +832,201 @@
             console.log('📊 Loading map data...');
             updateStatus('📊 Loading map data...');
             
-            fetch('http://localhost:8081/api/map-data')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('✅ Map data loaded:', data);
-                    mapData = data;
-                    
-                    // Add elements to map
-                    addStationsToMap();
-                    addTracksToMap();
-                    addTrainsToMap();
-                    addTrainPathVisualization();
-                    
-                    // Update real-time data display
-                    updateRealTimeDataDisplay();
-                    
-                    // Start real-time updates
-                    startRealTimeUpdates();
-                    
-                    // Populate station dropdown
-                    populateStationDropdown();
-                    
-                    updateStatus('✅ Map data loaded successfully');
-                })
-                .catch(error => {
-                    console.error('❌ Error loading map data:', error);
-                    updateStatus('❌ Failed to load map data: ' + error.message);
-                });
+            // Try multiple API endpoints for different deployment scenarios
+            const apiEndpoints = [
+                'http://localhost:8081/api/map-data',
+                'http://localhost:8080/api/map-data',
+                '/api/map-data',
+                './api/map-data'
+            ];
+            
+            let currentEndpointIndex = 0;
+            
+            function tryNextEndpoint() {
+                if (currentEndpointIndex >= apiEndpoints.length) {
+                    console.log('🔄 All API endpoints failed, using fallback data');
+                    loadFallbackData();
+                    return;
+                }
+                
+                const endpoint = apiEndpoints[currentEndpointIndex];
+                console.log(`🔄 Trying endpoint: ${endpoint}`);
+                
+                fetch(endpoint)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('✅ Map data loaded from:', endpoint);
+                        mapData = data;
+                        
+                        // Add elements to map
+                        addStationsToMap();
+                        addTracksToMap();
+                        addTrainsToMap();
+                        addTrainPathVisualization();
+                        
+                        // Update real-time data display
+                        updateRealTimeDataDisplay();
+                        
+                        // Start real-time updates
+                        startRealTimeUpdates();
+                        
+                        // Populate station dropdown
+                        populateStationDropdown();
+                        
+                        updateStatus('✅ Map data loaded successfully');
+                    })
+                    .catch(error => {
+                        console.error(`❌ Error loading from ${endpoint}:`, error);
+                        currentEndpointIndex++;
+                        tryNextEndpoint();
+                    });
+            }
+            
+            tryNextEndpoint();
+        }
+        
+        // Fallback data when API is not available
+        function loadFallbackData() {
+            console.log('🔄 Loading fallback data...');
+            updateStatus('🔄 Loading fallback data...');
+            
+            mapData = {
+                stations: [
+                    {"id": "NDLS", "name": "New Delhi", "lat": 28.644800, "lon": 77.216721},
+                    {"id": "CSMT", "name": "Mumbai CST", "lat": 18.939800, "lon": 72.835500},
+                    {"id": "HWH", "name": "Howrah", "lat": 22.585320, "lon": 88.346790},
+                    {"id": "MAS", "name": "Chennai Central", "lat": 13.082700, "lon": 80.270721},
+                    {"id": "SBC", "name": "Bangalore City", "lat": 12.976750, "lon": 77.575279},
+                    {"id": "HYB", "name": "Hyderabad Deccan", "lat": 17.385044, "lon": 78.486671},
+                    {"id": "PUNE", "name": "Pune", "lat": 18.531400, "lon": 73.874359},
+                    {"id": "JP", "name": "Jaipur", "lat": 26.922070, "lon": 75.778885},
+                    {"id": "ADI", "name": "Ahmedabad", "lat": 23.022505, "lon": 72.571365},
+                    {"id": "LKO", "name": "Lucknow", "lat": 26.846510, "lon": 80.946166}
+                ],
+                tracks: [
+                    {"from": {"id": "NDLS", "lat": 28.644800, "lon": 77.216721}, "to": {"id": "HWH", "lat": 22.585320, "lon": 88.346790}},
+                    {"from": {"id": "NDLS", "lat": 28.644800, "lon": 77.216721}, "to": {"id": "CSMT", "lat": 18.939800, "lon": 72.835500}},
+                    {"from": {"id": "CSMT", "lat": 18.939800, "lon": 72.835500}, "to": {"id": "MAS", "lat": 13.082700, "lon": 80.270721}},
+                    {"from": {"id": "MAS", "lat": 13.082700, "lon": 80.270721}, "to": {"id": "SBC", "lat": 12.976750, "lon": 77.575279}},
+                    {"from": {"id": "SBC", "lat": 12.976750, "lon": 77.575279}, "to": {"id": "HYB", "lat": 17.385044, "lon": 78.486671}},
+                    {"from": {"id": "HYB", "lat": 17.385044, "lon": 78.486671}, "to": {"id": "PUNE", "lat": 18.531400, "lon": 73.874359}},
+                    {"from": {"id": "NDLS", "lat": 28.644800, "lon": 77.216721}, "to": {"id": "JP", "lat": 26.922070, "lon": 75.778885}},
+                    {"from": {"id": "JP", "lat": 26.922070, "lon": 75.778885}, "to": {"id": "ADI", "lat": 23.022505, "lon": 72.571365}},
+                    {"from": {"id": "NDLS", "lat": 28.644800, "lon": 77.216721}, "to": {"id": "LKO", "lat": 26.846510, "lon": 80.946166}}
+                ],
+                trains: [
+                    {
+                        "train_number": "12001",
+                        "train_name": "Rajdhani Express",
+                        "train_type": "Rajdhani Express",
+                        "origin": "NDLS",
+                        "destination": "HWH",
+                        "current_station": "NDLS",
+                        "next_station": "HWH",
+                        "status": "running",
+                        "speed": 110,
+                        "delay_minutes": 0,
+                        "progress": 0.3,
+                        "lat": 26.0,
+                        "lon": 82.0,
+                        "collision_risk": false,
+                        "rerouting_needed": false
+                    },
+                    {
+                        "train_number": "12002",
+                        "train_name": "Shatabdi Express",
+                        "train_type": "Shatabdi Express",
+                        "origin": "CSMT",
+                        "destination": "MAS",
+                        "current_station": "CSMT",
+                        "next_station": "MAS",
+                        "status": "running",
+                        "speed": 95,
+                        "delay_minutes": 5,
+                        "progress": 0.6,
+                        "lat": 16.0,
+                        "lon": 76.5,
+                        "collision_risk": false,
+                        "rerouting_needed": false
+                    },
+                    {
+                        "train_number": "12003",
+                        "train_name": "Mail Express",
+                        "train_type": "Mail Express",
+                        "origin": "SBC",
+                        "destination": "HYB",
+                        "current_station": "SBC",
+                        "next_station": "HYB",
+                        "status": "running",
+                        "speed": 85,
+                        "delay_minutes": 12,
+                        "progress": 0.8,
+                        "lat": 15.5,
+                        "lon": 78.0,
+                        "collision_risk": true,
+                        "rerouting_needed": false
+                    },
+                    {
+                        "train_number": "12004",
+                        "train_name": "Superfast",
+                        "train_type": "Superfast",
+                        "origin": "JP",
+                        "destination": "ADI",
+                        "current_station": "JP",
+                        "next_station": "ADI",
+                        "status": "stopped",
+                        "speed": 0,
+                        "delay_minutes": 8,
+                        "progress": 0.1,
+                        "lat": 25.0,
+                        "lon": 74.5,
+                        "collision_risk": false,
+                        "rerouting_needed": true
+                    },
+                    {
+                        "train_number": "12005",
+                        "train_name": "Passenger",
+                        "train_type": "Passenger",
+                        "origin": "LKO",
+                        "destination": "NDLS",
+                        "current_station": "LKO",
+                        "next_station": "NDLS",
+                        "status": "in_transit",
+                        "speed": 65,
+                        "delay_minutes": 15,
+                        "progress": 0.4,
+                        "lat": 27.5,
+                        "lon": 81.0,
+                        "collision_risk": false,
+                        "rerouting_needed": false
+                    }
+                ],
+                collisions: [],
+                timestamp: new Date().toISOString()
+            };
+            
+            // Add elements to map
+            addStationsToMap();
+            addTracksToMap();
+            addTrainsToMap();
+            addTrainPathVisualization();
+            
+            // Update real-time data display
+            updateRealTimeDataDisplay();
+            
+            // Start real-time updates (simulated)
+            startRealTimeUpdates();
+            
+            // Populate station dropdown
+            populateStationDropdown();
+            
+            updateStatus('✅ Fallback data loaded successfully');
+            console.log('✅ Fallback data loaded');
         }
 
         // Add stations to map

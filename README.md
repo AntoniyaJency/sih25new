@@ -1,44 +1,28 @@
-# Railway Traffic Control System
-## Smart India Hackathon 2025 - Ministry of Railways
+# 🚂 Railway Monitoring System - Smart India Hackathon 2025
 
-### 🚂 **AI-Powered Decision Support System for Railway Traffic Control**
+An AI-powered railway traffic control system that maximizes section throughput and minimizes delays using real-time train tracking, collision detection, and intelligent rerouting.
 
-A comprehensive web application that maximizes section throughput using intelligent decision support for railway traffic controllers across India's vast railway network.
+## 🌟 Features
 
----
+- **Real-time Train Tracking**: Live map with moving trains across Indian railway network
+- **AI-Powered Section Control**: Intelligent traffic management and optimization
+- **Collision Detection**: Advanced algorithms to prevent train collisions
+- **Voice Alerts**: Audio notifications for critical events
+- **Station Monitoring**: Detailed station-specific train tracking
+- **Analytics Dashboard**: Comprehensive performance metrics and trends
+- **Full-screen Mode**: Immersive railway monitoring experience
 
-## 🌟 **Key Features**
+## 🚀 Live Demo
 
-### **Real-time Monitoring & Control**
-- **Live Railway Map**: Interactive map showing all trains, stations, and tracks across India
-- **Real-time Tracking**: Live train position updates with movement simulation
-- **Comprehensive Network**: 124+ major stations and 86+ track segments covering all railway zones
+The system is deployed on GitHub Pages: **[View Live Demo](https://antoniyaajency.github.io/sih25new/)**
 
-### **AI-Powered Optimization**
-- **Conflict Detection**: Advanced algorithms for identifying and resolving train conflicts
-- **Route Optimization**: Multi-objective optimization for maximum throughput
-- **Dynamic Re-optimization**: Rapid response to disruptions and schedule changes
+## 🛠️ Local Development
 
-### **Professional Dashboard**
-- **System Overview**: Real-time statistics and KPIs
-- **Train Management**: Complete train information and status tracking
-- **Performance Analytics**: Punctuality rates, efficiency metrics, and delay analysis
-
-### **Advanced Features**
-- **What-if Simulation**: Scenario analysis and disruption handling
-- **Predictive Analytics**: Machine learning for proactive management
-- **Audit Trails**: Complete logging and performance tracking
-
----
-
-## 🚀 **Quick Start**
-
-### **Prerequisites**
+### Prerequisites
 - Python 3.8+
-- Node.js (for frontend development)
 - Modern web browser
 
-### **Installation**
+### Running Locally
 
 1. **Clone the repository**
    ```bash
@@ -46,182 +30,97 @@ A comprehensive web application that maximizes section throughput using intellig
    cd sih25new
    ```
 
-2. **Install Python dependencies**
+2. **Start the server**
    ```bash
-   pip install -r requirements.txt
+   python server.py
    ```
 
-3. **Start the backend server**
-   ```bash
-   python3 realtime_railway_map.py &
+3. **Open in browser**
+   ```
+   http://localhost:8080
    ```
 
-4. **Start the web server**
-   ```bash
-   python3 -m http.server 8084 --bind 127.0.0.1 &
-   ```
+## 📁 Project Structure
 
-5. **Open the application**
-   ```
-   http://localhost:8084/index.html
-   ```
-
----
-
-## 📱 **Website Navigation**
-
-### **Complete Navigation Flow**
-
-The website features a comprehensive navigation system with the following pages:
-
-#### **🏠 Home Page**
-- Hero section with system overview
-- Feature highlights and capabilities
-- Quick access buttons to main sections
-
-#### **📊 Dashboard**
-- Real-time system statistics
-- Active train count and status
-- Recent train activity feed
-- System efficiency metrics
-
-#### **🗺️ Live Map**
-- Interactive railway network map
-- Real-time train positions
-- Station and track information
-- Clickable markers with detailed popups
-
-#### **🚂 Trains**
-- Complete train management interface
-- Train status and route information
-- Speed and location tracking
-- Status indicators (Running, Delayed, On-time, Maintenance)
-
-#### **📈 Analytics**
-- Performance metrics and KPIs
-- Punctuality rates and efficiency data
-- Conflict resolution statistics
-- Average delay calculations
-
-#### **ℹ️ About**
-- System mission and technology overview
-- Impact and future roadmap
-- Technical specifications
-
----
-
-## 🛠️ **Technical Architecture**
-
-### **Backend (Python)**
-- **FastAPI**: High-performance web framework
-- **Google OR-Tools**: Advanced optimization algorithms
-- **SQLAlchemy**: Database ORM and management
-- **WebSockets**: Real-time communication
-- **Redis**: Caching and session management
-
-### **Frontend (HTML/CSS/JavaScript)**
-- **Responsive Design**: Mobile-first approach
-- **Leaflet.js**: Interactive mapping
-- **Modern CSS**: Advanced styling with animations
-- **Vanilla JavaScript**: Clean, efficient code
-- **Auto-refresh**: Real-time data updates
-
-### **Data Management**
-- **PostgreSQL**: Robust data storage
-- **Pydantic**: Data validation and serialization
-- **Real-time Updates**: Live data synchronization
-
----
-
-## 🎯 **Key Capabilities**
-
-### **Comprehensive Indian Railway Network**
-- **124 Major Stations** across all railway zones
-- **86 Track Segments** covering Golden Quadrilateral routes
-- **50+ Realistic Trains** including Rajdhani, Shatabdi, Duronto, Vande Bharat
-
-### **Real-time Features**
-- **Live Train Tracking**: Real-time position updates
-- **Interactive Map**: Clickable stations and trains
-- **Status Monitoring**: Real-time status updates
-- **Auto-refresh**: Data updates every 30 seconds
-
-### **Professional Interface**
-- **Responsive Design**: Works on all devices
-- **Smooth Animations**: Enhanced user experience
-- **Mobile Navigation**: Hamburger menu for mobile
-- **Keyboard Shortcuts**: Alt+1-6 for quick navigation
-
----
-
-## 📊 **System Statistics**
-
-- **Stations**: 124+ major Indian railway stations
-- **Tracks**: 86+ track segments
-- **Trains**: 50+ active trains
-- **Coverage**: All major railway zones
-- **Routes**: Golden Quadrilateral and regional routes
-
----
-
-## 🔧 **Development**
-
-### **File Structure**
 ```
 sih25new/
-├── index.html              # Main website
+├── index.html              # Main web application
 ├── css/
-│   └── styles.css          # Main stylesheet
-├── js/
-│   └── app.js              # Application logic
-├── realtime_railway_map.py # Backend server
-├── requirements.txt        # Python dependencies
+│   └── styles.css         # Styling and responsive design
+├── server.py              # Python backend server
+├── .github/
+│   └── workflows/
+│       └── deploy.yml     # GitHub Pages deployment
 └── README.md              # This file
 ```
 
-### **Customization**
-- Modify `css/styles.css` for styling changes
-- Update `js/app.js` for functionality enhancements
-- Edit `realtime_railway_map.py` for backend modifications
+## 🎯 Smart India Hackathon 2025
+
+This project addresses the problem statement: **"Maximizing Section Throughput Using AI-Powered Precise Train Traffic Control"**
+
+### Key Solutions Implemented:
+- **Operations Research Models**: Constraint-based scheduling algorithms
+- **AI Decision Support**: Machine learning for traffic optimization
+- **Real-time Processing**: Live data updates and rapid re-optimization
+- **User Interface**: Intuitive controls for section controllers
+- **What-if Analysis**: Scenario simulation and impact assessment
+
+## 🚂 Railway Network Coverage
+
+The system includes major Indian railway stations:
+- **North**: New Delhi, Jaipur, Lucknow, Patna
+- **West**: Mumbai CST, Pune, Ahmedabad
+- **East**: Howrah, Kharagpur
+- **South**: Chennai Central, Bangalore City, Hyderabad Deccan
+- **Central**: Vijayawada, Guntakal, Katpadi
+
+## 📊 Real-time Analytics
+
+- **Performance Trends**: Speed and efficiency monitoring
+- **Train Metrics**: Punctuality rates and delay analysis
+- **Station Analytics**: Traffic flow and congestion analysis
+- **Alert Analysis**: Collision risks and rerouting events
+- **Route Performance**: On-time performance by route
+- **AI Optimization**: Impact of intelligent traffic control
+
+## 🔧 Technical Stack
+
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Maps**: Leaflet.js with OpenStreetMap
+- **Backend**: Python HTTP server
+- **Real-time**: WebSocket-like polling for live updates
+- **Voice**: Web Speech API
+- **Deployment**: GitHub Pages with GitHub Actions
+
+## 🌐 API Endpoints
+
+- `GET /api/map-data` - Live railway network data
+- `GET /api/section-status` - Section controller information
+- `GET /` - Main application interface
+
+## 📱 Responsive Design
+
+The system is fully responsive and works on:
+- Desktop computers
+- Tablets
+- Mobile phones
+- Large displays for control rooms
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+This project is developed for Smart India Hackathon 2025.
+
+## 👥 Team
+
+Developed by the Smart India Hackathon 2025 team focusing on railway traffic optimization and AI-powered decision support systems.
 
 ---
 
-## 🌐 **Access Information**
-
-- **Main Website**: http://localhost:8084/index.html
-- **Backend API**: http://localhost:8081/api/map-data
-- **Map Data**: Real-time railway network information
-
----
-
-## 🏆 **Smart India Hackathon 2025**
-
-This project was developed for the **Smart India Hackathon 2025** under the **Ministry of Railways** theme:
-
-> **"Maximizing Section Throughput Using AI-Powered Precise Train Traffic Control"**
-
-### **Problem Statement**
-Develop an intelligent decision-support system for section controllers that leverages operations research and AI to model constraints, train priorities, and operational rules for conflict-free, feasible schedules.
-
-### **Solution**
-A comprehensive web application with real-time monitoring, AI-powered optimization, and professional user interface for railway traffic control across India's vast network.
-
----
-
-## 📞 **Support**
-
-For technical support or questions about the Railway Traffic Control System:
-
-- **GitHub**: https://github.com/AntoniyaJency/sih25new
-- **Documentation**: See inline code comments
-- **Issues**: Report via GitHub Issues
-
----
-
-## 📄 **License**
-
-This project is developed for the Smart India Hackathon 2025 and is intended for educational and demonstration purposes.
-
----
-
-**🚂 Railway Traffic Control System - Revolutionizing Indian Railways with AI-Powered Intelligence**
+**🚂 Real-time Railway Monitoring | AI-Powered Traffic Control | Smart India Hackathon 2025**
