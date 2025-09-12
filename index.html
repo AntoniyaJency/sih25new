@@ -906,6 +906,79 @@
             console.log('🔄 Loading fallback data...');
             updateStatus('🔄 Loading fallback data...');
             
+            // Load comprehensive trains data (all 50 trains from local backend)
+            const allTrains = [
+                // Rajdhani Express trains (Premium trains connecting Delhi)
+                {"id": "T001", "train_number": "12951", "train_name": "Rajdhani Express", "train_type": "Rajdhani Express", "origin": "BCT", "destination": "DLI", "current_station": "BCT", "next_station": "KYN", "status": "running", "speed": 130, "delay_minutes": 0, "progress": 0.1, "lat": 19.0176, "lon": 72.8562, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "MUM-MAH", "priority": 1},
+                {"id": "T002", "train_number": "12301", "train_name": "Rajdhani Express", "train_type": "Rajdhani Express", "origin": "HWH", "destination": "DLI", "current_station": "HWH", "next_station": "KGP", "status": "running", "speed": 140, "delay_minutes": 2, "progress": 0.2, "lat": 22.5848, "lon": 88.3426, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KOL-WB", "priority": 1},
+                {"id": "T003", "train_number": "12431", "train_name": "Rajdhani Express", "train_type": "Rajdhani Express", "origin": "TVC", "destination": "DLI", "current_station": "TVC", "next_station": "ERS", "status": "running", "speed": 130, "delay_minutes": 0, "progress": 0.3, "lat": 8.4875, "lon": 76.9525, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KER-TN", "priority": 1},
+                {"id": "T004", "train_number": "12009", "train_name": "Rajdhani Express", "train_type": "Rajdhani Express", "origin": "SBC", "destination": "DLI", "current_station": "SBC", "next_station": "SA", "status": "running", "speed": 130, "delay_minutes": 1, "progress": 0.4, "lat": 12.9716, "lon": 77.5946, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KAR-TN", "priority": 1},
+                {"id": "T005", "train_number": "12423", "train_name": "Rajdhani Express", "train_type": "Rajdhani Express", "origin": "DLI", "destination": "ALD", "current_station": "DLI", "next_station": "GZB", "status": "running", "speed": 140, "delay_minutes": 0, "progress": 0.1, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-NCR", "priority": 1},
+                
+                // Shatabdi Express trains (Day trains)
+                {"id": "T006", "train_number": "12017", "train_name": "Shatabdi Express", "train_type": "Shatabdi Express", "origin": "DLI", "destination": "KTA", "current_station": "DLI", "next_station": "JP", "status": "running", "speed": 150, "delay_minutes": 0, "progress": 0.2, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-RJ", "priority": 2},
+                {"id": "T007", "train_number": "12002", "train_name": "Shatabdi Express", "train_type": "Shatabdi Express", "origin": "BCT", "destination": "AII", "current_station": "BCT", "next_station": "PUNE", "status": "running", "speed": 140, "delay_minutes": 3, "progress": 0.5, "lat": 19.0176, "lon": 72.8562, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "MUM-MAH", "priority": 2},
+                {"id": "T008", "train_number": "12008", "train_name": "Shatabdi Express", "train_type": "Shatabdi Express", "origin": "MAS", "destination": "SBC", "current_station": "MAS", "next_station": "SA", "status": "running", "speed": 130, "delay_minutes": 0, "progress": 0.6, "lat": 13.0827, "lon": 80.2707, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TN-KAR", "priority": 2},
+                {"id": "T009", "train_number": "12004", "train_name": "Shatabdi Express", "train_type": "Shatabdi Express", "origin": "DLI", "destination": "LKO", "current_station": "DLI", "next_station": "CNB", "status": "running", "speed": 150, "delay_minutes": 1, "progress": 0.3, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-UP", "priority": 2},
+                {"id": "T010", "train_number": "12010", "train_name": "Shatabdi Express", "train_type": "Shatabdi Express", "origin": "HWH", "destination": "BBS", "current_station": "HWH", "next_station": "KGP", "status": "running", "speed": 130, "delay_minutes": 2, "progress": 0.4, "lat": 22.5848, "lon": 88.3426, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KOL-ODI", "priority": 2},
+                
+                // Duronto Express trains (Non-stop long distance)
+                {"id": "T011", "train_number": "12259", "train_name": "Duronto Express", "train_type": "Duronto Express", "origin": "SC", "destination": "DLI", "current_station": "SC", "next_station": "NGP", "status": "running", "speed": 140, "delay_minutes": 0, "progress": 0.7, "lat": 17.4399, "lon": 78.5010, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TEL-MP", "priority": 2},
+                {"id": "T012", "train_number": "12274", "train_name": "Duronto Express", "train_type": "Duronto Express", "origin": "HWH", "destination": "DLI", "current_station": "HWH", "next_station": "MGS", "status": "running", "speed": 140, "delay_minutes": 1, "progress": 0.5, "lat": 22.5848, "lon": 88.3426, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KOL-UP", "priority": 2},
+                {"id": "T013", "train_number": "12218", "train_name": "Duronto Express", "train_type": "Duronto Express", "origin": "CSMT", "destination": "SC", "current_station": "CSMT", "next_station": "PUNE", "status": "running", "speed": 120, "delay_minutes": 4, "progress": 0.8, "lat": 18.9398, "lon": 72.8355, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "MUM-TEL", "priority": 2},
+                {"id": "T014", "train_number": "12290", "train_name": "Duronto Express", "train_type": "Duronto Express", "origin": "MAS", "destination": "DLI", "current_station": "MAS", "next_station": "BZA", "status": "running", "speed": 130, "delay_minutes": 0, "progress": 0.2, "lat": 13.0827, "lon": 80.2707, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TN-TEL", "priority": 2},
+                {"id": "T015", "train_number": "12246", "train_name": "Duronto Express", "train_type": "Duronto Express", "origin": "YPR", "destination": "DLI", "current_station": "YPR", "next_station": "UBL", "status": "running", "speed": 130, "delay_minutes": 2, "progress": 0.6, "lat": 13.0284, "lon": 77.5043, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KAR-KAR", "priority": 2},
+                
+                // Superfast Express trains
+                {"id": "T016", "train_number": "12049", "train_name": "Gatimaan Express", "train_type": "Gatimaan Express", "origin": "DLI", "destination": "JHS", "current_station": "DLI", "next_station": "AGR", "status": "running", "speed": 160, "delay_minutes": 0, "progress": 0.1, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-UP", "priority": 2},
+                {"id": "T017", "train_number": "22691", "train_name": "Rajdhani Express", "train_type": "Rajdhani Express", "origin": "DLI", "destination": "KOL", "current_station": "DLI", "next_station": "CNB", "status": "running", "speed": 140, "delay_minutes": 0, "progress": 0.2, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-UP", "priority": 1},
+                {"id": "T018", "train_number": "12434", "train_name": "Chennai Rajdhani", "train_type": "Chennai Rajdhani", "origin": "MAS", "destination": "DLI", "current_station": "MAS", "next_station": "RU", "status": "running", "speed": 130, "delay_minutes": 1, "progress": 0.3, "lat": 13.0827, "lon": 80.2707, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TN-TEL", "priority": 1},
+                {"id": "T019", "train_number": "12952", "train_name": "Mumbai Rajdhani", "train_type": "Mumbai Rajdhani", "origin": "DLI", "destination": "BCT", "current_station": "DLI", "next_station": "KTA", "status": "running", "speed": 130, "delay_minutes": 0, "progress": 0.4, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-RJ", "priority": 1},
+                {"id": "T020", "train_number": "22406", "train_name": "Vande Bharat Express", "train_type": "Vande Bharat Express", "origin": "DLI", "destination": "KTA", "current_station": "DLI", "next_station": "JP", "status": "running", "speed": 160, "delay_minutes": 0, "progress": 0.3, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-RJ", "priority": 2},
+                
+                // Long Distance Express trains
+                {"id": "T021", "train_number": "12615", "train_name": "Grand Trunk Express", "train_type": "Grand Trunk Express", "origin": "MAS", "destination": "DLI", "current_station": "MAS", "next_station": "GNT", "status": "running", "speed": 110, "delay_minutes": 5, "progress": 0.4, "lat": 13.0827, "lon": 80.2707, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TN-TEL", "priority": 3},
+                {"id": "T022", "train_number": "12842", "train_name": "Coromandel Express", "train_type": "Coromandel Express", "origin": "HWH", "destination": "MAS", "current_station": "HWH", "next_station": "BBS", "status": "running", "speed": 120, "delay_minutes": 3, "progress": 0.5, "lat": 22.5848, "lon": 88.3426, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KOL-ODI", "priority": 3},
+                {"id": "T023", "train_number": "12840", "train_name": "Howrah Mail", "train_type": "Howrah Mail", "origin": "MAS", "destination": "HWH", "current_station": "MAS", "next_station": "VSKP", "status": "running", "speed": 110, "delay_minutes": 2, "progress": 0.6, "lat": 13.0827, "lon": 80.2707, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TN-TEL", "priority": 3},
+                {"id": "T024", "train_number": "12321", "train_name": "Howrah Mail", "train_type": "Howrah Mail", "origin": "HWH", "destination": "BCT", "current_station": "HWH", "next_station": "NGP", "status": "running", "speed": 110, "delay_minutes": 7, "progress": 0.6, "lat": 22.5848, "lon": 88.3426, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KOL-MP", "priority": 3},
+                {"id": "T025", "train_number": "16031", "train_name": "Andaman Express", "train_type": "Andaman Express", "origin": "MAS", "destination": "VM", "current_station": "MAS", "next_station": "VM", "status": "running", "speed": 100, "delay_minutes": 4, "progress": 0.7, "lat": 13.0827, "lon": 80.2707, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TN-TN", "priority": 3},
+                
+                // Regional Express trains
+                {"id": "T026", "train_number": "11013", "train_name": "Coimbatore Express", "train_type": "Coimbatore Express", "origin": "MAS", "destination": "CBE", "current_station": "MAS", "next_station": "SA", "status": "running", "speed": 100, "delay_minutes": 3, "progress": 0.8, "lat": 13.0827, "lon": 80.2707, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TN-TN", "priority": 3},
+                {"id": "T027", "train_number": "12163", "train_name": "Mumbai Express", "train_type": "Mumbai Express", "origin": "BCT", "destination": "PUNE", "current_station": "BCT", "next_station": "PUNE", "status": "running", "speed": 100, "delay_minutes": 2, "progress": 0.5, "lat": 19.0176, "lon": 72.8562, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "MUM-MAH", "priority": 3},
+                {"id": "T028", "train_number": "12779", "train_name": "Goa Express", "train_type": "Goa Express", "origin": "HWH", "destination": "VSKP", "current_station": "HWH", "next_station": "VSKP", "status": "running", "speed": 110, "delay_minutes": 5, "progress": 0.4, "lat": 22.5848, "lon": 88.3426, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KOL-TEL", "priority": 3},
+                {"id": "T029", "train_number": "12432", "train_name": "Trivandrum Rajdhani", "train_type": "Trivandrum Rajdhani", "origin": "DLI", "destination": "TVC", "current_station": "DLI", "next_station": "BPL", "status": "running", "speed": 130, "delay_minutes": 1, "progress": 0.2, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-MP", "priority": 1},
+                {"id": "T030", "train_number": "12269", "train_name": "Chennai Duronto", "train_type": "Chennai Duronto", "origin": "HWH", "destination": "MAS", "current_station": "HWH", "next_station": "BZA", "status": "running", "speed": 130, "delay_minutes": 0, "progress": 0.3, "lat": 22.5848, "lon": 88.3426, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KOL-TEL", "priority": 2},
+                
+                // Mail/Express trains
+                {"id": "T031", "train_number": "12651", "train_name": "Sampark Kranti Express", "train_type": "Sampark Kranti Express", "origin": "TVC", "destination": "DLI", "current_station": "TVC", "next_station": "CBE", "status": "running", "speed": 110, "delay_minutes": 2, "progress": 0.6, "lat": 8.4875, "lon": 76.9525, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KER-TN", "priority": 3},
+                {"id": "T032", "train_number": "12617", "train_name": "Mangala Lakshadweep Express", "train_type": "Mangala Lakshadweep Express", "origin": "ERS", "destination": "DLI", "current_station": "ERS", "next_station": "SRR", "status": "running", "speed": 110, "delay_minutes": 3, "progress": 0.7, "lat": 9.9718, "lon": 76.2847, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KER-KER", "priority": 3},
+                {"id": "T033", "train_number": "12625", "train_name": "Kerala Express", "train_type": "Kerala Express", "origin": "TVC", "destination": "DLI", "current_station": "TVC", "next_station": "PGT", "status": "running", "speed": 110, "delay_minutes": 1, "progress": 0.5, "lat": 8.4875, "lon": 76.9525, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KER-KER", "priority": 3},
+                {"id": "T034", "train_number": "12484", "train_name": "Punjab Express", "train_type": "Punjab Express", "origin": "DLI", "destination": "CNB", "current_station": "DLI", "next_station": "GZB", "status": "running", "speed": 100, "delay_minutes": 4, "progress": 0.8, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-UP", "priority": 3},
+                {"id": "T035", "train_number": "12472", "train_name": "Swaraj Express", "train_type": "Swaraj Express", "origin": "PUNE", "destination": "SUR", "current_station": "PUNE", "next_station": "SUR", "status": "running", "speed": 100, "delay_minutes": 2, "progress": 0.6, "lat": 18.5204, "lon": 73.8567, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "MAH-MAH", "priority": 3},
+                
+                // Freight trains (cargo)
+                {"id": "T036", "train_number": "FG001", "train_name": "Container Freight", "train_type": "Container Freight", "origin": "BCT", "destination": "PUNE", "current_station": "BCT", "next_station": "PUNE", "status": "running", "speed": 80, "delay_minutes": 15, "progress": 0.3, "lat": 19.0176, "lon": 72.8562, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "MUM-MAH", "priority": 4},
+                {"id": "T037", "train_number": "FG002", "train_name": "Coal Freight", "train_type": "Coal Freight", "origin": "BBS", "destination": "HWH", "current_station": "BBS", "next_station": "HWH", "status": "running", "speed": 70, "delay_minutes": 20, "progress": 0.4, "lat": 20.2961, "lon": 85.8245, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "ODI-WB", "priority": 4},
+                {"id": "T038", "train_number": "FG003", "train_name": "Iron Ore Freight", "train_type": "Iron Ore Freight", "origin": "BZA", "destination": "VSKP", "current_station": "BZA", "next_station": "VSKP", "status": "running", "speed": 75, "delay_minutes": 18, "progress": 0.5, "lat": 16.5062, "lon": 80.6480, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TEL-TEL", "priority": 4},
+                {"id": "T039", "train_number": "FG004", "train_name": "Petroleum Freight", "train_type": "Petroleum Freight", "origin": "JU", "destination": "AII", "current_station": "JU", "next_station": "AII", "status": "running", "speed": 70, "delay_minutes": 22, "progress": 0.6, "lat": 26.2389, "lon": 73.0243, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "RJ-RJ", "priority": 4},
+                {"id": "T040", "train_number": "FG005", "train_name": "Food Grains Freight", "train_type": "Food Grains Freight", "origin": "DLI", "destination": "MAS", "current_station": "DLI", "next_station": "CNB", "status": "running", "speed": 80, "delay_minutes": 16, "progress": 0.7, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-UP", "priority": 4},
+                
+                // Suburban/Local trains
+                {"id": "T041", "train_number": "SL001", "train_name": "Local Train", "train_type": "Local Train", "origin": "CSMT", "destination": "KYN", "current_station": "CSMT", "next_station": "THA", "status": "running", "speed": 60, "delay_minutes": 5, "progress": 0.2, "lat": 18.9398, "lon": 72.8355, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "MUM-MAH", "priority": 5},
+                {"id": "T042", "train_number": "SL002", "train_name": "Local Train", "train_type": "Local Train", "origin": "MAS", "destination": "TBM", "current_station": "MAS", "next_station": "CGL", "status": "running", "speed": 50, "delay_minutes": 8, "progress": 0.3, "lat": 13.0827, "lon": 80.2707, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TN-TN", "priority": 5},
+                {"id": "T043", "train_number": "SL003", "train_name": "EMU Local", "train_type": "EMU Local", "origin": "HWH", "destination": "SRC", "current_station": "HWH", "next_station": "SRC", "status": "running", "speed": 45, "delay_minutes": 10, "progress": 0.4, "lat": 22.5848, "lon": 88.3426, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KOL-WB", "priority": 5},
+                {"id": "T044", "train_number": "SL004", "train_name": "MEMU Local", "train_type": "MEMU Local", "origin": "DLI", "destination": "GZB", "current_station": "DLI", "next_station": "GZB", "status": "running", "speed": 55, "delay_minutes": 6, "progress": 0.5, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-NCR", "priority": 5},
+                {"id": "T045", "train_number": "SL005", "train_name": "Passenger Train", "train_type": "Passenger Train", "origin": "BZA", "destination": "SC", "current_station": "BZA", "next_station": "WL", "status": "running", "speed": 40, "delay_minutes": 12, "progress": 0.6, "lat": 16.5062, "lon": 80.6480, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "TEL-TEL", "priority": 5},
+                
+                // Special trains
+                {"id": "T046", "train_number": "SP001", "train_name": "Palace on Wheels", "train_type": "Palace on Wheels", "origin": "DLI", "destination": "JP", "current_station": "DLI", "next_station": "JP", "status": "running", "speed": 90, "delay_minutes": 0, "progress": 0.8, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-RJ", "priority": 1},
+                {"id": "T047", "train_number": "SP002", "train_name": "Deccan Odyssey", "train_type": "Deccan Odyssey", "origin": "BCT", "destination": "PUNE", "current_station": "BCT", "next_station": "PUNE", "status": "running", "speed": 80, "delay_minutes": 0, "progress": 0.9, "lat": 19.0176, "lon": 72.8562, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "MUM-MAH", "priority": 1},
+                {"id": "T048", "train_number": "SP003", "train_name": "Golden Chariot", "train_type": "Golden Chariot", "origin": "SBC", "destination": "YPR", "current_station": "SBC", "next_station": "YPR", "status": "running", "speed": 70, "delay_minutes": 0, "progress": 0.7, "lat": 12.9716, "lon": 77.5946, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "KAR-KAR", "priority": 1},
+                {"id": "T049", "train_number": "SP004", "train_name": "Maharaja Express", "train_type": "Maharaja Express", "origin": "DLI", "destination": "BCT", "current_station": "DLI", "next_station": "JP", "status": "running", "speed": 100, "delay_minutes": 0, "progress": 0.6, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-RJ", "priority": 1},
+                {"id": "T050", "train_number": "SP005", "train_name": "Buddhist Circuit Train", "train_type": "Buddhist Circuit Train", "origin": "DLI", "destination": "BSB", "current_station": "DLI", "next_station": "LKO", "status": "running", "speed": 90, "delay_minutes": 0, "progress": 0.5, "lat": 28.6448, "lon": 77.2194, "collision_risk": false, "rerouting_needed": false, "ai_message": "", "section_id": "DEL-UP", "priority": 1}
+            ];
+            
             mapData = {
                 stations: [
                     // Northern Railway Zone
@@ -1164,93 +1237,7 @@
                     {"from": {"id": "JBP", "lat": 23.1815, "lon": 79.9864}, "to": {"id": "NGP", "lat": 21.1458, "lon": 79.0882}},
                     {"from": {"id": "KTE", "lat": 23.8367, "lon": 80.3942}, "to": {"id": "NGP", "lat": 21.1458, "lon": 79.0882}}
                 ],
-                trains: [
-                    {
-                        "train_number": "12001",
-                        "train_name": "Rajdhani Express",
-                        "train_type": "Rajdhani Express",
-                        "origin": "NDLS",
-                        "destination": "HWH",
-                        "current_station": "NDLS",
-                        "next_station": "HWH",
-                        "status": "running",
-                        "speed": 110,
-                        "delay_minutes": 0,
-                        "progress": 0.3,
-                        "lat": 26.0,
-                        "lon": 82.0,
-                        "collision_risk": false,
-                        "rerouting_needed": false
-                    },
-                    {
-                        "train_number": "12002",
-                        "train_name": "Shatabdi Express",
-                        "train_type": "Shatabdi Express",
-                        "origin": "CSMT",
-                        "destination": "MAS",
-                        "current_station": "CSMT",
-                        "next_station": "MAS",
-                        "status": "running",
-                        "speed": 95,
-                        "delay_minutes": 5,
-                        "progress": 0.6,
-                        "lat": 16.0,
-                        "lon": 76.5,
-                        "collision_risk": false,
-                        "rerouting_needed": false
-                    },
-                    {
-                        "train_number": "12003",
-                        "train_name": "Mail Express",
-                        "train_type": "Mail Express",
-                        "origin": "SBC",
-                        "destination": "HYB",
-                        "current_station": "SBC",
-                        "next_station": "HYB",
-                        "status": "running",
-                        "speed": 85,
-                        "delay_minutes": 12,
-                        "progress": 0.8,
-                        "lat": 15.5,
-                        "lon": 78.0,
-                        "collision_risk": true,
-                        "rerouting_needed": false
-                    },
-                    {
-                        "train_number": "12004",
-                        "train_name": "Superfast",
-                        "train_type": "Superfast",
-                        "origin": "JP",
-                        "destination": "ADI",
-                        "current_station": "JP",
-                        "next_station": "ADI",
-                        "status": "stopped",
-                        "speed": 0,
-                        "delay_minutes": 8,
-                        "progress": 0.1,
-                        "lat": 25.0,
-                        "lon": 74.5,
-                        "collision_risk": false,
-                        "rerouting_needed": true
-                    },
-                    {
-                        "train_number": "12005",
-                        "train_name": "Passenger",
-                        "train_type": "Passenger",
-                        "origin": "LKO",
-                        "destination": "NDLS",
-                        "current_station": "LKO",
-                        "next_station": "NDLS",
-                        "status": "in_transit",
-                        "speed": 65,
-                        "delay_minutes": 15,
-                        "progress": 0.4,
-                        "lat": 27.5,
-                        "lon": 81.0,
-                        "collision_risk": false,
-                        "rerouting_needed": false
-                    }
-                ],
+                trains: allTrains,
                 collisions: [],
                 rerouting: [],
                 timestamp: new Date().toISOString()
