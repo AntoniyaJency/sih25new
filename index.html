@@ -1357,7 +1357,7 @@
                         <p><strong>Route:</strong> ${train.origin || 'N/A'} → ${train.destination || 'N/A'}</p>
                         <p><strong>Current:</strong> ${train.current_station || 'N/A'}</p>
                         <p><strong>Next:</strong> ${train.next_station || 'N/A'}</p>
-                        <p><strong>Delay:</strong> ${train.delay_minutes || 0} minutes</p>
+                        <p><strong>Delay:</strong> ${Math.round(train.delay_minutes || 0)} minutes</p>
                         <p><strong>Priority:</strong> ${train.priority || 'Standard'}</p>
                         ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
                         ${train.rerouting_needed ? '<p style="color: orange;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
@@ -1601,7 +1601,7 @@
                             <p><strong>Route:</strong> ${train.origin || 'N/A'} → ${train.destination || 'N/A'}</p>
                             <p><strong>Current:</strong> ${train.current_station || 'N/A'}</p>
                             <p><strong>Next:</strong> ${train.next_station || 'N/A'}</p>
-                            <p><strong>Delay:</strong> ${train.delay_minutes || 0} minutes</p>
+                            <p><strong>Delay:</strong> ${Math.round(train.delay_minutes || 0)} minutes</p>
                             <p><strong>Priority:</strong> ${train.priority || 'Standard'}</p>
                             <p><strong>Movement:</strong> ${distance > 0.001 ? 'Moving' : 'Stationary'}</p>
                             ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
@@ -1685,7 +1685,7 @@
                     train.speed = Math.max(80, Math.min(160, train.speed + (Math.random() - 0.5) * 10));
                     
                     // Simulate delay changes
-                    train.delay_minutes = Math.max(0, train.delay_minutes + (Math.random() - 0.7) * 2);
+                    train.delay_minutes = Math.round(Math.max(0, train.delay_minutes + (Math.random() - 0.7) * 2));
                     
                     // Simulate collision risks and rerouting
                     if (Math.random() < 0.05) { // 5% chance
@@ -1961,7 +1961,7 @@
                             <div class="train-metrics">
                                 <div class="metric">Speed: ${train.speed} km/h</div>
                                 <div class="metric">Progress: ${Math.round(train.progress * 100)}%</div>
-                                <div class="metric">Delay: ${train.delay_minutes || 0} min</div>
+                                <div class="metric">Delay: ${Math.round(train.delay_minutes || 0)} min</div>
                             </div>
                             ${train.collision_risk ? '<span class="alert-badge collision">⚠️ Collision Risk</span>' : ''}
                             ${train.rerouting_needed ? '<span class="alert-badge rerouting">🔄 Rerouting Needed</span>' : ''}
@@ -2248,7 +2248,7 @@
                             </div>
                             <div class="metric">
                                 <span class="metric-label">Delay:</span>
-                                <span class="metric-value ${train.delay_minutes > 0 ? 'delayed' : 'ontime'}">${train.delay_minutes || 0} min</span>
+                                <span class="metric-value ${train.delay_minutes > 0 ? 'delayed' : 'ontime'}">${Math.round(train.delay_minutes || 0)} min</span>
                             </div>
                         </div>
                         <div class="train-alerts">
@@ -2345,11 +2345,11 @@
                     train.current_station === station.id || train.next_station === station.id
                 );
                 const avgDelay = trainsAtStation.length > 0 
-                    ? trainsAtStation.reduce((sum, train) => sum + (train.delay_minutes || 0), 0) / trainsAtStation.length
+                    ? Math.round(trainsAtStation.reduce((sum, train) => sum + (train.delay_minutes || 0), 0) / trainsAtStation.length)
                     : 0;
                 stationDelays[station.name] = {
                     trains: trainsAtStation.length,
-                    avgDelay: Math.round(avgDelay)
+                    avgDelay: avgDelay
                 };
             });
             
