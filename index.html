@@ -1605,15 +1605,15 @@
                         element.style.animation = 'train-alert 1s infinite';
                         element.style.filter = 'hue-rotate(0deg) brightness(1.3)';
                         // Voice alert for collision risk
-                        if (voiceAlertsEnabled && train.ai_message) {
-                            speakAlert(`Collision risk detected for train ${train.train_number}`);
+                        if (voiceAlertsEnabled) {
+                            speakAlert(`Collision risk detected for train ${train.train_number} ${train.train_name}`);
                         }
                     } else if (train.rerouting_needed) {
                         element.style.animation = 'train-warning 1s infinite';
                         element.style.filter = 'hue-rotate(30deg) brightness(1.2)';
                         // Voice alert for rerouting
-                        if (voiceAlertsEnabled && train.ai_message) {
-                            speakAlert(`Rerouting needed for train ${train.train_number}`);
+                        if (voiceAlertsEnabled) {
+                            speakAlert(`Rerouting needed for train ${train.train_number} ${train.train_name}`);
                         }
                     } else {
                         // Enhanced movement animation
@@ -1657,6 +1657,15 @@
             window.simulatedUpdateInterval = setInterval(() => {
                 if (!mapData || !mapData.trains) return;
                 
+                // Track previous states for voice alerts
+                const previousStates = mapData.trains.map(train => ({
+                    id: train.id,
+                    collision_risk: train.collision_risk,
+                    rerouting_needed: train.rerouting_needed,
+                    delay_minutes: train.delay_minutes,
+                    progress: train.progress
+                }));
+                
                 // Simulate train movement and updates
                 mapData.trains.forEach(train => {
                     // Simulate progress changes
@@ -1674,9 +1683,52 @@
                         train.rerouting_needed = Math.random() < 0.3;
                     }
                     
+                    // Clear events after some time
+                    if (Math.random() < 0.1) {
+                        train.collision_risk = false;
+                        train.rerouting_needed = false;
+                    }
+                    
                     // Update timestamp
                     mapData.timestamp = new Date().toISOString();
                 });
+                
+                // Voice alerts for state changes
+                if (voiceAlertsEnabled) {
+                    mapData.trains.forEach((train, index) => {
+                        const prev = previousStates[index];
+                        
+                        // Collision risk alert
+                        if (!prev.collision_risk && train.collision_risk) {
+                            speakAlert(`Alert! Collision risk detected for train ${train.train_number} ${train.train_name}`);
+                        }
+                        
+                        // Rerouting alert
+                        if (!prev.rerouting_needed && train.rerouting_needed) {
+                            speakAlert(`Rerouting required for train ${train.train_number} ${train.train_name}`);
+                        }
+                        
+                        // Delay alert
+                        if (train.delay_minutes > 10 && prev.delay_minutes <= 10) {
+                            speakAlert(`Train ${train.train_number} ${train.train_name} is experiencing significant delays of ${Math.round(train.delay_minutes)} minutes`);
+                        }
+                        
+                        // Station approach alert
+                        if (train.progress > 0.9 && prev.progress <= 0.9) {
+                            const stationName = getStationName(train.next_station);
+                            speakAlert(`Train ${train.train_number} ${train.train_name} approaching ${stationName}`);
+                        }
+                        
+                        // Clear alerts
+                        if (prev.collision_risk && !train.collision_risk) {
+                            speakAlert(`Collision risk cleared for train ${train.train_number} ${train.train_name}`);
+                        }
+                        
+                        if (prev.rerouting_needed && !train.rerouting_needed) {
+                            speakAlert(`Rerouting completed for train ${train.train_number} ${train.train_name}`);
+                        }
+                    });
+                }
                 
                 // Update the map with new positions
                 updateTrainPositions();
@@ -1744,6 +1796,11 @@
                     startLiveStationMonitoring(station);
                     
                     updateStatus(`📍 Monitoring station: ${station.name}`);
+                    
+                    // Voice alert for station selection
+                    if (voiceAlertsEnabled) {
+                        speakAlert(`Now monitoring station ${station.name}`);
+                    }
                 } else {
                     console.error('❌ Station not found:', stationId);
                 }
@@ -2063,6 +2120,13 @@
                 utterance.volume = 0.7;
                 speechSynthesis.speak(utterance);
             }
+        }
+        
+        // Helper function to get station name by ID
+        function getStationName(stationId) {
+            if (!mapData || !mapData.stations) return stationId;
+            const station = mapData.stations.find(s => s.id === stationId);
+            return station ? station.name : stationId;
         }
 
         function toggleLiveMovement() {
