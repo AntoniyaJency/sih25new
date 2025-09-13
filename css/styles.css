@@ -518,6 +518,22 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+/* No data states */
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.no-data h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.no-data p {
+    margin-bottom: 1.5rem;
+}
+
 .error {
     background: #f8d7da;
     color: #721c24;

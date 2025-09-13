@@ -712,9 +712,18 @@
             }
             
             // Auto-load train data if on trains page
-            if (pageId === 'trains' && mapData && mapData.trains) {
-                setTimeout(() => refreshTrainData(), 100);
-                setupTrainSearchListeners();
+            if (pageId === 'trains') {
+                setTimeout(() => {
+                    if (mapData && mapData.trains) {
+                        refreshTrainData();
+                    } else {
+                        // If no data yet, try loading fallback data
+                        console.log('🔄 Loading fallback data for trains page...');
+                        loadFallbackData();
+                        setTimeout(() => refreshTrainData(), 500);
+                    }
+                    setupTrainSearchListeners();
+                }, 100);
             }
             
             // Auto-load analytics data if on analytics page
@@ -2167,12 +2176,20 @@
         // Refresh train data for trains page
         function refreshTrainData(searchTerm = '', filterType = 'all') {
             console.log('🚂 Refreshing train data...');
+            const trainsGrid = document.getElementById('trains-grid');
+            
             if (!mapData || !mapData.trains) {
                 console.log('❌ No map data available');
+                trainsGrid.innerHTML = `
+                    <div class="no-data">
+                        <h3>🚂 No Train Data Available</h3>
+                        <p>Loading train information...</p>
+                        <button onclick="loadFallbackData(); setTimeout(() => refreshTrainData(), 500);" class="btn btn-primary">🔄 Load Data</button>
+                    </div>
+                `;
                 return;
             }
             
-            const trainsGrid = document.getElementById('trains-grid');
             let trains = mapData.trains;
             
             // Apply search filter
