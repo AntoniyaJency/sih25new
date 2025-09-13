@@ -1282,8 +1282,8 @@
                     <div class="station-popup">
                         <h4>${station.name}</h4>
                         <p><strong>Code:</strong> ${station.id}</p>
-                        <p><strong>Type:</strong> ${station.type}</p>
-                        <p><strong>Platforms:</strong> ${station.platforms}</p>
+                        <p><strong>Coordinates:</strong> ${station.lat.toFixed(4)}, ${station.lon.toFixed(4)}</p>
+                        <p><strong>Status:</strong> Active</p>
                     </div>
                 `);
                 
@@ -1312,10 +1312,12 @@
                 
                 trackLine.bindPopup(`
                     <div class="track-popup">
-                        <h4>Track ${track.id}</h4>
-                        <p><strong>Distance:</strong> ${track.distance} km</p>
-                        <p><strong>Max Speed:</strong> ${track.max_speed} km/h</p>
-                        <p><strong>Type:</strong> ${track.type}</p>
+                        <h4>Track ${track.id || 'Segment'}</h4>
+                        <p><strong>From:</strong> ${track.from?.id || 'Unknown'}</p>
+                        <p><strong>To:</strong> ${track.to?.id || 'Unknown'}</p>
+                        <p><strong>Distance:</strong> ${track.distance || 'N/A'} km</p>
+                        <p><strong>Max Speed:</strong> ${track.max_speed || 'N/A'} km/h</p>
+                        <p><strong>Type:</strong> ${track.type || 'Standard'}</p>
                     </div>
                 `);
                 
@@ -1346,13 +1348,17 @@
                 
                 trainMarker.bindPopup(`
                     <div class="train-popup">
-                        <h4>${train.train_number} - ${train.train_type}</h4>
-                        <p><strong>Speed:</strong> ${train.speed} km/h</p>
-                        <p><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
-                        <p><strong>Status:</strong> ${train.status}</p>
-                        <p><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
-                        <p><strong>Current:</strong> ${train.current_station}</p>
-                        <p><strong>Next:</strong> ${train.next_station}</p>
+                        <h4>${train.train_number || 'Unknown'} - ${train.train_name || train.train_type || 'Train'}</h4>
+                        <p><strong>Name:</strong> ${train.train_name || 'N/A'}</p>
+                        <p><strong>Type:</strong> ${train.train_type || 'Express'}</p>
+                        <p><strong>Speed:</strong> ${train.speed || 0} km/h</p>
+                        <p><strong>Progress:</strong> ${Math.round((train.progress || 0) * 100)}%</p>
+                        <p><strong>Status:</strong> ${train.status || 'Unknown'}</p>
+                        <p><strong>Route:</strong> ${train.origin || 'N/A'} → ${train.destination || 'N/A'}</p>
+                        <p><strong>Current:</strong> ${train.current_station || 'N/A'}</p>
+                        <p><strong>Next:</strong> ${train.next_station || 'N/A'}</p>
+                        <p><strong>Delay:</strong> ${train.delay_minutes || 0} minutes</p>
+                        <p><strong>Priority:</strong> ${train.priority || 'Standard'}</p>
                         ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
                         ${train.rerouting_needed ? '<p style="color: orange;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
                     </div>
@@ -1586,13 +1592,17 @@
                     // Update popup with fresh data
                     marker.bindPopup(`
                         <div class="train-popup">
-                            <h4>${train.train_number} - ${train.train_type}</h4>
-                            <p><strong>Speed:</strong> ${train.speed} km/h</p>
-                            <p><strong>Progress:</strong> ${Math.round(train.progress * 100)}%</p>
-                            <p><strong>Status:</strong> ${train.status}</p>
-                            <p><strong>Route:</strong> ${train.origin} → ${train.destination}</p>
-                            <p><strong>Current:</strong> ${train.current_station}</p>
-                            <p><strong>Next:</strong> ${train.next_station}</p>
+                            <h4>${train.train_number || 'Unknown'} - ${train.train_name || train.train_type || 'Train'}</h4>
+                            <p><strong>Name:</strong> ${train.train_name || 'N/A'}</p>
+                            <p><strong>Type:</strong> ${train.train_type || 'Express'}</p>
+                            <p><strong>Speed:</strong> ${train.speed || 0} km/h</p>
+                            <p><strong>Progress:</strong> ${Math.round((train.progress || 0) * 100)}%</p>
+                            <p><strong>Status:</strong> ${train.status || 'Unknown'}</p>
+                            <p><strong>Route:</strong> ${train.origin || 'N/A'} → ${train.destination || 'N/A'}</p>
+                            <p><strong>Current:</strong> ${train.current_station || 'N/A'}</p>
+                            <p><strong>Next:</strong> ${train.next_station || 'N/A'}</p>
+                            <p><strong>Delay:</strong> ${train.delay_minutes || 0} minutes</p>
+                            <p><strong>Priority:</strong> ${train.priority || 'Standard'}</p>
                             <p><strong>Movement:</strong> ${distance > 0.001 ? 'Moving' : 'Stationary'}</p>
                             ${train.collision_risk ? '<p style="color: red;"><strong>⚠️ Collision Risk!</strong></p>' : ''}
                             ${train.rerouting_needed ? '<p style="color: orange;"><strong>🔄 Rerouting Needed</strong></p>' : ''}
